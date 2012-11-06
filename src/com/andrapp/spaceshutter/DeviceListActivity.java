@@ -18,8 +18,6 @@ package com.andrapp.spaceshutter;
 
 import java.util.Set;
 
-import com.andrapp.spaceshutter.R;
-
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -27,9 +25,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-
-import android.content.res.*;
-
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -65,7 +60,6 @@ public class DeviceListActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        
         // Setup the window
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.device_list);

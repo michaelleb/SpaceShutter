@@ -3,7 +3,7 @@ package com.andrapp.spaceshutter;
 public class BlueToothDefaults {
 
     // Message types sent from the BluetoothChatService Handler
-    public static final int MESSAGE_STATE_CHANGE = 11;
+    public static final int MESSAGE_STATE_CHANGE = 111;
     public static final int MESSAGE_READ = 22;
     public static final int MESSAGE_WRITE = 33;
     public static final int MESSAGE_DEVICE_NAME = 44;

@@ -11,6 +11,8 @@ import com.andrapp.spaceshutter.Constants;
 import com.andrapp.spaceshutter.MyView;
 import com.andrapp.spaceshutter.R;
 
+
+
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -62,13 +64,14 @@ public class MainActivity extends Activity {
 	private BluetoothAdapter mBluetoothAdapter = null;
 
 	// Member object for the chat services
-	private BluetoothService mBluetoothService = null;
+	private BluetoothChatService mChatService = null;
 
 
 	private MyView mView;
 
 
 	private DummyObject myObject;
+	private DummyObject otherObject;
 
 
 	private PlayPath myPath;
@@ -81,14 +84,14 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		Log.e("", "onCreate");
-
+		
+		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		// Set up the window layout
 		setContentView(R.layout.main);
 
-		mBluetoothService = new BluetoothService(this, mHandler);
 
-
-		myObject=new DummyObject(50,50);
+		myObject=new DummyObject(50,50,0);
+		otherObject=new DummyObject(60,60,1);
 
 		myPath=new PlayPath();
 		myPoly=new PlayPolygon();
@@ -101,6 +104,18 @@ public class MainActivity extends Activity {
 		myPoly.proceed(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
 
 		mHandler.sendEmptyMessage(Constants.MESSAGE_LOGIC_ROUND);
+		
+		// Get local Bluetooth adapter
+		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+		// If the adapter is null, then Bluetooth is not supported
+		if (mBluetoothAdapter == null) {
+			Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
+			finish();
+			return;
+		}
+
+
 	}
 
 
@@ -109,7 +124,11 @@ public class MainActivity extends Activity {
 
 		myObject.behave();
 
+		otherObject.behave();
+
 		mView.drawObject(myObject);
+
+		mView.drawObject(otherObject);
 
 		mView.drawObject(myPath);
 
@@ -125,9 +144,18 @@ public class MainActivity extends Activity {
 	@Override
 	public void onStart() {
 		super.onStart();
-
-		setBT();
+		
 		setGameScreen();
+
+		// If BT is not on, request that it be enabled.
+		// setupChat() will then be called during onActivityResult
+		if (!mBluetoothAdapter.isEnabled()) {
+			Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+			startActivityForResult(enableIntent, BlueToothDefaults.REQUEST_ENABLE_BT);
+			// Otherwise, setup the chat session
+		} else {
+			if (mChatService == null) setupBT();
+		}
 	}
 
 	private void setGameScreen(){
@@ -175,71 +203,70 @@ public class MainActivity extends Activity {
 
 	}
 
-	private void setBT(){
-		// Get local Bluetooth adapter
-		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-		// If the adapter is null, then Bluetooth is not supported
-		if (mBluetoothAdapter == null) {
-			Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
-			finish();
-			return;
-		}
-
-
-
-		// If BT is not on, request that it be enabled.
-		// setupChat() will then be called during onActivityResult
-		if (!mBluetoothAdapter.isEnabled()) {
-			Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-			startActivityForResult(enableIntent, BlueToothDefaults.REQUEST_ENABLE_BT);
-			// Otherwise, setup the chat session
-		}
-	}
 
 	@Override
 	public synchronized void onResume() {
 		super.onResume();
-		Log.e("", "onResume");
+		Log.e(">>><<<<", "+++ ON RESUME +++");
 
 
 
-		// Performing this check in onResume() covers the case in which BT was
-		// not enabled during onStart(), so we were paused to enable it...
-		// onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
-		if (mBluetoothService != null) {
-			// Only if the state is STATE_NONE, do we know that we haven't started already
-			if (mBluetoothService.getState() == BluetoothService.STATE_NONE) {
-				// Start the Bluetooth chat services
-				mBluetoothService.start();
-			}
-		}
+        // Performing this check in onResume() covers the case in which BT was
+        // not enabled during onStart(), so we were paused to enable it...
+        // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
+        if (mChatService != null) {
+            // Only if the state is STATE_NONE, do we know that we haven't started already
+            if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
+              // Start the Bluetooth chat services
+              mChatService.start();
+            }
+        }
 	}
+
+	private void setupBT() {
+
+
+		// Initialize the BluetoothChatService to perform bluetooth connections
+		mChatService = new BluetoothChatService(this, mHandler);
+
+	}
+
+
+
 
 	@Override
 	public synchronized void onPause() {
 		super.onPause();
-		Log.e("", "onPause");
+		Log.e(">>><<<<", "+++ ON PAUSE +++");
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
-		Log.e("", "onStop");
+		Log.e(">>><<<<", "+++ ON STOP +++");
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-
-		Log.e("", "onDestroy");
+		Log.e(">>><<<<", "+++ ON DESTROY +++");
 
 		// Stop the Bluetooth chat services
-		if (mBluetoothService != null)
-			mBluetoothService.stop();
+		if (mChatService != null)
+			mChatService.stop();
 
 	}
 
+	private void ensureDiscoverable() {
+		Log.e("", "ensureDiscoverable");
+		if (mBluetoothAdapter.getScanMode() !=
+				BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+			discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+			startActivity(discoverableIntent);
+		}
+	}
 
 
 
@@ -253,13 +280,12 @@ public class MainActivity extends Activity {
 
 	private boolean firsttime=false;
 
-	private final MyHandler mHandler = new MyHandler();
-
-	public class MyHandler extends Handler{
+	 private final Handler mHandler = new Handler() {
+		
 		@Override
 		public void handleMessage(Message msg) {
 
-			//Log.e("","main: handleMessage "+msg.what);
+			Log.e("","main: handleMessage "+msg.what);
 
 			Point2D point;
 
@@ -269,59 +295,13 @@ public class MainActivity extends Activity {
 
 				firsttime=true;
 
-				/*
-				myPath.clear();
-
-				point = (Point2D)msg.obj;
-
-				if(myObject.intersects(point)){
-
-					//Log.e("",""+point.getx()+"-"+point.gety());
-
-					myPath.start(myObject.getCenterX(),myObject.getCenterY());
-
-					//Log.e("",""+point.getx()+"-"+point.gety());
-
-
-				}
-				 */
 				point = (Point2D)msg.obj;
 				prev=point;
 
 				break;
 			case MotionEvent.ACTION_MOVE:
 
-
-
-				/*
-		Vector2D speed = myObject.getOrientation();
-
-		Point2D loc = myObject.getLocation();
-
-		Point2D dest = myPath.getPoint(pathDestIndex);
-
-
-		Point2D loc2 = new Point2D(loc);
-
-		loc2.add(speed);
-
-
-
-				 */
-
 				point = (Point2D)msg.obj;
-
-
-
-
-
-				//Log.e("",""+point.getx()+"-"+point.gety());
-
-				//if( prev.distance(point)>10){
-				//	myPath.proceed(point.getx(), point.gety());
-
-				//Log.e("",""+point.getx()+"-"+point.gety());
-
 
 
 				if(firsttime){
@@ -334,36 +314,44 @@ public class MainActivity extends Activity {
 
 						myObject.setOrientation(vec);
 						firsttime=false;
+
+						float[] arr = new float[4];
+
+						arr[0]=myObject.getCenterX();
+						arr[1]=myObject.getCenterY();
+						arr[2]=myObject.getOrientation().getVx();
+						arr[3]=myObject.getOrientation().getVy();
+
+						byte[] bytemsg = MySerialization.serialize(arr);
+
+						mChatService.write(bytemsg);
 					}
 				}
 
 				prev=point;
 
-				//}
-
 				break;
 			case MotionEvent.ACTION_UP:
 
-				/*
-				point = (Point2D)msg.obj;
-				//Log.e("",""+point.getx()+"-"+point.gety());
+				break;
 
-				myPath.proceed(point.getx(), point.gety());
+			case BlueToothDefaults.MESSAGE_READ:
 
+				byte[] readBuf = (byte[]) msg.obj;
+				// construct a string from the valid bytes in the buffer
+				float[] msgarr = (float[])MySerialization.deserialize(readBuf);
 
-				PlayPolygon h1=new PlayPolygon();
-				PlayPolygon h2=new PlayPolygon();
+				Point2D loc = new Point2D(msgarr[0],msgarr[1]);
+				Vector2D vec = new Vector2D(msgarr[2],msgarr[3]);
 
-				if(myPath.getSize()>0 && myPoly.cut(myPath, h1, h2)){
+				otherObject.setCenter(loc);
 
-					if(h1.getArea()>h2.getArea())
-						myPoly=h1;
-					else
-						myPoly=h2;
-				}
+				otherObject.setOrientation(vec);
 
-				 */
+				break;
 
+			case BlueToothDefaults.MESSAGE_WRITE:
+				Log.e("","222");
 				break;
 			case Constants.MESSAGE_LOGIC_ROUND:
 				updateGame();
@@ -372,14 +360,14 @@ public class MainActivity extends Activity {
 			case BlueToothDefaults.MESSAGE_STATE_CHANGE:
 
 				switch (msg.arg1) {
-				case BluetoothService.STATE_CONNECTED:
+				case BluetoothChatService.STATE_CONNECTED:
 					Log.i("","title_connected_to");
 					break;
-				case BluetoothService.STATE_CONNECTING:
+				case BluetoothChatService.STATE_CONNECTING:
 					Log.i("","title_connecting");
 					break;
-				case BluetoothService.STATE_LISTEN:
-				case BluetoothService.STATE_NONE:
+				case BluetoothChatService.STATE_LISTEN:
+				case BluetoothChatService.STATE_NONE:
 					Log.i("","title_not_connected");
 					break;
 				}
@@ -395,9 +383,6 @@ public class MainActivity extends Activity {
 				Toast.makeText(getApplicationContext(), "Connected to "
 						+ mConnectedDeviceName, Toast.LENGTH_SHORT).show();
 
-
-				//((MyView) findViewById(R.id.mysingle)).setBTService(mBluetoothService);
-
 				break;
 			case BlueToothDefaults.MESSAGE_TOAST:
 
@@ -412,7 +397,6 @@ public class MainActivity extends Activity {
 
 
 	};
-
 
 	/*
 ==========================================================================================================
@@ -437,11 +421,7 @@ public class MainActivity extends Activity {
 				// Get the BLuetoothDevice object
 				BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
 				// Attempt to connect to the device
-				mBluetoothService.connect(device);
-				//setBTService
-
-
-
+				mChatService.connect(device);
 			}
 			break;
 		case BlueToothDefaults.REQUEST_ENABLE_BT:
@@ -449,7 +429,11 @@ public class MainActivity extends Activity {
 			Log.e("","REQUEST_ENABLE_BT");
 
 
-			if (resultCode != Activity.RESULT_OK) {
+			if (resultCode == Activity.RESULT_OK) {
+				// Bluetooth is now enabled, so set up a chat session
+				setupBT();
+			}
+			else{
 				// User did not enable Bluetooth or an error occured
 
 				Log.e("", "BT not enabled");
@@ -487,16 +471,6 @@ OPTIONS MENU BUTTONS FOR BLUETOOTH OPERATIONS
 			return true;
 		}
 		return false;
-	}
-
-	private void ensureDiscoverable() {
-		Log.e("", "ensureDiscoverable");
-		if (mBluetoothAdapter.getScanMode() !=
-				BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
-			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-			discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-			startActivity(discoverableIntent);
-		}
 	}
 
 }

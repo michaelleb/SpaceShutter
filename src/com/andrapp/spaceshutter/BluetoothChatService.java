@@ -16,6 +16,9 @@
 
 package com.andrapp.spaceshutter;
 
+
+
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -37,7 +40,7 @@ import android.util.Log;
  * incoming connections, a thread for connecting with a device, and a
  * thread for performing data transmissions when connected.
  */
-public class BluetoothService {
+public class BluetoothChatService {
     // Debugging
     private static final String TAG = "BluetoothChatService";
     private static final boolean D = true;
@@ -50,7 +53,7 @@ public class BluetoothService {
 
     // Member fields
     private final BluetoothAdapter mAdapter;
-    private Handler mHandler;
+    private final Handler mHandler;
     private AcceptThread mAcceptThread;
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
@@ -67,7 +70,7 @@ public class BluetoothService {
      * @param context  The UI Activity Context
      * @param handler  A Handler to send messages back to the UI Activity
      */
-    public BluetoothService(Context context, Handler handler) {
+    public BluetoothChatService(Context context, Handler handler) {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = STATE_NONE;
         mHandler = handler;
@@ -258,7 +261,7 @@ public class BluetoothService {
 
                 // If a connection was accepted
                 if (socket != null) {
-                    synchronized (BluetoothService.this) {
+                    synchronized (BluetoothChatService.this) {
                         switch (mState) {
                         case STATE_LISTEN:
                         case STATE_CONNECTING:
@@ -336,12 +339,12 @@ public class BluetoothService {
                     Log.e(TAG, "unable to close() socket during connection failure", e2);
                 }
                 // Start the service over to restart listening mode
-                BluetoothService.this.start();
+                BluetoothChatService.this.start();
                 return;
             }
 
             // Reset the ConnectThread because we're done
-            synchronized (BluetoothService.this) {
+            synchronized (BluetoothChatService.this) {
                 mConnectThread = null;
             }
 
@@ -357,16 +360,7 @@ public class BluetoothService {
             }
         }
     }
-    
-    /**
-     * This thread runs during a connection with a remote device.
-     * It handles all incoming and outgoing transmissions.
-     */
-    public void setHandler(Handler handler){
-    	
-    	this.mHandler=handler;
-    }
-    
+
     /**
      * This thread runs during a connection with a remote device.
      * It handles all incoming and outgoing transmissions.

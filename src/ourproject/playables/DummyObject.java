@@ -18,15 +18,21 @@ public class DummyObject implements PlayingObject{
 	private int width;
 	private int height;
 	
-	public DummyObject(float x,float y){
+	private int type;
+	
+	public DummyObject(float x,float y,int type){
 
 		width=10;
 		height=10;
+		
+		this.type=type;
 		
 		orientation=new Vector2D(0,0);
 		
 		this.location=new Point2D(x,y);
 	}
+	
+	public int getType(){return type;}
 	
 	public float getCenterX(){return location.getx();}
 	public float getCenterY(){return location.gety();}

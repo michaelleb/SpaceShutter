@@ -229,8 +229,14 @@ public class MyView extends View {
 
 
 		Resources r = this.getContext().getResources();
-
-		Drawable dwble = r.getDrawable(R.drawable.redstar);
+		
+		Drawable dwble;
+		
+		if(currObj.getType()==0)
+			dwble = r.getDrawable(R.drawable.redstar);
+		else
+			dwble = r.getDrawable(R.drawable.greenstar);
+		
 		Bitmap bitmap = Bitmap.createBitmap(objWidth, objHeight, Bitmap.Config.ARGB_8888);
 		Canvas canvass = new Canvas(bitmap);
 
