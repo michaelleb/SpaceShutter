@@ -1,5 +1,7 @@
 package ourproject.playables;
 
+
+
 import com.andrapp.spaceshutter.MyView;
 
 import android.graphics.Bitmap;
@@ -9,6 +11,7 @@ import android.graphics.drawable.Drawable;
 
 import mark.geometry.*;
 import android.graphics.Canvas;
+import android.util.Log;
 
 public class DummyObject implements PlayingObject{
 
@@ -62,8 +65,32 @@ public class DummyObject implements PlayingObject{
 	}
 
 
-	public void behave(){
-		location.add(orientation);
+	public void behave(PlayPolygon pol){
+		
+		Point2D loc2 = new Point2D(location);
+					
+		loc2.add(orientation);
+		
+		Point2D intersection = pol.lineIntersects(new Line2D(location,loc2));
+		
+		if(intersection!=null){
+			
+			//Log.e("","intersects");
+			
+			orientation=new Vector2D(0,0);
+			
+			location=intersection;
+		}
+		else if(!pol.contains(loc2)){
+			orientation=new Vector2D(0,0);
+		}
+		else{
+			//Log.e("","noo");
+			
+			location=loc2;
+		}
+		
+		
 	}
 	
 	public float getDistToCenter(Point2D point){

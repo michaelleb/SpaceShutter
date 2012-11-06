@@ -37,4 +37,9 @@ public class Point2D{
 		this.x+=other.getVx();
 		this.y+=other.getVy();
 	}
+	
+	public void sub(Vector2D other){
+		this.x-=other.getVx();
+		this.y-=other.getVy();
+	}
 }

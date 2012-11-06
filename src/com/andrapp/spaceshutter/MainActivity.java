@@ -90,8 +90,9 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.main);
 
 
-		myObject=new DummyObject(50,50,0);
-		otherObject=new DummyObject(60,60,1);
+		myObject=new DummyObject(Constants.MARGIN_PADDING,Constants.MARGIN_PADDING,0);
+		
+		otherObject=new DummyObject(Constants.MARGIN_PADDING,Constants.MARGIN_PADDING,1);
 
 		myPath=new PlayPath();
 		myPoly=new PlayPolygon();
@@ -122,20 +123,25 @@ public class MainActivity extends Activity {
 	public void updateGame(){
 
 
-		myObject.behave();
+		myObject.behave(myPoly);
 
-		otherObject.behave();
-
-		mView.drawObject(myObject);
-
-		mView.drawObject(otherObject);
+		otherObject.behave(myPoly);
 
 		mView.drawObject(myPath);
 
 		mView.drawObject(myPoly);
-
+		
+		mView.drawObject(otherObject);
+		
+		mView.drawObject(myObject);
+		
 		mView.execureDrawing();
-
+		
+		
+		//boolean cont = myPoly.contains(new Point2D(myObject.getCenterX(),myObject.getCenterY()));
+		
+		//Log.e("",">>>>>>> "+cont);
+		
 		mHandler.removeMessages(Constants.MESSAGE_LOGIC_ROUND);
 		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_LOGIC_ROUND), Constants.ROUND_REFRESH);
 	}
@@ -285,7 +291,7 @@ public class MainActivity extends Activity {
 		@Override
 		public void handleMessage(Message msg) {
 
-			Log.e("","main: handleMessage "+msg.what);
+			//Log.e("","main: handleMessage "+msg.what);
 
 			Point2D point;
 
@@ -306,7 +312,7 @@ public class MainActivity extends Activity {
 
 				if(firsttime){
 
-					Vector2D vec = new Line2D(prev,point).getVectorWidthLen(1);
+					Vector2D vec = new Line2D(prev,point).getVectorWidthLen(2);
 
 					if(vec.getLength()>0){
 
@@ -393,9 +399,6 @@ public class MainActivity extends Activity {
 				break;
 			}
 		}
-
-
-
 	};
 
 	/*
