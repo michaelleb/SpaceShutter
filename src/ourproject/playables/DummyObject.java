@@ -92,6 +92,7 @@ public class DummyObject implements PlayingObject{
 			
 			Point2D next = pol.getPoint(nextChkpnt);
 			
+			
 			if(closestPoint==null)
 			{
 				boundariesPhase=false;
