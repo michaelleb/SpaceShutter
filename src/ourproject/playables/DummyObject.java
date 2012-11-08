@@ -44,6 +44,7 @@ public class DummyObject implements PlayingObject{
 	public boolean cuttingPhase=false;
 
 	public boolean isCutting(){return cuttingPhase==true;}
+	public boolean isBoundariesMoving(){return boundariesPhase==true;}
 
 
 	private Vector2D getOrientation(){return orientation;}
