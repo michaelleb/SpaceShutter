@@ -199,7 +199,9 @@ public class Polygon2D extends Path2D {
 		return res;
 	}
 
-
+	/*
+	 * 
+	 */
 	public boolean contains(Point2D point){
 
 		ListIterator<Point2D> polyIter = coords.listIterator();
@@ -229,7 +231,10 @@ public class Polygon2D extends Path2D {
 
 	}
 
-
+	/*
+	 * gets segment line L, returns some polygon line, that intersects segment L
+	 * 
+	 */
 	public Line2D interSectionLine(Line2D line){
 
 		ListIterator<Point2D> polyIter = coords.listIterator();
@@ -253,7 +258,11 @@ public class Polygon2D extends Path2D {
 		return null;
 
 	}
-
+	
+	/*
+	 * gets segment line L, returns intersection point of L with polygon
+	 * 
+	 */
 	public Point2D intersectionPoint(Line2D line){
 
 		Line2D iline = this.interSectionLine(line);
@@ -266,7 +275,10 @@ public class Polygon2D extends Path2D {
 	
 	
 	
-	
+	/*
+	 * gets point P, returns closest point on some polygon line
+	 * 
+	 */
 	public Point2D closestPointSimplified(Point2D point){
 		
 		Point2D result=null;
@@ -315,21 +327,10 @@ public class Polygon2D extends Path2D {
 	
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	/*
+	 * gets point P, returns the index of point in polygon such that the line (index,index-1) contains the point P between
+	 * 
+	 */
 	public int getLineWithPointIndex(Point2D point){
 
 		ListIterator<Point2D> polyIter = coords.listIterator();

@@ -28,20 +28,23 @@ public class DummyObject implements PlayingObject{
 
 
 	private Point2D location;
+	
 	private Vector2D orientation;
 
 
-	private PlayPath cuttingPath;
+	private PlayPath cuttingPath;		//paths that player cuts
 
-	private Point2D closestPoint;
-	private Point2D userClosestPoint;
-	private boolean direction;
+	
+	
+	
+	private Point2D userPointOnMap;		//user specified point to move near to
+	private Point2D closestPointOnPoly;	//point on polygon which is closest to userPointOnMap
+	private boolean direction;			//bounds direction (2 options)
+	private int nextCheckpointIndex; 	//next index on a poly to move to, in boundaries moving phase
 
+	public boolean boundariesPhase=false;	//boundaries moving phase
 
-
-	public boolean boundariesPhase=false;
-
-	public boolean cuttingPhase=false;
+	public boolean cuttingPhase=false;		//path cutting phase
 
 	public boolean isCutting(){return cuttingPhase==true;}
 	public boolean isBoundariesMoving(){return boundariesPhase==true;}
@@ -51,88 +54,83 @@ public class DummyObject implements PlayingObject{
 	private void setOrientation(float x,float y){orientation=new Vector2D(x,y);}
 
 
-	private int nextChkpnt;
-
-	public void setBoundMovingPhase(Point2D userClosestPoint,boolean direction,PlayPolygon pol){
-		
+	
+	
+	/*
+	 * set moving on boundaries phase, gets user selected point on map, moving direction, polyogn
+	 * 
+	 * finds closest point on polygon to what user specified, 
+	 */
+	
+	public void setBoundMovingPhase(Point2D userPointOnMap,boolean direction,PlayPolygon pol){
 		
 		if(cuttingPhase)
 			return;
 		
-		this.userClosestPoint=closestPoint;
+		this.userPointOnMap=userPointOnMap;
 
 		this.direction=direction;
 
+		this.closestPointOnPoly=pol.closestPointSimplified(userPointOnMap);
 
-		this.closestPoint=pol.closestPointSimplified(userClosestPoint);
-
-
-		nextChkpnt = pol.getLineWithPointIndex(location);
+		nextCheckpointIndex = pol.getLineWithPointIndex(location);
 		
-		if(closestPoint!=null && nextChkpnt>=0){
+		if(direction)
+			nextCheckpointIndex=(nextCheckpointIndex-1+pol.getSize())%pol.getSize();
+		
+		if(closestPointOnPoly!=null && nextCheckpointIndex>=0){
 			boundariesPhase=true;
 		}
 		else{
 			return;
 		}
 		
-		if(direction){
-			
-			//nextChkpnt--;
-			
-			nextChkpnt=(nextChkpnt-1+pol.getSize())%pol.getSize();
-			
-			//if(nextChkpnt==-1)
-			//	nextChkpnt=pol.getSize()-1;
-			
-		}
-			
-		
-		Log.e("closest point !!!>>>",""+closestPoint.getx()+"-"+closestPoint.gety()+" next="+nextChkpnt);
+		Log.e("closest point !!!>>>",""+closestPointOnPoly.getx()+"-"+closestPointOnPoly.gety()+" next="+nextCheckpointIndex);
 
 	}
 
 	public void recalcBoundMovingPhase(PlayPolygon pol){
-		setBoundMovingPhase(userClosestPoint,direction,pol);
+		setBoundMovingPhase(userPointOnMap,direction,pol);
 	}
 
 
 	public void behave(PlayPolygon pol){
 
 
-		//----------------------- boundary sticking phase
+//----------------------- boundary moving phase
 
 		if(boundariesPhase){
 			
 			int polsize = pol.getSize();
 			
-			Point2D next = pol.getPoint(nextChkpnt);
+			Point2D next = pol.getPoint(nextCheckpointIndex);	//next point destination
 			
 			
-			if(closestPoint==null)
+			if(closestPointOnPoly==null)
 			{
 				boundariesPhase=false;
 				
 				return;
 			}
 			
-			if(location.distance(closestPoint)<=speed){
-				location=closestPoint;
+			if(location.distance(closestPointOnPoly)<=speed){	//if final destination within reach
+				
+				location=closestPointOnPoly;
 
 				boundariesPhase=false;
 			}
-			else if(location.distance(next)<=speed){
+			else if(location.distance(next)<=speed){	//if next point within reach
 				
 				int diff=1;
 				
 				if(direction)
 					diff=-1;
 				
-				nextChkpnt=(nextChkpnt+diff+pol.getSize())%polsize;
+				nextCheckpointIndex=(nextCheckpointIndex+diff+pol.getSize())%polsize;
 
 				location=next;
 			}
-			else{
+			else{	//else: proceed moving towards next point
 
 				Vector2D vec = new Vector2D(next.getx()-location.getx(),next.gety()-location.gety());
 
@@ -144,7 +142,7 @@ public class DummyObject implements PlayingObject{
 
 		}
 
-		//----------------------- cutting phase
+//----------------------- cutting phase
 
 		if(cuttingPhase){
 
@@ -181,21 +179,25 @@ public class DummyObject implements PlayingObject{
 
 		PlayPath getCutPathTemp = cuttingPath.clone();
 
-		Point2D additional = new Point2D(location);
+		Point2D offset = new Point2D(location);
 		
 		Vector2D orientation2=new Vector2D(orientation.getVx(),orientation.getVy());
 		
 		orientation2.setLength(speed+0.1f);
 		
-		additional.add(orientation2);
+		offset.add(orientation2);
 		
-		getCutPathTemp.proceed(additional.getx(), additional.gety());
+		getCutPathTemp.proceed(offset.getx(), offset.gety());
 		
 		return getCutPathTemp;
 
 	}
 
-
+	/*
+	 * start cutting phase, gets initial cut orientation
+	 * 
+	 */
+	
 	public void startCuting(Vector2D orientation){
 
 		if(!boundariesPhase && !cuttingPhase){
@@ -208,15 +210,15 @@ public class DummyObject implements PlayingObject{
 			cuttingPath=new PlayPath();
 			
 			
-			Point2D additional = new Point2D(location);
+			Point2D offset = new Point2D(location);
 			
 			Vector2D orientation2=new Vector2D(orientation.getVx(),orientation.getVy());
 			
 			orientation2.setLength(0.1f);
 			
-			additional.sub(orientation2);
+			offset.sub(orientation2);
 			
-			cuttingPath.start(additional.getx(), additional.gety());
+			cuttingPath.start(offset.getx(), offset.gety());
 
 			this.orientation=new Vector2D(orientation.getVx(),orientation.getVy());
 

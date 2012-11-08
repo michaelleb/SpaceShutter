@@ -375,7 +375,7 @@ public class MainActivity extends Activity {
 
 				point = (Point2D)msg.obj;
 
-				myObject.setBoundMovingPhase(point,true,myPoly);
+				myObject.setBoundMovingPhase(point,false,myPoly);
 
 				break;
 
