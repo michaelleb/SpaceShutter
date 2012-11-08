@@ -96,7 +96,7 @@ public class Line2D {
 		float len1 = (new Line2D(start,point)).getLength();
 		float len2 = (new Line2D(end,point)).getLength();
 		
-		return (len1+len2>=wholelen-0.01f && len1+len2<=wholelen+0.01f);
+		return (len1+len2>=wholelen-1.0f && len1+len2<=wholelen+1.0f);
 	}
 	
 }

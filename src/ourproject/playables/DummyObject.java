@@ -21,7 +21,7 @@ public class DummyObject implements PlayingObject{
 	private int type;
 
 
-	private float speed=3.0f;
+	private float speed=4.0f;
 
 
 
@@ -72,7 +72,19 @@ public class DummyObject implements PlayingObject{
 			boundariesPhase=true;
 		}
 		
-		//Log.e("closest point !!!>>>",""+closestPoint.getx()+"-"+closestPoint.gety()+" next="+nextChkpnt);
+		if(direction){
+			
+			//nextChkpnt--;
+			
+			nextChkpnt=(nextChkpnt-1+pol.getSize())%pol.getSize();
+			
+			//if(nextChkpnt==-1)
+			//	nextChkpnt=pol.getSize()-1;
+			
+		}
+			
+		
+		Log.e("closest point !!!>>>",""+closestPoint.getx()+"-"+closestPoint.gety()+" next="+nextChkpnt);
 
 	}
 
@@ -106,8 +118,13 @@ public class DummyObject implements PlayingObject{
 				boundariesPhase=false;
 			}
 			else if(location.distance(next)<=speed){
-
-				nextChkpnt=(nextChkpnt+1)%polsize;
+				
+				int diff=1;
+				
+				if(direction)
+					diff=-1;
+				
+				nextChkpnt=(nextChkpnt+diff+pol.getSize())%polsize;
 
 				location=next;
 			}
