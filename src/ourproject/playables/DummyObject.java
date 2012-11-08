@@ -71,6 +71,9 @@ public class DummyObject implements PlayingObject{
 		if(closestPoint!=null && nextChkpnt>=0){
 			boundariesPhase=true;
 		}
+		else{
+			return;
+		}
 		
 		if(direction){
 			
