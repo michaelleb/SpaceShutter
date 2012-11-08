@@ -84,14 +84,18 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		Log.e("", "onCreate");
-		
+
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		// Set up the window layout
 		setContentView(R.layout.main);
 
 
-		myObject=new DummyObject(Constants.MARGIN_PADDING,Constants.MARGIN_PADDING,0);
-		
+		myObject=new DummyObject(
+				Constants.PROJ_WIDTH-Constants.MARGIN_PADDING
+				,
+				Constants.PROJ_HEIGHT/2-Constants.MARGIN_PADDING
+				,0);
+
 		otherObject=new DummyObject(Constants.MARGIN_PADDING,Constants.MARGIN_PADDING,1);
 
 		myPath=new PlayPath();
@@ -105,7 +109,7 @@ public class MainActivity extends Activity {
 		myPoly.proceed(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
 
 		mHandler.sendEmptyMessage(Constants.MESSAGE_LOGIC_ROUND);
-		
+
 		// Get local Bluetooth adapter
 		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -120,6 +124,8 @@ public class MainActivity extends Activity {
 	}
 
 
+	private Path2D playerPathRecord=null;
+
 	public void updateGame(){
 
 
@@ -127,21 +133,49 @@ public class MainActivity extends Activity {
 
 		otherObject.behave(myPoly);
 
-		mView.drawObject(myPath);
+		Path2D tempPath = myObject.getCutPath();
+
+		if(tempPath!=null){
+
+			playerPathRecord=tempPath;
+
+			mView.drawObject(myObject.getCutPath());
+		}
+		else if(playerPathRecord!=null){
+
+			PlayPolygon sideA = new PlayPolygon();
+			PlayPolygon sideB = new PlayPolygon();
+			
+			
+			
+			playerPathRecord.print();
+			
+			if(myPoly.cut(playerPathRecord, sideA, sideB)==true){
+				
+				//if(sideA.getArea()>sideB.getArea())
+					myPoly=sideA;
+				//else
+				//	myPoly=sideB;
+			}
+
+
+
+			playerPathRecord=null;
+		}
 
 		mView.drawObject(myPoly);
-		
+
 		mView.drawObject(otherObject);
-		
+
 		mView.drawObject(myObject);
-		
+
 		mView.execureDrawing();
-		
-		
+
+
 		//boolean cont = myPoly.contains(new Point2D(myObject.getCenterX(),myObject.getCenterY()));
-		
+
 		//Log.e("",">>>>>>> "+cont);
-		
+
 		mHandler.removeMessages(Constants.MESSAGE_LOGIC_ROUND);
 		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_LOGIC_ROUND), Constants.ROUND_REFRESH);
 	}
@@ -150,7 +184,7 @@ public class MainActivity extends Activity {
 	@Override
 	public void onStart() {
 		super.onStart();
-		
+
 		setGameScreen();
 
 		// If BT is not on, request that it be enabled.
@@ -218,16 +252,16 @@ public class MainActivity extends Activity {
 
 
 
-        // Performing this check in onResume() covers the case in which BT was
-        // not enabled during onStart(), so we were paused to enable it...
-        // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
-        if (mChatService != null) {
-            // Only if the state is STATE_NONE, do we know that we haven't started already
-            if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
-              // Start the Bluetooth chat services
-              mChatService.start();
-            }
-        }
+		// Performing this check in onResume() covers the case in which BT was
+		// not enabled during onStart(), so we were paused to enable it...
+		// onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
+		if (mChatService != null) {
+			// Only if the state is STATE_NONE, do we know that we haven't started already
+			if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
+				// Start the Bluetooth chat services
+				mChatService.start();
+			}
+		}
 	}
 
 	private void setupBT() {
@@ -286,8 +320,8 @@ public class MainActivity extends Activity {
 
 	private boolean firsttime=false;
 
-	 private final Handler mHandler = new Handler() {
-		
+	private final Handler mHandler = new Handler() {
+
 		@Override
 		public void handleMessage(Message msg) {
 
@@ -304,6 +338,9 @@ public class MainActivity extends Activity {
 				point = (Point2D)msg.obj;
 				prev=point;
 
+
+
+
 				break;
 			case MotionEvent.ACTION_MOVE:
 
@@ -311,26 +348,23 @@ public class MainActivity extends Activity {
 
 
 				if(firsttime){
+					
+					
+					
+					Vector2D vec = new Line2D(prev,point).getVector();
 
-					Vector2D vec = new Line2D(prev,point).getVectorWidthLen(2);
-
-					if(vec.getLength()>0){
+					if(myObject.intersects(point) && vec.getLength()>0){
 
 						Log.e("",""+vec.getVx()+"-"+vec.getVy());
 
-						myObject.setOrientation(vec);
+						myObject.startCuting(vec);
+						
 						firsttime=false;
-
-						float[] arr = new float[4];
-
-						arr[0]=myObject.getCenterX();
-						arr[1]=myObject.getCenterY();
-						arr[2]=myObject.getOrientation().getVx();
-						arr[3]=myObject.getOrientation().getVy();
-
-						byte[] bytemsg = MySerialization.serialize(arr);
-
-						mChatService.write(bytemsg);
+					}
+					else if(myObject.isCutting() && vec.getLength()>0){
+						myObject.proceedCutting(vec);
+						
+						firsttime=false;
 					}
 				}
 
@@ -339,10 +373,15 @@ public class MainActivity extends Activity {
 				break;
 			case MotionEvent.ACTION_UP:
 
+				point = (Point2D)msg.obj;
+
+				myObject.setBoundMovingPhase(point,true,myPoly);
+
 				break;
 
 			case BlueToothDefaults.MESSAGE_READ:
 
+				/*
 				byte[] readBuf = (byte[]) msg.obj;
 				// construct a string from the valid bytes in the buffer
 				float[] msgarr = (float[])MySerialization.deserialize(readBuf);
@@ -352,8 +391,8 @@ public class MainActivity extends Activity {
 
 				otherObject.setCenter(loc);
 
-				otherObject.setOrientation(vec);
-
+				//otherObject.setOrientation(vec);
+				 */
 				break;
 
 			case BlueToothDefaults.MESSAGE_WRITE:

@@ -40,6 +40,10 @@ public class Path2D {
 		//Log.e("",""+coords.size());
 	}
 	
+	public void pushAtFront(float x,float y){
+		coords.add(0, new Point2D(x,y));
+	}
+	
 	public void removeLast(){
 		coords.remove(coords.size()-1);
 	}
@@ -53,7 +57,10 @@ public class Path2D {
 	}
 	
 	public Point2D getPoint(int index){
-		return this.coords.get(index);
+		
+		Point2D pt = new Point2D(this.coords.get(index).getx(),this.coords.get(index).gety());
+		
+		return pt;
 	}
 	
 	public Path getPath(){
@@ -87,5 +94,23 @@ public class Path2D {
 		return path;
 	}
 
-
+	
+	
+	
+	
+	public void print(){
+		Log.e("-------------------------------------","");
+		
+		
+		for(int i=0;i<this.getSize();i++){
+			
+			Point2D pp = this.getPoint(i);
+			
+			Log.e("point:"+i,"("+pp.getx()+","+pp.gety()+")");
+			
+		}
+		
+		Log.e("-------------------------------------","");
+		
+	}
 }

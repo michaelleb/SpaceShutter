@@ -15,9 +15,10 @@ public class Polygon2D extends Path2D {
 	public Polygon2D(){
 
 	}
-
+	
+	
 	public boolean cut(Path2D cuttingPath,Polygon2D sideA,Polygon2D sideB){
-
+		
 		Path2D path =  cuttingPath.clone();
 
 		ListIterator<Point2D> pathIter = path.coords.listIterator();
@@ -45,21 +46,22 @@ public class Polygon2D extends Path2D {
 			Point2D polysecond;
 
 			while (polyIter.hasNext()) {
+				
+				
 				polysecond = polyIter.next();
 
 				//--------------------------------------------
-
-				Point2D res = segIntersection(
-						first.getx(),first.gety(),second.getx(),second.gety(),
-						polyfirst.getx(),polyfirst.gety(),polysecond.getx(),polysecond.gety()
-						,false);
+				
+				Line2D linea=new Line2D(first,second);
+				Line2D lineb=new Line2D(polyfirst,polysecond);
+				
+				Point2D res = linea.lineIntersection(lineb, false);
+						
 
 				if(res!=null){
-
+					
 					collisioncnt++;
-
-					Log.i(""," path: "+(pathIter.nextIndex()-2)+" poly: "+(polyIter.nextIndex()-2));
-
+					
 					if(pathIndexA==-1){
 						pathIndexA=pathIter.nextIndex()-2;
 						polyIndexA=polyIter.nextIndex()-2;
@@ -94,8 +96,10 @@ public class Polygon2D extends Path2D {
 
 			first = second; 
 		}
-
-		Log.e("",""+collisioncnt);
+		
+		//pathIndexA polyIndexA
+		
+		Log.e("",""+pathIndexA+" "+pathIndexB+" "+polyIndexA+" "+polyIndexB);
 
 		if(collisioncnt!=2)
 			return false;
@@ -172,39 +176,6 @@ public class Polygon2D extends Path2D {
 		return true;
 	}
 
-	protected Point2D segIntersection(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4,boolean includeEdges) 
-	{ 
-		float bx = x2 - x1; 
-		float by = y2 - y1; 
-		float dx = x4 - x3; 
-		float dy = y4 - y3;
-		float b_dot_d_perp = bx * dy - by * dx;
-		if(b_dot_d_perp == 0) {
-			return null;
-		}
-		float cx = x3 - x1;
-		float cy = y3 - y1;
-		float t = (cx * dy - cy * dx) / b_dot_d_perp;
-		if(
-		(!includeEdges && (t <= 0 || t >= 1)) 
-		||
-		(includeEdges && (t < 0 || t > 1))
-		) {
-			return null;
-		}
-		float u = (cx * by - cy * bx) / b_dot_d_perp;
-		if(
-				(!includeEdges && (u <= 0 || u >= 1)) 
-				||
-				(includeEdges && (u < 0 || u > 1))
-				) { 
-			return null;
-		}
-		return new Point2D(x1+t*bx, y1+t*by);
-	}
-
-
-
 	public float getArea(){
 
 		float res=0;
@@ -230,60 +201,187 @@ public class Polygon2D extends Path2D {
 
 
 	public boolean contains(Point2D point){
-		
+
 		ListIterator<Point2D> polyIter = coords.listIterator();
 
 		Point2D polyfirst = polyIter.next();
 		Point2D polysecond;
-		
+
 		int intersectCnt=0;
-		
+
 		while (polyIter.hasNext()) {
 			polysecond = polyIter.next();
-			
-			if(segIntersection(-10,-10,point.getx(),point.gety(),
-					polyfirst.getx(),polyfirst.gety(),polysecond.getx(),polysecond.gety(),
-					false
-					)!=null){
-				
+
+
+			Line2D line1 = new Line2D(new Point2D(-10,-10),point);
+			Line2D line2 = new Line2D(polyfirst,polysecond);
+
+
+			if(line1.lineIntersection(line2, false)!=null){
+
 				intersectCnt++;
 			}
-			
+
 			polyfirst=polysecond;
 		}
-		
+
 		return (intersectCnt%2)==1;
+
+	}
+
+
+	public Line2D interSectionLine(Line2D line){
+
+		ListIterator<Point2D> polyIter = coords.listIterator();
+
+		Point2D polyfirst = polyIter.next();
+		Point2D polysecond;
+
+		while (polyIter.hasNext()) {
+			polysecond = polyIter.next();
+
+			Point2D intersect = line.lineIntersection(new Line2D(polyfirst,polysecond),false);
+
+			if(intersect!=null){
+
+				return new Line2D(polyfirst,polysecond);
+			}
+
+			polyfirst=polysecond;
+		}
+
+		return null;
+
+	}
+
+	public Point2D intersectionPoint(Line2D line){
+
+		Line2D iline = this.interSectionLine(line);
+
+		if(iline!=null)
+			return iline.lineIntersection(line, true);
+		return null;
 
 	}
 	
 	
-	public Point2D lineIntersects(Line2D line){
+	
+	
+	public Point2D closestPointSimplified(Point2D point){
+		
+		Point2D result=null;
+		
+		Line2D linea=new Line2D(
+				new Point2D(point.getx(),point.gety()-1000),
+				new Point2D(point.getx(),point.gety()+1000)
+			);
+		
+		Line2D lineb=new Line2D(
+				new Point2D(point.getx()-1000,point.gety()),
+				new Point2D(point.getx()+1000,point.gety())
+			);
 		
 		ListIterator<Point2D> polyIter = coords.listIterator();
 
 		Point2D polyfirst = polyIter.next();
 		Point2D polysecond;
-		
+
 		while (polyIter.hasNext()) {
 			polysecond = polyIter.next();
+
 			
-			Point2D intersect =segIntersection(
-					line.getStart().getx(),line.getStart().gety(),
-					line.getEnd().getx(),line.getEnd().gety(),
-					polyfirst.getx(),polyfirst.gety(),
-					polysecond.getx(),polysecond.gety(),
-					false
-					);
+			Line2D currLine = new Line2D(polyfirst,polysecond);
 			
-			if(intersect!=null){
-				
-				return intersect;
+			
+			Point2D interPta = currLine.lineIntersection(linea, true);
+			Point2D interPtb = currLine.lineIntersection(lineb, true);
+			
+			if(interPta!=null){
+				if(result==null || (result.distance(point)>interPta.distance(point)))
+					result=interPta;
+			}
+			
+			if(interPtb!=null){
+				if(result==null || (result.distance(point)>interPtb.distance(point)))
+					result=interPtb;
 			}
 			
 			polyfirst=polysecond;
 		}
+
+		return result;
 		
-		return null;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public int getLineWithPointIndex(Point2D point){
+
+		ListIterator<Point2D> polyIter = coords.listIterator();
+
+		Point2D polyfirst = polyIter.next();
+		Point2D polysecond;
+
+		while (polyIter.hasNext()) {
+			
+			int index=polyIter.nextIndex();
+			
+			polysecond = polyIter.next();
+
+			Line2D currLine = new Line2D(polyfirst,polysecond);
+			
+			if(currLine.isBetween(point)){
+				return index;
+			}
+			
+			polyfirst=polysecond;
+		}
+
+		return -1;
+
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public void print(){
+		Log.e("-------------------------------------","");
+		
+		
+		for(int i=0;i<=this.getSize();i++){
+			
+			
+			
+			int ii=i%this.getSize();
+			
+			Point2D pp = this.getPoint(ii);
+			
+			Log.e("point:"+ii,"("+pp.getx()+","+pp.gety()+")");
+			
+		}
+		
+		Log.e("-------------------------------------","");
 		
 	}
 
