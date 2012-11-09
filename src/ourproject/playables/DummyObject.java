@@ -21,11 +21,7 @@ public class DummyObject implements PlayingObject{
 	private int type;
 
 
-	private float speed=2.0f;
-
-
-
-
+	private float speed=2.13f;
 
 	private Point2D location;
 	
@@ -85,7 +81,7 @@ public class DummyObject implements PlayingObject{
 			return;
 		}
 		
-		Log.e("closest point !!!>>>",""+closestPointOnPoly.getx()+"-"+closestPointOnPoly.gety()+" next="+nextCheckpointIndex);
+		//log.e("closest point !!!>>>",""+closestPointOnPoly.getx()+"-"+closestPointOnPoly.gety()+" next="+nextCheckpointIndex);
 
 	}
 
@@ -144,26 +140,42 @@ public class DummyObject implements PlayingObject{
 
 //----------------------- cutting phase
 
+		//Log.e("",""+pol.contains(location));
+		
 		if(cuttingPhase){
 
 			Point2D nextloc= new Point2D(location);
 			nextloc.add(orientation);
 
 			if(pol.contains(nextloc)){
+				
+				//Log.e("on poly 1",location.getx()+","+location.gety()+" : "+pol.contains(location));
+				
 				location=nextloc;
 				
-				Log.e("","on poly");
+				//Log.e("on poly 2",location.getx()+","+location.gety()+" : "+pol.contains(nextloc));
 			}
 			else{
-
+				
+				
+				
 				Line2D traj = new Line2D(location,nextloc);
 
 				Point2D newLoc = pol.intersectionPoint(traj);
 
-				if(newLoc!=null)
+				if(newLoc!=null){
 					location=newLoc;
+					
+					//Log.e(">>>>",newLoc.getx()+","+newLoc.gety());
+					
+				}
+				
+				Log.e("stop",location.getx()+","+location.gety());
 				
 				cuttingPath.proceed(location.getx(), location.gety());
+				
+				
+				
 				
 				cuttingPhase=false;
 				

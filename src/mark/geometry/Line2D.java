@@ -43,22 +43,26 @@ public class Line2D {
 
 
 
-
-
-
-	public Point2D lineIntersection(Line2D line2,boolean left,boolean right){
+	
+	
+	
+	
+	public Point2D lineIntersection(Line2D line2,boolean left1,boolean right1,boolean left2,boolean right2){
 		return segIntersection(
 				this.getStart().getx(),this.getStart().gety(),
 				this.getEnd().getx(),this.getEnd().gety(),
 				line2.getStart().getx(),line2.getStart().gety(),
 				line2.getEnd().getx(),line2.getEnd().gety(),
-				left,right
+				left1,right1,left2,right2
 				);
 	}
-
-
+	
+	
+	
+	
 	protected Point2D segIntersection(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, 
-			boolean includeLeftEdge, boolean includeRightEdge) 
+			boolean includeLeftEdge1, boolean includeRightEdge1,
+			boolean includeLeftEdge2, boolean includeRightEdge2) 
 	{ 
 		float bx = x2 - x1; 
 		float by = y2 - y1; 
@@ -73,24 +77,24 @@ public class Line2D {
 		float t = (cx * dy - cy * dx) / b_dot_d_perp;
 		
 		if(
-		(t < 0 || (t <= 0  && !includeLeftEdge))
+		(t < 0 || (t <= 0  && !includeLeftEdge1))
 		||
-		(t > 1 || (t >= 1 && !includeRightEdge))
+		(t > 1 || (t >= 1 && !includeRightEdge1))
 		){
 			return null;
 		}
 		float u = (cx * by - cy * bx) / b_dot_d_perp;
 		if(
-		(u < 0 || (u <= 0  && !includeLeftEdge))
+		(u < 0 || (u <= 0  && !includeLeftEdge2))
 		||
-		(u > 1 || (u >= 1 && !includeRightEdge))
+		(u > 1 || (u >= 1 && !includeRightEdge2))
 		){ 
 			return null;
 		}
 		return new Point2D(x1+t*bx, y1+t*by);
 	}
-
-
+	
+	
 	public boolean isBetween(Point2D point){
 
 		float wholelen = getLength();
@@ -98,7 +102,7 @@ public class Line2D {
 		float len1 = (new Line2D(start,point)).getLength();
 		float len2 = (new Line2D(end,point)).getLength();
 
-		return (len1+len2>=wholelen-0.1f && len1+len2<=wholelen+0.1f);
+		return (len1+len2==wholelen);
 	}
-
+	
 }

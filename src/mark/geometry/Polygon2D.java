@@ -55,7 +55,7 @@ public class Polygon2D extends Path2D {
 				Line2D linea=new Line2D(first,second);
 				Line2D lineb=new Line2D(polyfirst,polysecond);
 
-				Point2D res = linea.lineIntersection(lineb, false,false);
+				Point2D res = linea.lineIntersection(lineb, false,false,false,false);
 
 
 				if(res!=null){
@@ -99,7 +99,7 @@ public class Polygon2D extends Path2D {
 
 		//pathIndexA polyIndexA
 
-		Log.e("",""+pathIndexA+" "+pathIndexB+" "+polyIndexA+" "+polyIndexB);
+		//log.e("",""+pathIndexA+" "+pathIndexB+" "+polyIndexA+" "+polyIndexB);
 
 		if(collisioncnt!=2)
 			return false;
@@ -219,8 +219,11 @@ public class Polygon2D extends Path2D {
 			Line2D line1 = new Line2D(new Point2D(-1,-1),point);
 			Line2D line2 = new Line2D(polyfirst,polysecond);
 
-
-			if(line1.lineIntersection(line2, true,false)!=null){
+			
+			if(line2.isBetween(point))
+				return true;
+			
+			if(line1.lineIntersection(line2, false,false,false,true)!=null){
 
 				intersectCnt++;
 			}
@@ -228,7 +231,7 @@ public class Polygon2D extends Path2D {
 			polyfirst=polysecond;
 		}
 
-		Log.e("",""+intersectCnt);
+		//log.e("",""+intersectCnt);
 
 		return (intersectCnt%2)==1;
 
@@ -248,7 +251,7 @@ public class Polygon2D extends Path2D {
 		while (polyIter.hasNext()) {
 			polysecond = polyIter.next();
 
-			Point2D intersect = line.lineIntersection(new Line2D(polyfirst,polysecond),false,false);
+			Point2D intersect = line.lineIntersection(new Line2D(polyfirst,polysecond),false,false,false,false);
 
 			if(intersect!=null){
 
@@ -273,7 +276,7 @@ public class Polygon2D extends Path2D {
 		Line2D iline = this.interSectionLine(line);
 
 		if(iline!=null)
-			return iline.lineIntersection(line, true,true);
+			return iline.lineIntersection(line, true,true,true,true);
 		return null;
 
 	}
@@ -310,8 +313,8 @@ public class Polygon2D extends Path2D {
 			Line2D currLine = new Line2D(polyfirst,polysecond);
 
 
-			Point2D interPta = currLine.lineIntersection(linea, true,true);
-			Point2D interPtb = currLine.lineIntersection(lineb, true,true);
+			Point2D interPta = currLine.lineIntersection(linea, true,true,true,true);
+			Point2D interPtb = currLine.lineIntersection(lineb, true,true,true,true);
 
 			if(interPta!=null){
 				if(result==null || (result.distance(point)>interPta.distance(point)))
@@ -422,7 +425,7 @@ public class Polygon2D extends Path2D {
 					secondpolysecond = secondPolyIter.next();
 
 					{
-						Point2D intersect = (new Line2D(polyfirst,polysecond)).lineIntersection(new Line2D(secondpolyfirst,secondpolysecond),false,false);
+						Point2D intersect = (new Line2D(polyfirst,polysecond)).lineIntersection(new Line2D(secondpolyfirst,secondpolysecond),true,true,true,true);
 
 						if(intersect!=null){
 							return new Line2D(polyfirst,polysecond);
@@ -453,7 +456,7 @@ public class Polygon2D extends Path2D {
 
 
 	public void print(){
-		Log.e("-------------------------------------","");
+		//log.e("-------------------------------------","");
 
 
 		for(int i=0;i<=this.getSize();i++){
@@ -464,11 +467,11 @@ public class Polygon2D extends Path2D {
 
 			Point2D pp = this.getPoint(ii);
 
-			Log.e("point:"+ii,"("+pp.getx()+","+pp.gety()+")");
+			//log.e("point:"+ii,"("+pp.getx()+","+pp.gety()+")");
 
 		}
 
-		Log.e("-------------------------------------","");
+		//log.e("-------------------------------------","");
 
 	}
 

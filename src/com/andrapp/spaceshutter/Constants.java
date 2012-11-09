@@ -24,5 +24,5 @@ public class Constants {
 	
 	
 	
-	public static final int MARGIN_PADDING=3;
+	public static final int MARGIN_PADDING=10;
 }

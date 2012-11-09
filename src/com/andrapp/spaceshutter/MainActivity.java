@@ -83,7 +83,7 @@ public class MainActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		Log.e("", "onCreate");
+		//log.e("", "onCreate");
 
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		// Set up the window layout
@@ -129,9 +129,10 @@ public class MainActivity extends Activity {
 	public void updateGame(){
 
 
+		
 		myObject.behave(myPoly);
 
-		otherObject.behave(myPoly);
+		//otherObject.behave(myPoly);
 
 		Path2D tempPath = myObject.getCutPath();
 
@@ -148,7 +149,7 @@ public class MainActivity extends Activity {
 			
 			
 			
-			playerPathRecord.print();
+			//playerPathRecord.print();
 			
 			if(myPoly.cut(playerPathRecord, sideA, sideB)==true){
 				
@@ -174,7 +175,7 @@ public class MainActivity extends Activity {
 
 		//boolean cont = myPoly.contains(new Point2D(myObject.getCenterX(),myObject.getCenterY()));
 
-		//Log.e("",">>>>>>> "+cont);
+		////log.e("",">>>>>>> "+cont);
 
 		mHandler.removeMessages(Constants.MESSAGE_LOGIC_ROUND);
 		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_LOGIC_ROUND), Constants.ROUND_REFRESH);
@@ -228,7 +229,7 @@ public class MainActivity extends Activity {
 
 				int newHeight=(int)(new Float(newWidth)*(new Float(Constants.PROJ_HEIGHT)/new Float(Constants.PROJ_WIDTH)));
 
-				//Log.e("",mm.widthPixels+"  "+mm.heightPixels);
+				////log.e("",mm.widthPixels+"  "+mm.heightPixels);
 
 				//Constants.VIEW_PROPORTION
 
@@ -248,7 +249,7 @@ public class MainActivity extends Activity {
 	@Override
 	public synchronized void onResume() {
 		super.onResume();
-		Log.e(">>><<<<", "+++ ON RESUME +++");
+		//log.e(">>><<<<", "+++ ON RESUME +++");
 
 
 
@@ -278,19 +279,19 @@ public class MainActivity extends Activity {
 	@Override
 	public synchronized void onPause() {
 		super.onPause();
-		Log.e(">>><<<<", "+++ ON PAUSE +++");
+		//log.e(">>><<<<", "+++ ON PAUSE +++");
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
-		Log.e(">>><<<<", "+++ ON STOP +++");
+		//log.e(">>><<<<", "+++ ON STOP +++");
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		Log.e(">>><<<<", "+++ ON DESTROY +++");
+		//log.e(">>><<<<", "+++ ON DESTROY +++");
 
 		// Stop the Bluetooth chat services
 		if (mChatService != null)
@@ -299,7 +300,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void ensureDiscoverable() {
-		Log.e("", "ensureDiscoverable");
+		//log.e("", "ensureDiscoverable");
 		if (mBluetoothAdapter.getScanMode() !=
 				BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
 			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
@@ -325,7 +326,7 @@ public class MainActivity extends Activity {
 		@Override
 		public void handleMessage(Message msg) {
 
-			//Log.e("","main: handleMessage "+msg.what);
+			////log.e("","main: handleMessage "+msg.what);
 
 			Point2D point;
 
@@ -349,7 +350,7 @@ public class MainActivity extends Activity {
 					
 					Vector2D vec = new Line2D(prev,point).getVector();
 					
-					Log.e("",""+vec.getVx()+","+vec.getVx());
+					//log.e("",""+vec.getVx()+","+vec.getVx());
 					
 					
 					if(Math.abs(vec.getVx())>Math.abs(vec.getVy()))
@@ -360,7 +361,7 @@ public class MainActivity extends Activity {
 					
 					if(myObject.intersects(point) && vec.getLength()>0){
 
-						//Log.e("",""+vec.getVx()+"-"+vec.getVy());
+						////log.e("",""+vec.getVx()+"-"+vec.getVy());
 
 						myObject.startCuting(vec);
 						
@@ -428,7 +429,7 @@ public class MainActivity extends Activity {
 				// save the connected device's name
 				mConnectedDeviceName = msg.getData().getString(BlueToothDefaults.DEVICE_NAME);
 
-				Log.e("", "Connected to " + mConnectedDeviceName);
+				//log.e("", "Connected to " + mConnectedDeviceName);
 
 				Toast.makeText(getApplicationContext(), "Connected to "
 						+ mConnectedDeviceName, Toast.LENGTH_SHORT).show();
@@ -436,7 +437,7 @@ public class MainActivity extends Activity {
 				break;
 			case BlueToothDefaults.MESSAGE_TOAST:
 
-				Log.e("", msg.getData().getString(BlueToothDefaults.TOAST));
+				//log.e("", msg.getData().getString(BlueToothDefaults.TOAST));
 
 				Toast.makeText(getApplicationContext(), msg.getData().getString(BlueToothDefaults.TOAST),
 						Toast.LENGTH_SHORT).show();
@@ -453,12 +454,12 @@ public class MainActivity extends Activity {
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-		Log.e("","onActivityResult");
+		//log.e("","onActivityResult");
 
 		switch (requestCode) {
 		case BlueToothDefaults.REQUEST_CONNECT_DEVICE:
 
-			Log.e("","REQUEST_CONNECT_DEVICE");
+			//log.e("","REQUEST_CONNECT_DEVICE");
 
 			// When DeviceListActivity returns with a device to connect
 			if (resultCode == Activity.RESULT_OK) {
@@ -473,7 +474,7 @@ public class MainActivity extends Activity {
 			break;
 		case BlueToothDefaults.REQUEST_ENABLE_BT:
 
-			Log.e("","REQUEST_ENABLE_BT");
+			//log.e("","REQUEST_ENABLE_BT");
 
 
 			if (resultCode == Activity.RESULT_OK) {
@@ -483,7 +484,7 @@ public class MainActivity extends Activity {
 			else{
 				// User did not enable Bluetooth or an error occured
 
-				Log.e("", "BT not enabled");
+				//log.e("", "BT not enabled");
 
 				Toast.makeText(this, R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
 				finish();
