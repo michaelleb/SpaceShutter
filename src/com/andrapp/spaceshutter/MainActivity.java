@@ -169,7 +169,7 @@ public class MainActivity extends Activity {
 
 		mView.drawObject(myObject);
 
-		mView.execureDrawing();
+		mView.executeDrawing();
 
 
 		//boolean cont = myPoly.contains(new Point2D(myObject.getCenterX(),myObject.getCenterY()));
@@ -228,7 +228,7 @@ public class MainActivity extends Activity {
 
 				int newHeight=(int)(new Float(newWidth)*(new Float(Constants.PROJ_HEIGHT)/new Float(Constants.PROJ_WIDTH)));
 
-				Log.e("",mm.widthPixels+"  "+mm.heightPixels);
+				//Log.e("",mm.widthPixels+"  "+mm.heightPixels);
 
 				//Constants.VIEW_PROPORTION
 
@@ -337,25 +337,30 @@ public class MainActivity extends Activity {
 
 				point = (Point2D)msg.obj;
 				prev=point;
-
-
-
-
+				
 				break;
 			case MotionEvent.ACTION_MOVE:
 
 				point = (Point2D)msg.obj;
-
 
 				if(firsttime){
 					
 					
 					
 					Vector2D vec = new Line2D(prev,point).getVector();
-
+					
+					Log.e("",""+vec.getVx()+","+vec.getVx());
+					
+					
+					if(Math.abs(vec.getVx())>Math.abs(vec.getVy()))
+						vec.setVy(0);
+					else
+						vec.setVx(0);
+					
+					
 					if(myObject.intersects(point) && vec.getLength()>0){
 
-						Log.e("",""+vec.getVx()+"-"+vec.getVy());
+						//Log.e("",""+vec.getVx()+"-"+vec.getVy());
 
 						myObject.startCuting(vec);
 						
@@ -374,8 +379,9 @@ public class MainActivity extends Activity {
 			case MotionEvent.ACTION_UP:
 
 				point = (Point2D)msg.obj;
-
-				myObject.setBoundMovingPhase(point,false,myPoly);
+				
+				if(!myObject.isCutting())
+					myObject.setBoundMovingPhase(point,false,myPoly);
 
 				break;
 
@@ -396,7 +402,6 @@ public class MainActivity extends Activity {
 				break;
 
 			case BlueToothDefaults.MESSAGE_WRITE:
-				Log.e("","222");
 				break;
 			case Constants.MESSAGE_LOGIC_ROUND:
 				updateGame();

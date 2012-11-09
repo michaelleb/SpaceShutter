@@ -21,7 +21,7 @@ public class DummyObject implements PlayingObject{
 	private int type;
 
 
-	private float speed=4.0f;
+	private float speed=2.0f;
 
 
 
@@ -151,6 +151,8 @@ public class DummyObject implements PlayingObject{
 
 			if(pol.contains(nextloc)){
 				location=nextloc;
+				
+				Log.e("","on poly");
 			}
 			else{
 
@@ -164,6 +166,8 @@ public class DummyObject implements PlayingObject{
 				cuttingPath.proceed(location.getx(), location.gety());
 				
 				cuttingPhase=false;
+				
+				
 			}
 		}
 

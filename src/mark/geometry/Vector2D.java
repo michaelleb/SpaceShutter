@@ -28,4 +28,7 @@ public class Vector2D {
 	public float getVx(){return vx;}
 	public float getVy(){return vy;}
 	
+	public void setVx(float vx){this.vx=vx;}
+	public void setVy(float vy){this.vy=vy;}
+	
 }

@@ -112,7 +112,7 @@ public class MyView extends View {
 		objectsQueue.add(obj);
 	}
 
-	public void execureDrawing(){
+	public void executeDrawing(){
 		invalidate();
 	}
 
