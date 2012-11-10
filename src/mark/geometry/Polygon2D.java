@@ -18,115 +18,67 @@ public class Polygon2D extends Path2D {
 
 
 	public boolean cut(Path2D cuttingPath,Polygon2D sideA,Polygon2D sideB){
-
+		
 		Path2D path =  cuttingPath.clone();
+		
+		ListIterator<Point2D> polyIter = coords.listIterator();
 
-		ListIterator<Point2D> pathIter = path.coords.listIterator();
+		Point2D polyfirst = polyIter.next();
+		Point2D polysecond;
+		
+		Point2D start = path.getPoint(0);
+		Point2D end = path.getPoint(path.getSize()-1);
+		
+		
+		int indexa=-1;
+		int indexb=-1;
+		
+		while (polyIter.hasNext()) {
+			
+			int index=polyIter.nextIndex()-1;
 
-		Point2D firstptadded=null;
-		Point2D firstptadded2=null;
+			polysecond = polyIter.next();
 
-		Point2D first = pathIter.next();
-		Point2D second;
-
-		int pathIndexA=-1,pathIndexB=-1;
-
-		int polyIndexA=-1,polyIndexB=-1;
-
-
-		int collisioncnt=0;
-
-		while (pathIter.hasNext()) {
-
-			second = pathIter.next();
-
-			ListIterator<Point2D> polyIter = coords.listIterator();
-
-			Point2D polyfirst = polyIter.next();
-			Point2D polysecond;
-
-			while (polyIter.hasNext()) {
-
-
-				polysecond = polyIter.next();
-
-				//--------------------------------------------
-
-				Line2D linea=new Line2D(first,second);
-				Line2D lineb=new Line2D(polyfirst,polysecond);
-
-				Point2D res = linea.lineIntersection(lineb, false,false,false,false);
-
-
-				if(res!=null){
-
-					collisioncnt++;
-
-					if(pathIndexA==-1){
-						pathIndexA=pathIter.nextIndex()-2;
-						polyIndexA=polyIter.nextIndex()-2;
-
-						pathIter.previous();
-						pathIter.previous();
-						pathIter.set(res);
-						pathIter.next();
-						pathIter.next();
-
-					}
-					else{
-						pathIndexB=pathIter.nextIndex()-2;
-						polyIndexB=polyIter.nextIndex()-2;
-
-
-						pathIter.previous();
-						pathIter.set(res);
-						pathIter.next();
-
-					}
-
-				}
-
-				//--------------------------------------------
-
-				polyfirst=polysecond;
+			//--------------------------------------------
+			
+			Line2D polyLine=new Line2D(polyfirst,polysecond);
+			
+			
+			if(polyLine.isBetween(start)){
+				indexa=index;
 			}
+			
+			if(polyLine.isBetween(end)){
+				indexb=index;
+			}
+			
+			//--------------------------------------------
 
-
-			//-------------------------------------------------	
-
-			first = second; 
+			polyfirst=polysecond;
 		}
-
-		//pathIndexA polyIndexA
-
-		//log.e("",""+pathIndexA+" "+pathIndexB+" "+polyIndexA+" "+polyIndexB);
-
-		if(collisioncnt!=2)
-			return false;
-
-		for(int i=path.coords.size()-1;i>pathIndexB+1;i--)
-			path.coords.remove(i);
-
-		for(int i=0;i<pathIndexA;i++)
-			path.coords.remove(0);
-
-		if(polyIndexB<polyIndexA){
-			int tmp=polyIndexA;
-			polyIndexA=polyIndexB;
-			polyIndexB=tmp;
+		
+		Log.e("",""+indexa+"___"+indexb);
+		
+		if(indexb<indexa){
 			Collections.reverse(path.coords);
+			
+			int tmp=indexa;
+			indexa=indexb;
+			indexb=tmp;
+			
 		}
-
-
-		if(polyIndexB==polyIndexA){
-
-			Point2D pta=this.coords.get(polyIndexA);
+		
+		if(indexb==indexa){
+			Point2D pta=this.coords.get(indexa);
 			Point2D ptb=path.coords.get(0);
 			Point2D ptc=path.coords.get(path.coords.size()-1);
 
 			if(pta.distance(ptb)>pta.distance(ptc))
 				Collections.reverse(path.coords);
 		}
+		
+		Point2D firstptadded=null;
+		Point2D firstptadded2=null;
 
 
 		ArrayList<Point2D> coords1 = new ArrayList<Point2D>();
@@ -135,7 +87,7 @@ public class Polygon2D extends Path2D {
 
 		for(int i=0;i<this.coords.size();i++){
 
-			if(i<=polyIndexA || i>polyIndexB){
+			if(i<=indexa || i>indexb){
 				coords1.add(this.coords.get(i));
 
 				if(firstptadded==null)
@@ -148,7 +100,7 @@ public class Polygon2D extends Path2D {
 					firstptadded2=this.coords.get(i);
 			}
 
-			if(i==polyIndexA){
+			if(i==indexa){
 				for(int j=0;j<path.coords.size();j++){
 					coords1.add(path.coords.get(j));
 					coords2.add(path.coords.get(path.coords.size()-j-1));
@@ -172,6 +124,9 @@ public class Polygon2D extends Path2D {
 
 		if(sideB!=null)
 			sideB.coords=coords2;
+
+		
+
 
 		return true;
 	}

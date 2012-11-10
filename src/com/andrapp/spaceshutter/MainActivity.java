@@ -123,48 +123,36 @@ public class MainActivity extends Activity {
 
 	}
 
-
-	private Path2D playerPathRecord=null;
-
 	public void updateGame(){
 
-
-		
 		myObject.behave(myPoly);
 
-		//otherObject.behave(myPoly);
+		mView.drawObject(myPoly);
 
-		Path2D tempPath = myObject.getCutPath();
+		if(myPath!=null && myPath.getSize()>1){
+			mView.drawObject(myPath);
 
-		if(tempPath!=null){
+			if(!myObject.isCutting()){
 
-			playerPathRecord=tempPath;
+				PlayPolygon sideA = new PlayPolygon();
+				PlayPolygon sideB = new PlayPolygon();
 
-			mView.drawObject(myObject.getCutPath());
-		}
-		else if(playerPathRecord!=null){
+				//playerPathRecord.print();
 
-			PlayPolygon sideA = new PlayPolygon();
-			PlayPolygon sideB = new PlayPolygon();
-			
-			
-			
-			//playerPathRecord.print();
-			
-			if(myPoly.cut(playerPathRecord, sideA, sideB)==true){
-				
-				//if(sideA.getArea()>sideB.getArea())
+				if(myPoly.cut(myPath, sideA, sideB)==true){
+
+					//if(sideA.getArea()>sideB.getArea())
 					myPoly=sideA;
-				//else
-				//	myPoly=sideB;
+					//else
+					//	myPoly=sideB;
+				}
+				
+				myPath=new PlayPath();
+
 			}
 
 
-
-			playerPathRecord=null;
 		}
-
-		mView.drawObject(myPoly);
 
 		mView.drawObject(otherObject);
 
@@ -338,38 +326,38 @@ public class MainActivity extends Activity {
 
 				point = (Point2D)msg.obj;
 				prev=point;
-				
+
 				break;
 			case MotionEvent.ACTION_MOVE:
 
 				point = (Point2D)msg.obj;
 
 				if(firsttime){
-					
-					
-					
+
+
+
 					Vector2D vec = new Line2D(prev,point).getVector();
-					
+
 					//log.e("",""+vec.getVx()+","+vec.getVx());
-					
-					
+
+
 					if(Math.abs(vec.getVx())>Math.abs(vec.getVy()))
 						vec.setVy(0);
 					else
 						vec.setVx(0);
-					
-					
+
+
 					if(myObject.intersects(point) && vec.getLength()>0){
 
 						////log.e("",""+vec.getVx()+"-"+vec.getVy());
 
-						myObject.startCuting(vec);
-						
+						myObject.startCuting(vec,myPath);
+
 						firsttime=false;
 					}
 					else if(myObject.isCutting() && vec.getLength()>0){
 						myObject.proceedCutting(vec);
-						
+
 						firsttime=false;
 					}
 				}
@@ -380,7 +368,7 @@ public class MainActivity extends Activity {
 			case MotionEvent.ACTION_UP:
 
 				point = (Point2D)msg.obj;
-				
+
 				if(!myObject.isCutting())
 					myObject.setBoundMovingPhase(point,false,myPoly);
 

@@ -99,7 +99,7 @@ public class Path2D {
 	
 	
 	public void print(){
-		Log.e("-------------------------------------","");
+		Log.e("","-------------------------------------");
 		
 		
 		for(int i=0;i<this.getSize();i++){
@@ -110,7 +110,33 @@ public class Path2D {
 			
 		}
 		
-		Log.e("-------------------------------------","");
+		Log.e("","-------------------------------------");
 		
 	}
+	
+	
+	
+	
+	public void reverse(){
+		
+		
+		Path2D path=new Path2D();
+
+		ListIterator<Point2D> pathIter = path.coords.listIterator();
+
+		Point2D elem;
+
+		if(pathIter.hasNext()){			
+
+			elem = pathIter.next();
+			
+			path.pushAtFront(elem.getx(), elem.gety());
+		}
+		
+		this.coords=path.coords;
+		
+		
+		
+	}
+	
 }

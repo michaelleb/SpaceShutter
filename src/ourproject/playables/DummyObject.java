@@ -21,7 +21,7 @@ public class DummyObject implements PlayingObject{
 	private int type;
 
 
-	private float speed=2.13f;
+	private float speed=3.13f;
 
 	private Point2D location;
 	
@@ -148,16 +148,9 @@ public class DummyObject implements PlayingObject{
 			nextloc.add(orientation);
 
 			if(pol.contains(nextloc)){
-				
-				//Log.e("on poly 1",location.getx()+","+location.gety()+" : "+pol.contains(location));
-				
 				location=nextloc;
-				
-				//Log.e("on poly 2",location.getx()+","+location.gety()+" : "+pol.contains(nextloc));
 			}
 			else{
-				
-				
 				
 				Line2D traj = new Line2D(location,nextloc);
 
@@ -165,76 +158,41 @@ public class DummyObject implements PlayingObject{
 
 				if(newLoc!=null){
 					location=newLoc;
-					
-					//Log.e(">>>>",newLoc.getx()+","+newLoc.gety());
-					
 				}
 				
-				Log.e("stop",location.getx()+","+location.gety());
+				//Log.e("stop",location.getx()+","+location.gety());
 				
-				cuttingPath.proceed(location.getx(), location.gety());
-				
-				
-				
+				//cuttingPath.proceed(location.getx(), location.gety());
 				
 				cuttingPhase=false;
 				
-				
+				Log.e("","behave finnished");
 			}
+			
+			cuttingPath.removeLast();
+			cuttingPath.proceed(location.getx(), location.gety());
 		}
 
 
 	}
-
-
-
-	public PlayPath getCutPath(){
-
-		if(cuttingPath==null || !cuttingPhase)
-			return null;
-
-		PlayPath getCutPathTemp = cuttingPath.clone();
-
-		Point2D offset = new Point2D(location);
-		
-		Vector2D orientation2=new Vector2D(orientation.getVx(),orientation.getVy());
-		
-		orientation2.setLength(speed+0.1f);
-		
-		offset.add(orientation2);
-		
-		getCutPathTemp.proceed(offset.getx(), offset.gety());
-		
-		return getCutPathTemp;
-
-	}
-
+	
 	/*
 	 * start cutting phase, gets initial cut orientation
 	 * 
 	 */
 	
-	public void startCuting(Vector2D orientation){
+	public void startCuting(Vector2D orientation,PlayPath path){
 
 		if(!boundariesPhase && !cuttingPhase){
 
 			orientation.setLength(speed);
 
-
 			cuttingPhase=true;
 
-			cuttingPath=new PlayPath();
+			cuttingPath=path;
 			
-			
-			Point2D offset = new Point2D(location);
-			
-			Vector2D orientation2=new Vector2D(orientation.getVx(),orientation.getVy());
-			
-			orientation2.setLength(0.1f);
-			
-			offset.sub(orientation2);
-			
-			cuttingPath.start(offset.getx(), offset.gety());
+			cuttingPath.start(location.getx(), location.gety());
+			cuttingPath.proceed(location.getx(), location.gety());
 
 			this.orientation=new Vector2D(orientation.getVx(),orientation.getVy());
 
@@ -253,16 +211,6 @@ public class DummyObject implements PlayingObject{
 
 		this.orientation.setLength(speed);
 	}
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -191,7 +191,7 @@ public class MyView extends View {
 			//Log.e("",""+phys.getx()+" "+phys.gety());
 		}
 
-		canvas.drawPath(path, paint);
+		canvas.drawPath(path, pathpaint);
 
 	}
 	
