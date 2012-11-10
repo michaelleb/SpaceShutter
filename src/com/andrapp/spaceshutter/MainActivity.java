@@ -133,20 +133,21 @@ public class MainActivity extends Activity {
 			mView.drawObject(myPath);
 
 			if(!myObject.isCutting()){
-
+				
+				Log.e("",">><<");
+				
 				PlayPolygon sideA = new PlayPolygon();
 				PlayPolygon sideB = new PlayPolygon();
 
 				//playerPathRecord.print();
 
 				if(myPoly.cut(myPath, sideA, sideB)==true){
-
-					//if(sideA.getArea()>sideB.getArea())
+					
 					myPoly=sideA;
-					//else
-					//	myPoly=sideB;
+					
+					//myPoly=sideB;
 				}
-				
+
 				myPath=new PlayPath();
 
 			}
@@ -338,9 +339,6 @@ public class MainActivity extends Activity {
 
 					Vector2D vec = new Line2D(prev,point).getVector();
 
-					//log.e("",""+vec.getVx()+","+vec.getVx());
-
-
 					if(Math.abs(vec.getVx())>Math.abs(vec.getVy()))
 						vec.setVy(0);
 					else
@@ -351,7 +349,7 @@ public class MainActivity extends Activity {
 
 						////log.e("",""+vec.getVx()+"-"+vec.getVy());
 
-						myObject.startCuting(vec,myPath);
+						myObject.startCuting(vec,myPath,myPoly);
 
 						firsttime=false;
 					}

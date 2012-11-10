@@ -27,6 +27,10 @@ public class Polygon2D extends Path2D {
 		Point2D polysecond;
 		
 		Point2D start = path.getPoint(0);
+		Point2D start2 = path.getPoint(1);
+		
+		Line2D startLine = new Line2D(start,start2);
+		
 		Point2D end = path.getPoint(path.getSize()-1);
 		
 		
@@ -78,8 +82,6 @@ public class Polygon2D extends Path2D {
 		}
 		
 		Point2D firstptadded=null;
-		Point2D firstptadded2=null;
-
 
 		ArrayList<Point2D> coords1 = new ArrayList<Point2D>();
 		ArrayList<Point2D> coords2 = new ArrayList<Point2D>();
@@ -89,35 +91,29 @@ public class Polygon2D extends Path2D {
 
 			if(i<=indexa || i>indexb){
 				coords1.add(this.coords.get(i));
-
-				if(firstptadded==null)
-					firstptadded=this.coords.get(i);
 			}
 			else{
 				coords2.add(this.coords.get(i));
 
-				if(firstptadded2==null)
-					firstptadded2=this.coords.get(i);
+				if(firstptadded==null)
+					firstptadded=this.coords.get(i);
 			}
 
 			if(i==indexa){
 				for(int j=0;j<path.coords.size();j++){
 					coords1.add(path.coords.get(j));
 					coords2.add(path.coords.get(path.coords.size()-j-1));
-
+					
 					if(firstptadded==null)
-						firstptadded=path.coords.get(j);
-
-					if(firstptadded2==null)
-						firstptadded2=path.coords.get(path.coords.size()-j-1);
+						firstptadded=path.coords.get(path.coords.size()-j-1);
 				}
 			}
 
 
 
 		}
-		coords1.add(firstptadded);
-		coords2.add(firstptadded2);
+		
+		coords2.add(firstptadded);
 
 		if(sideA!=null)
 			sideA.coords=coords1;
@@ -300,7 +296,9 @@ public class Polygon2D extends Path2D {
 
 		Point2D polyfirst = polyIter.next();
 		Point2D polysecond;
-
+		
+		int res=-1;
+		
 		while (polyIter.hasNext()) {
 
 			int index=polyIter.nextIndex();
@@ -310,13 +308,13 @@ public class Polygon2D extends Path2D {
 			Line2D currLine = new Line2D(polyfirst,polysecond);
 
 			if(currLine.isBetween(point)){
-				return index;
+				res= index;
 			}
 
 			polyfirst=polysecond;
 		}
 
-		return -1;
+		return res;
 
 	}
 
