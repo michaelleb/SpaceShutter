@@ -184,27 +184,7 @@ public class DummyObject implements PlayingObject{
 	public void startCuting(Vector2D orientation,PlayPath path,PlayPolygon pol){
 
 		if(!boundariesPhase && !cuttingPhase){
-
-			int ind = pol.getLineWithPointIndex(location);
-
-			{	//same vector as border check
-				
-				Point2D p1 = pol.getPoint(ind-1);
-				Point2D p2 = pol.getPoint(ind);
-
-				Line2D ln = new Line2D(p1,p2);
-
-				orientation.setLength(1);
-
-				Vector2D vec = ln.getVectorWidthLen(1);
-
-				if(Math.abs(vec.getVx())==Math.abs(orientation.getVx()) 
-				&& Math.abs(vec.getVy())==Math.abs(orientation.getVy())){
-					return;
-				}
-			}
-
-
+			
 			orientation.setLength(speed);
 
 			cuttingPhase=true;
@@ -224,12 +204,12 @@ public class DummyObject implements PlayingObject{
 
 		if(!cuttingPhase)
 			return;
-
+		
+		orientation.setLength(speed);
+		
 		cuttingPath.proceed(location.getx(), location.gety());
 
 		this.orientation=new Vector2D(orientation.getVx(),orientation.getVy());
-
-		this.orientation.setLength(speed);
 	}
 
 
