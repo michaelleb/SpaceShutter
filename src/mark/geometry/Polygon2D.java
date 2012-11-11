@@ -323,43 +323,6 @@ public class Polygon2D extends Path2D {
 
 
 
-
-
-	public void setCenter(float x,float y){
-		
-		
-		ListIterator<Point2D> polyIter = coords.listIterator();
-		
-		float cx=0;
-		float cy=0;
-		
-		while (polyIter.hasNext()) {
-			Point2D polyfirst = polyIter.next();
-			
-			cx+=polyfirst.getx();
-			cy+=polyfirst.gety();
-		}
-		
-		cx/=coords.size();
-		cy/=coords.size();
-		
-		
-		cx=-cx+x;
-		cy=-cy+y;
-		
-		ListIterator<Point2D> polyIter2 = coords.listIterator();
-		
-		while (polyIter.hasNext()) {
-			Point2D polyfirst = polyIter.next();
-			
-			cx+=polyfirst.getx();
-			cy+=polyfirst.gety();
-		}
-		
-	}
-
-	
-	
 	
 	public Line2D polyIntersectionLine(Polygon2D poly){
 

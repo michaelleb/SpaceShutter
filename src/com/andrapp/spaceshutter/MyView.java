@@ -44,11 +44,11 @@ import mark.geometry.*;
 public class MyView extends View {
 
 	private Paint paint = new Paint();
-	
+
 	private Paint pathpaint = new Paint();
 
-	
-	
+
+
 	private int logicHeight;
 	private int logicWidth;
 
@@ -56,9 +56,9 @@ public class MyView extends View {
 	private int width;
 
 
-	
+
 	Path mPath = new Path();
-	
+
 	private Handler evHandler;
 
 	private ArrayList<PlayingObject> objectsQueue;
@@ -72,17 +72,17 @@ public class MyView extends View {
 		paint.setColor(Color.WHITE);
 		paint.setStyle(Paint.Style.STROKE);
 		paint.setStrokeJoin(Paint.Join.ROUND);
-		
-		
+
+
 		//pathpaint
-		
+
 		pathpaint.setAntiAlias(true);
 		pathpaint.setStrokeWidth(6f);
 		pathpaint.setColor(Color.RED);
 		pathpaint.setStyle(Paint.Style.STROKE);
 		pathpaint.setStrokeJoin(Paint.Join.ROUND);
-		
-		
+
+
 		this.logicHeight=logicHeight;
 		this.logicWidth=logicWidth;
 
@@ -98,7 +98,7 @@ public class MyView extends View {
 
 		objectsQueue.add(obj);
 	}
-	
+
 	public void drawObject(PlayPolygon obj){
 
 
@@ -151,9 +151,9 @@ public class MyView extends View {
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		
-		
-		
+
+
+
 		canvas.drawColor(Color.BLACK);
 
 		for(int i=0;i<objectsQueue.size();i++){
@@ -164,7 +164,7 @@ public class MyView extends View {
 		}
 
 		objectsQueue.clear();
-		
+
 		canvas.drawPath(mPath, pathpaint);
 	}
 
@@ -194,9 +194,9 @@ public class MyView extends View {
 		canvas.drawPath(path, pathpaint);
 
 	}
-	
+
 	public void DrawObject(PlayPolygon currObj,Canvas canvas){
-		
+
 		Path path = new Path();
 
 		boolean first=true;
@@ -219,34 +219,50 @@ public class MyView extends View {
 		}
 
 		canvas.drawPath(path, paint);
-		
+
 	}
-	
+
+	public Bitmap p1=null;
+	public Bitmap p2=null;
+
 	public void DrawObject(DummyObject currObj,Canvas canvas){
+
+		
+
+
 		int objHeight=LogicToPhysHeight(currObj.getHeight());
 		int objWidth=LogicToPhysWidth(currObj.getWidth());
 
+		Bitmap bitmapPtr;
 
 
-		Resources r = this.getContext().getResources();
-		
-		Drawable dwble;
-		
 		if(currObj.getType()==0)
-			dwble = r.getDrawable(R.drawable.redstar);
+			bitmapPtr=p1;
 		else
-			dwble = r.getDrawable(R.drawable.greenstar);
+			bitmapPtr=p2;
+
+		if(bitmapPtr==null){
+
+			Resources r = this.getContext().getResources();
+
+			Drawable dwble;
+
+			if(currObj.getType()==0)
+				dwble = r.getDrawable(R.drawable.redstar);
+			else
+				dwble = r.getDrawable(R.drawable.greenstar);
+
+			bitmapPtr = Bitmap.createBitmap(objWidth, objHeight, Bitmap.Config.ARGB_8888);
+			Canvas canvass = new Canvas(bitmapPtr);
+
+			dwble.setBounds(0, 0, objWidth, objHeight);
+
+			dwble.draw(canvass);
+		}
 		
-		Bitmap bitmap = Bitmap.createBitmap(objWidth, objHeight, Bitmap.Config.ARGB_8888);
-		Canvas canvass = new Canvas(bitmap);
-
-		dwble.setBounds(0, 0, objWidth, objHeight);
-
-		dwble.draw(canvass);
-
 		Point2D physLoc = logicToPhys(currObj.getLocation());
-
-		canvas.drawBitmap(bitmap,
+		
+		canvas.drawBitmap(bitmapPtr,
 				physLoc.getx()-objWidth/2,
 				physLoc.gety()-objHeight/2, null);
 
@@ -262,7 +278,7 @@ public class MyView extends View {
 
 		Point2D point = null;
 
-		
+
 
 
 
@@ -272,49 +288,49 @@ public class MyView extends View {
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
 
-			
+
 			mPath.reset();
-			
+
 			mPath.moveTo(eventX, eventY);
-			
-			
+
+
 			point = new Point2D(eventX,eventY);
-			
+
 			sendKeyEvent(event,point);
-			
+
 			return true;
 		case MotionEvent.ACTION_MOVE:
-			
+
 			mPath.lineTo(eventX, eventY);
-			
+
 			point = new Point2D(eventX,eventY);
-			
+
 			sendKeyEvent(event,point);
-			
+
 			break;
 		case MotionEvent.ACTION_UP: // nothing to do break; default:
-			
-			
+
+
 			mPath.lineTo(eventX, eventY);
-			
+
 			point = new Point2D(eventX,eventY);
-			
+
 			sendKeyEvent(event,point);
 
 		} 
 
 
-		
+
 		//invalidate();
 
 		return true;
 
 	}
-	
+
 	public void sendKeyEvent(MotionEvent event, Point2D point){
-		
+
 		point=PhysToLogic(point);
-		
+
 		Message msg = new Message();
 
 		msg.what=event.getAction();

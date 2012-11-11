@@ -21,7 +21,7 @@ public class DummyObject implements PlayingObject{
 	private int type;
 
 
-	private float speed=1.63f;
+	private float speed=0.5f;
 
 	private Point2D location;
 

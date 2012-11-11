@@ -92,11 +92,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.main);
 
 
-		myObject=new DummyObject(
-				Constants.PROJ_WIDTH-Constants.MARGIN_PADDING
-				,
-				Constants.PROJ_HEIGHT/2-Constants.MARGIN_PADDING
-				,0);
+		myObject=new DummyObject(Constants.MARGIN_PADDING,Constants.MARGIN_PADDING,0);
 
 		otherObject=new DummyObject(Constants.MARGIN_PADDING,Constants.MARGIN_PADDING,1);
 
@@ -127,15 +123,17 @@ public class MainActivity extends Activity {
 
 	}
 
-	public void updateGame(){
+	public int times=0;
+	
+	public long startTime;
+	
+	
+	void logicRound(){
 
 		myObject.behave(myPoly);
 		otherObject.behave(myPoly);
-
-		mView.drawObject(myPoly);
-
+		
 		if(myPath!=null && myPath.getSize()>1){
-			mView.drawObject(myPath);
 
 			if(!myObject.isCutting()){
 				PlayPolygon sideA = new PlayPolygon();
@@ -143,18 +141,16 @@ public class MainActivity extends Activity {
 
 				if(myPoly.cut(myPath, sideA, sideB)==true){
 					myPoly=sideA;
-					
+
 					otherObject.recalcBoundMovingPhase(myPoly);
 				}
 
 				myPath=new PlayPath();
 			}
-
 		}
 
 
 		if(otherPath!=null && otherPath.getSize()>1){
-			mView.drawObject(otherPath);
 
 			if(!otherObject.isCutting()){
 				PlayPolygon sideA = new PlayPolygon();
@@ -162,7 +158,7 @@ public class MainActivity extends Activity {
 
 				if(myPoly.cut(otherPath, sideA, sideB)==true){
 					myPoly=sideA;
-					
+
 					myObject.recalcBoundMovingPhase(myPoly);
 				}
 
@@ -170,11 +166,48 @@ public class MainActivity extends Activity {
 			}
 
 		}
+		
+	}
+	
+	public void LogicPart(){
+		
+		if(times==0){
+			startTime=System.currentTimeMillis();
+		}
+		
+		logicRound();
+		
+		times++;
+		
+		int diff =(int)((float)(System.currentTimeMillis()-startTime)/(float)Constants.ROUND_REFRESH);
+		
+		if(times<diff){
+			
+			Log.e("",""+(diff-times));
+			
+			logicRound();
+			
+			times++;
+		}
 
+	}
+	
+	public void updateGame(){
+		
+		LogicPart();
+
+		mView.drawObject(myPoly);
+		
+		if(otherPath!=null && otherPath.getSize()>1)
+			mView.drawObject(otherPath);
+
+		if(myPath!=null && myPath.getSize()>1)
+			mView.drawObject(myPath);
+		
 		mView.drawObject(otherObject);
 
 		mView.drawObject(myObject);
-
+		
 		mView.executeDrawing();
 
 
@@ -202,7 +235,7 @@ public class MainActivity extends Activity {
 		} else {
 			if (mChatService == null) setupBT();
 		}
-		
+
 		Intent serverIntent = new Intent(this, DeviceListActivity.class);
 		startActivityForResult(serverIntent, BlueToothDefaults.REQUEST_CONNECT_DEVICE);
 	}
@@ -366,36 +399,36 @@ public class MainActivity extends Activity {
 					if(myObject.intersects(point) && vec.getLength()>0){
 
 						//Log.e("",""+vec.getVx()+"-"+vec.getVy());
-						
+
 						byte[] msgb = (new TestMsg(0,myObject.getLocation(),new Vector2D(vec.getVx(),vec.getVy()),0,new Point2D(0,0))).getBytes();
-						
+
 						mChatService.write(msgb);
-						
+
 						myObject.startCuting(vec,myPath,myPoly);
 
 						TestMsg messg = new TestMsg(msgb);
-						
+
 						//Log.e(" other: "," ("+messg.getLocation().getx()+","+messg.getLocation().gety()+") "
 						//		+", ["+messg.getOrientation().getVx()+","+messg.getOrientation().getVy()+"]");
 
 						firsttime=false;
 					}
 					else if(myObject.isCutting() && vec.getLength()>0){
-						
+
 						//Log.e("",""+vec.getVx()+"-"+vec.getVy());
-						
+
 						byte[] msgb = (new TestMsg(1,myObject.getLocation(),new Vector2D(vec.getVx(),vec.getVy()),0,new Point2D(0,0))).getBytes();
-						
+
 						mChatService.write(msgb);
-						
+
 						TestMsg messg = new TestMsg(msgb);
-						
+
 						//Log.e(" other: "," ("+messg.getLocation().getx()+","+messg.getLocation().gety()+") "
 						//		+", ["+messg.getOrientation().getVx()+","+messg.getOrientation().getVy()+"]");
-						
+
 						myObject.proceedCutting(vec);
 
-						
+
 
 						firsttime=false;
 					}
@@ -429,34 +462,34 @@ public class MainActivity extends Activity {
 				//Log.e(">>>"," purpose: == "+messg.getPurp());
 
 				if(messg.getPurp()==0){
-					
+
 					//Log.e(" other: "," ("+messg.getLocation().getx()+","+messg.getLocation().gety()+") "
 					//		+", ["+messg.getOrientation().getVx()+""+messg.getOrientation().getVy()+"]");
-					
+
 					otherObject.setLocation(messg.getLocation());
-					
+
 					otherObject.startCuting(messg.getOrientation(), otherPath, myPoly);
-					
+
 					//messg.getOrientation();
-					
+
 				}
 				if(messg.getPurp()==1){
-					
-					
+
+
 					//Log.e(" other: "," ("+messg.getLocation().getx()+","+messg.getLocation().gety()+") "
 					//+", ["+messg.getOrientation().getVx()+""+messg.getOrientation().getVy()+"]");
-					
+
 					otherObject.setLocation(messg.getLocation());
-					
+
 					otherObject.proceedCutting(messg.getOrientation());
-					
+
 				}
 				if(messg.getPurp()==2){
-					
+
 					otherObject.setLocation(messg.getLocation());
-					
+
 					otherObject.setBoundMovingPhase(messg.getUserPoint(),true,myPoly);
-					
+
 				}
 
 

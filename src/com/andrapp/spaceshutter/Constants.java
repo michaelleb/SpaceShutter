@@ -14,7 +14,7 @@ public class Constants {
 	
 	
 	public static final int MESSAGE_LOGIC_ROUND=1234;
-	public static final int ROUND_REFRESH=100;
+	public static final int ROUND_REFRESH=50;
 	
 	
 	
