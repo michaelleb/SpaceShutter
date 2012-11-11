@@ -1,4 +1,4 @@
-package com.andrapp.spaceshutter;
+package ourproject.messages;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -45,4 +45,11 @@ public class MySerialization {
 			
 		}
 	}
+	
+	
+	
+	
+	
+	
+	
 }

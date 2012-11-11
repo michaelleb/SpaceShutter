@@ -51,6 +51,8 @@ import android.view.MotionEvent;
 import mark.geometry.*;
 
 
+import ourproject.messages.*;
+
 /**
  * This is the main Activity that displays the current chat session.
  */
@@ -75,6 +77,7 @@ public class MainActivity extends Activity {
 
 
 	private PlayPath myPath;
+	private PlayPath otherPath;
 
 	private PlayPolygon myPoly;
 
@@ -83,7 +86,6 @@ public class MainActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		//log.e("", "onCreate");
 
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		// Set up the window layout
@@ -99,6 +101,8 @@ public class MainActivity extends Activity {
 		otherObject=new DummyObject(Constants.MARGIN_PADDING,Constants.MARGIN_PADDING,1);
 
 		myPath=new PlayPath();
+		otherPath=new PlayPath();
+
 		myPoly=new PlayPolygon();
 
 
@@ -126,6 +130,7 @@ public class MainActivity extends Activity {
 	public void updateGame(){
 
 		myObject.behave(myPoly);
+		otherObject.behave(myPoly);
 
 		mView.drawObject(myPoly);
 
@@ -133,25 +138,36 @@ public class MainActivity extends Activity {
 			mView.drawObject(myPath);
 
 			if(!myObject.isCutting()){
-				
-				Log.e("",">><<");
-				
 				PlayPolygon sideA = new PlayPolygon();
 				PlayPolygon sideB = new PlayPolygon();
 
-				//playerPathRecord.print();
-
 				if(myPoly.cut(myPath, sideA, sideB)==true){
-					
 					myPoly=sideA;
 					
-					//myPoly=sideB;
+					otherObject.recalcBoundMovingPhase(myPoly);
 				}
 
 				myPath=new PlayPath();
-
 			}
 
+		}
+
+
+		if(otherPath!=null && otherPath.getSize()>1){
+			mView.drawObject(otherPath);
+
+			if(!otherObject.isCutting()){
+				PlayPolygon sideA = new PlayPolygon();
+				PlayPolygon sideB = new PlayPolygon();
+
+				if(myPoly.cut(otherPath, sideA, sideB)==true){
+					myPoly=sideA;
+					
+					myObject.recalcBoundMovingPhase(myPoly);
+				}
+
+				otherPath=new PlayPath();
+			}
 
 		}
 
@@ -186,6 +202,9 @@ public class MainActivity extends Activity {
 		} else {
 			if (mChatService == null) setupBT();
 		}
+		
+		Intent serverIntent = new Intent(this, DeviceListActivity.class);
+		startActivityForResult(serverIntent, BlueToothDefaults.REQUEST_CONNECT_DEVICE);
 	}
 
 	private void setGameScreen(){
@@ -344,20 +363,45 @@ public class MainActivity extends Activity {
 					else
 						vec.setVx(0);
 
-
 					if(myObject.intersects(point) && vec.getLength()>0){
 
-						////log.e("",""+vec.getVx()+"-"+vec.getVy());
-
+						//Log.e("",""+vec.getVx()+"-"+vec.getVy());
+						
+						byte[] msgb = (new TestMsg(0,myObject.getLocation(),new Vector2D(vec.getVx(),vec.getVy()),0,new Point2D(0,0))).getBytes();
+						
+						mChatService.write(msgb);
+						
 						myObject.startCuting(vec,myPath,myPoly);
+
+						TestMsg messg = new TestMsg(msgb);
+						
+						//Log.e(" other: "," ("+messg.getLocation().getx()+","+messg.getLocation().gety()+") "
+						//		+", ["+messg.getOrientation().getVx()+","+messg.getOrientation().getVy()+"]");
 
 						firsttime=false;
 					}
 					else if(myObject.isCutting() && vec.getLength()>0){
+						
+						//Log.e("",""+vec.getVx()+"-"+vec.getVy());
+						
+						byte[] msgb = (new TestMsg(1,myObject.getLocation(),new Vector2D(vec.getVx(),vec.getVy()),0,new Point2D(0,0))).getBytes();
+						
+						mChatService.write(msgb);
+						
+						TestMsg messg = new TestMsg(msgb);
+						
+						//Log.e(" other: "," ("+messg.getLocation().getx()+","+messg.getLocation().gety()+") "
+						//		+", ["+messg.getOrientation().getVx()+","+messg.getOrientation().getVy()+"]");
+						
 						myObject.proceedCutting(vec);
+
+						
 
 						firsttime=false;
 					}
+
+
+
 				}
 
 				prev=point;
@@ -367,26 +411,54 @@ public class MainActivity extends Activity {
 
 				point = (Point2D)msg.obj;
 
-				if(!myObject.isCutting())
-					myObject.setBoundMovingPhase(point,false,myPoly);
+				if(!myObject.isCutting()){
+					myObject.setBoundMovingPhase(point,true,myPoly);
+
+					mChatService.write((new TestMsg(2,myObject.getLocation(),new Vector2D(0,0),1,point)).getBytes());
+				}
 
 				break;
 
 			case BlueToothDefaults.MESSAGE_READ:
 
-				/*
+
 				byte[] readBuf = (byte[]) msg.obj;
-				// construct a string from the valid bytes in the buffer
-				float[] msgarr = (float[])MySerialization.deserialize(readBuf);
 
-				Point2D loc = new Point2D(msgarr[0],msgarr[1]);
-				Vector2D vec = new Vector2D(msgarr[2],msgarr[3]);
+				TestMsg messg = new TestMsg(readBuf);
 
-				otherObject.setCenter(loc);
+				//Log.e(">>>"," purpose: == "+messg.getPurp());
 
-				//otherObject.setOrientation(vec);
-				 */
-				break;
+				if(messg.getPurp()==0){
+					
+					//Log.e(" other: "," ("+messg.getLocation().getx()+","+messg.getLocation().gety()+") "
+					//		+", ["+messg.getOrientation().getVx()+""+messg.getOrientation().getVy()+"]");
+					
+					otherObject.setLocation(messg.getLocation());
+					
+					otherObject.startCuting(messg.getOrientation(), otherPath, myPoly);
+					
+					//messg.getOrientation();
+					
+				}
+				if(messg.getPurp()==1){
+					
+					
+					//Log.e(" other: "," ("+messg.getLocation().getx()+","+messg.getLocation().gety()+") "
+					//+", ["+messg.getOrientation().getVx()+""+messg.getOrientation().getVy()+"]");
+					
+					otherObject.setLocation(messg.getLocation());
+					
+					otherObject.proceedCutting(messg.getOrientation());
+					
+				}
+				if(messg.getPurp()==2){
+					
+					otherObject.setLocation(messg.getLocation());
+					
+					otherObject.setBoundMovingPhase(messg.getUserPoint(),true,myPoly);
+					
+				}
+
 
 			case BlueToothDefaults.MESSAGE_WRITE:
 				break;
@@ -431,6 +503,23 @@ public class MainActivity extends Activity {
 			}
 		}
 	};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	/*
 ==========================================================================================================

@@ -21,7 +21,7 @@ public class DummyObject implements PlayingObject{
 	private int type;
 
 
-	private float speed=3.13f;
+	private float speed=1.63f;
 
 	private Point2D location;
 
@@ -64,14 +64,17 @@ public class DummyObject implements PlayingObject{
 		this.closestPointOnPoly=pol.closestPointSimplified(userPointOnMap);
 
 		nextCheckpointIndex = pol.getLineWithPointIndex(location);
-
-		if(direction)
-			nextCheckpointIndex=(nextCheckpointIndex-1+pol.getSize())%pol.getSize();
-
+		
 		if(closestPointOnPoly!=null && nextCheckpointIndex>=0){
 			boundariesPhase=true;
+			
+			if(!direction)
+				nextCheckpointIndex=(nextCheckpointIndex+1+pol.getSize())%pol.getSize();
 		}
 		else{
+			
+			boundariesPhase=false;
+			
 			return;
 		}
 
@@ -80,9 +83,68 @@ public class DummyObject implements PlayingObject{
 	}
 
 	public void recalcBoundMovingPhase(PlayPolygon pol){
-		setBoundMovingPhase(userPointOnMap,direction,pol);
+		if(boundariesPhase)
+			setBoundMovingPhase(userPointOnMap,direction,pol);
 	}
 
+
+	/*
+	 * start cutting phase, gets initial cut orientation
+	 * 
+	 */
+
+	public void startCuting(Vector2D orientation,PlayPath path,PlayPolygon pol){
+		
+		if(boundariesPhase){
+			boundariesPhase=false;
+		}
+		
+		if(!cuttingPhase){
+			
+			orientation.setLength(speed);
+
+			cuttingPhase=true;
+
+			cuttingPath=path;
+
+			cuttingPath.start(location.getx(), location.gety());
+			cuttingPath.proceed(location.getx(), location.gety());
+
+			this.orientation=new Vector2D(orientation.getVx(),orientation.getVy());
+
+		}
+
+	}
+
+	public void proceedCutting(Vector2D orientation){
+
+		if(!cuttingPhase)
+			return;
+		
+		orientation.setLength(speed);
+		
+		cuttingPath.setValue(cuttingPath.getSize()-1, location.getx(), location.gety());
+		
+		cuttingPath.proceed(location.getx(), location.gety());
+
+		this.orientation=new Vector2D(orientation.getVx(),orientation.getVy());
+	}
+
+
+
+
+
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	public void behave(PlayPolygon pol){
 
@@ -133,24 +195,17 @@ public class DummyObject implements PlayingObject{
 		}
 
 		//----------------------- cutting phase
-
-		//Log.e("",""+pol.contains(location));
-
+		
 		if(cuttingPhase){
 
 			Point2D nextloc= new Point2D(location);
 			nextloc.add(orientation);
 
-
-			Long aaa = System.currentTimeMillis();
-
 			if(pol.contains(nextloc)){
-
-				Long bbb = System.currentTimeMillis();
-
+				
 				location=nextloc;
 
-				Log.e("",""+(bbb-aaa));
+				cuttingPath.setValue(cuttingPath.getSize()-1, location.getx(), location.gety());
 			}
 			else{
 
@@ -164,60 +219,33 @@ public class DummyObject implements PlayingObject{
 					location=newLoc;
 				}
 
-				cuttingPhase=false;
-
-				Log.e("","behave finnished");
+				finnishCutting();
 			}
 
-			cuttingPath.removeLast();
-			cuttingPath.proceed(location.getx(), location.gety());
 		}
 
 
 	}
+	
+	public void finnishCutting(){
+		cuttingPhase=false;
 
-	/*
-	 * start cutting phase, gets initial cut orientation
-	 * 
-	 */
-
-	public void startCuting(Vector2D orientation,PlayPath path,PlayPolygon pol){
-
-		if(!boundariesPhase && !cuttingPhase){
-			
-			orientation.setLength(speed);
-
-			cuttingPhase=true;
-
-			cuttingPath=path;
-
-			cuttingPath.start(location.getx(), location.gety());
-			cuttingPath.proceed(location.getx(), location.gety());
-
-			this.orientation=new Vector2D(orientation.getVx(),orientation.getVy());
-
-		}
-
+		cuttingPath.setValue(cuttingPath.getSize()-1, location.getx(), location.gety());
 	}
 
-	public void proceedCutting(Vector2D orientation){
-
-		if(!cuttingPhase)
-			return;
-		
-		orientation.setLength(speed);
-		
-		cuttingPath.proceed(location.getx(), location.gety());
-
-		this.orientation=new Vector2D(orientation.getVx(),orientation.getVy());
-	}
-
-
-
-
-
-
-
+	
+	
+	
+	public Point2D getLocation(){return new Point2D(location.getx(),location.gety());}
+	
+	public void setLocation(Point2D loc){location=new Point2D(loc.getx(),loc.gety());}
+	
+	
+	
+	
+	
+	
+	
 
 	public DummyObject(float x,float y,int type){
 
@@ -243,12 +271,6 @@ public class DummyObject implements PlayingObject{
 
 	public int getWidth(){return width;}
 	public int getHeight(){return height;}
-
-	public Point2D getLocation(){return new Point2D(location.getx(),location.gety());}
-
-	//public Vector2D getOrientation(){return orientation;} 
-
-	//public void setOrientation(Vector2D newVec){orientation=newVec;}
 
 	public boolean intersects(Point2D point){
 

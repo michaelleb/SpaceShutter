@@ -2,13 +2,13 @@ package mark.geometry;
 
 public class Vector2D {
 	
-	float vx;
-	float vy;
+	private float vx;
+	private float vy;
 	
 	
-	public Vector2D(float vx,float vy){
-		this.vx=vx;
-		this.vy=vy;
+	public Vector2D(float vvx,float vvy){
+		this.vx=vvx;
+		this.vy=vvy;
 	}
 	
 	public void setLength(float newLength){
@@ -25,8 +25,8 @@ public class Vector2D {
 		return (new Line2D(new Point2D(0,0),new Point2D(vx,vy))).getLength();
 	}
 	
-	public float getVx(){return vx;}
-	public float getVy(){return vy;}
+	public float getVx(){return this.vx;}
+	public float getVy(){return this.vy;}
 	
 	public void setVx(float vx){this.vx=vx;}
 	public void setVy(float vy){this.vy=vy;}

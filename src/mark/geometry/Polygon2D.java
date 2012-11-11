@@ -61,7 +61,10 @@ public class Polygon2D extends Path2D {
 			polyfirst=polysecond;
 		}
 		
-		Log.e("",""+indexa+"___"+indexb);
+		//Log.e("",""+indexa+"___"+indexb);
+		
+		if(indexa==-1 || indexb==-1)
+			return false;
 		
 		if(indexb<indexa){
 			Collections.reverse(path.coords);
@@ -287,7 +290,7 @@ public class Polygon2D extends Path2D {
 
 
 	/*
-	 * gets point P, returns the index of point in polygon such that the line (index,index-1) contains the point P between
+	 * gets point P, returns the index of point in polygon such that the line (index,index+1) contains the point P between
 	 * 
 	 */
 	public int getLineWithPointIndex(Point2D point){
@@ -301,7 +304,7 @@ public class Polygon2D extends Path2D {
 		
 		while (polyIter.hasNext()) {
 
-			int index=polyIter.nextIndex();
+			int index=polyIter.nextIndex()-1;
 
 			polysecond = polyIter.next();
 

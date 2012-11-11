@@ -142,7 +142,7 @@ public class Path2D {
 	
 	public void setValue(int index,float x,float y){
 		this.coords.get(index).setx(x);
-		this.coords.get(index).setx(y);
+		this.coords.get(index).sety(y);
 	}
 	
 }
