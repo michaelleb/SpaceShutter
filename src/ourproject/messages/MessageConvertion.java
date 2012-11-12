@@ -16,6 +16,8 @@ public class MessageConvertion {
 		
 		myBuffer.put(bytes);
 		
+		//myBuffer.asShortBuffer()
+		
 		
 		
 		

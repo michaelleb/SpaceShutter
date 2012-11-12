@@ -86,12 +86,6 @@ public class MainActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		
-		
-		
-
-		
 		
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		// Set up the window layout
@@ -238,6 +232,7 @@ public class MainActivity extends Activity {
 
 		Intent serverIntent = new Intent(this, DeviceListActivity.class);
 		startActivityForResult(serverIntent, BlueToothDefaults.REQUEST_CONNECT_DEVICE);
+		
 	}
 
 	private void setGameScreen(){
