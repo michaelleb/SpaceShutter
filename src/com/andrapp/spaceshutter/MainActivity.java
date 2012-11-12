@@ -54,9 +54,6 @@ import mark.geometry.*;
 import ourproject.messages.*;
 
 
-
-import java.nio.*;
-
 /**
  * This is the main Activity that displays the current chat session.
  */
@@ -101,7 +98,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.main);
 
 
-		myObject=new DummyObject(Constants.MARGIN_PADDING,Constants.MARGIN_PADDING,0);
+		myObject=new DummyObject((short)Constants.MARGIN_PADDING,(short)Constants.MARGIN_PADDING,0);
 
 		otherObject=new DummyObject(Constants.MARGIN_PADDING,Constants.MARGIN_PADDING,1);
 
@@ -112,9 +109,9 @@ public class MainActivity extends Activity {
 
 
 		myPoly.start(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
-		myPoly.proceed(Constants.MARGIN_PADDING, Constants.PROJ_HEIGHT-Constants.MARGIN_PADDING);
-		myPoly.proceed(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING, Constants.PROJ_HEIGHT-Constants.MARGIN_PADDING);
-		myPoly.proceed(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
+		myPoly.proceed(Constants.MARGIN_PADDING, (short)(Constants.PROJ_HEIGHT-Constants.MARGIN_PADDING));
+		myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING), (short)(Constants.PROJ_HEIGHT-Constants.MARGIN_PADDING));
+		myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING), Constants.MARGIN_PADDING);
 		myPoly.proceed(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
 
 		mHandler.sendEmptyMessage(Constants.MESSAGE_LOGIC_ROUND);
@@ -361,7 +358,7 @@ public class MainActivity extends Activity {
 ==========================================================================================================
 	 */
 
-	private Point2D prev=null;
+	private Point2D.Short prev=null;
 
 	private boolean firsttime=false;
 
@@ -372,7 +369,7 @@ public class MainActivity extends Activity {
 
 			////log.e("","main: handleMessage "+msg.what);
 
-			Point2D point;
+			Point2D.Short point;
 
 			switch (msg.what) {
 
@@ -380,30 +377,41 @@ public class MainActivity extends Activity {
 
 				firsttime=true;
 
-				point = (Point2D)msg.obj;
+				point = (Point2D.Short)msg.obj;
 				prev=point;
 
 				break;
 			case MotionEvent.ACTION_MOVE:
 
-				point = (Point2D)msg.obj;
+				point = (Point2D.Short)msg.obj;
 
 				if(firsttime){
 
 
 
-					Vector2D vec = new Line2D(prev,point).getVector();
+					Vector2D.Short vec = new Line2D.Short(prev,point).getVector();
 
 					if(Math.abs(vec.getVx())>Math.abs(vec.getVy()))
-						vec.setVy(0);
+						vec.setVy((short)0);
 					else
-						vec.setVx(0);
+						vec.setVx((short)0);
 
 					if(myObject.intersects(point) && vec.getLength()>0){
 
 						//Log.e("",""+vec.getVx()+"-"+vec.getVy());
 
-						byte[] msgb = (new TestMsg(0,myObject.getLocation(),new Vector2D(vec.getVx(),vec.getVy()),0,new Point2D(0,0))).getBytes();
+						byte[] msgb = (new TestMsg(
+								
+								
+								
+								(short)0,
+								myObject.getLocation(),
+								new Vector2D.Short(vec.getVx(),vec.getVy()),
+								(short)0,
+								new Point2D.Short((short)0,(short)0)
+								
+								
+								)).getBytes();
 
 						mChatService.write(msgb);
 
@@ -420,7 +428,7 @@ public class MainActivity extends Activity {
 
 						//Log.e("",""+vec.getVx()+"-"+vec.getVy());
 
-						byte[] msgb = (new TestMsg(1,myObject.getLocation(),new Vector2D(vec.getVx(),vec.getVy()),0,new Point2D(0,0))).getBytes();
+						byte[] msgb = (new TestMsg((short)1,myObject.getLocation(),new Vector2D.Short(vec.getVx(),vec.getVy()),(short)0,new Point2D.Short((short)0,(short)0))).getBytes();
 
 						mChatService.write(msgb);
 
@@ -445,12 +453,12 @@ public class MainActivity extends Activity {
 				break;
 			case MotionEvent.ACTION_UP:
 
-				point = (Point2D)msg.obj;
+				point = (Point2D.Short)msg.obj;
 
 				if(!myObject.isCutting()){
 					myObject.setBoundMovingPhase(point,true,myPoly);
 
-					mChatService.write((new TestMsg(2,myObject.getLocation(),new Vector2D(0,0),1,point)).getBytes());
+					mChatService.write((new TestMsg((short)2,myObject.getLocation(),new Vector2D.Short((short)0,(short)0),(short)1,point)).getBytes());
 				}
 
 				break;

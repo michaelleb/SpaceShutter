@@ -1,9 +1,6 @@
 package com.andrapp.spaceshutter;
 
-import mark.geometry.Path2D;
-import mark.geometry.Point2D;
-
-import mark.geometry.Polygon2D;
+import mark.geometry.*;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -117,19 +114,19 @@ public class MyView extends View {
 	}
 
 
-	public Point2D logicToPhys(Point2D point){
-		Point2D newPnt=new Point2D(
-				(int)((float)point.getx()*((float)width/(float)logicWidth)),
-				(int)((float)point.gety()*((float)height/(float)logicHeight))
+	public Point2D.Short logicToPhys(Point2D.Short point){
+		Point2D.Short newPnt=new Point2D.Short(
+				(short)((float)point.getx()*((float)width/(float)logicWidth)),
+				(short)((float)point.gety()*((float)height/(float)logicHeight))
 				);
 
 		return newPnt;
 	}
 
-	public Point2D PhysToLogic(Point2D point){
-		Point2D newPnt=new Point2D(
-				(int)((float)point.getx()*((float)logicWidth/(float)width)),
-				(int)((float)point.gety()*((float)logicHeight/(float)height))
+	public Point2D.Short PhysToLogic(Point2D.Short point){
+		Point2D.Short newPnt=new Point2D.Short(
+				(short)((float)point.getx()*((float)logicWidth/(float)width)),
+				(short)((float)point.gety()*((float)logicHeight/(float)height))
 				);
 
 		return newPnt;
@@ -176,9 +173,9 @@ public class MyView extends View {
 
 		for(int i=0;i<currObj.getSize();i++){
 
-			Point2D elem=currObj.getPoint(i);
+			Point2D.Short elem=currObj.getPoint(i);
 
-			Point2D phys = logicToPhys(elem);
+			Point2D.Short phys = logicToPhys(elem);
 
 			if(first)
 				path.moveTo(phys.getx(), phys.gety());
@@ -203,9 +200,9 @@ public class MyView extends View {
 
 		for(int i=0;i<currObj.getSize();i++){
 
-			Point2D elem=currObj.getPoint(i);
+			Point2D.Short elem=currObj.getPoint(i);
 
-			Point2D phys = logicToPhys(elem);
+			Point2D.Short phys = logicToPhys(elem);
 
 			if(first)
 				path.moveTo(phys.getx(), phys.gety());
@@ -260,7 +257,7 @@ public class MyView extends View {
 			dwble.draw(canvass);
 		}
 		
-		Point2D physLoc = logicToPhys(currObj.getLocation());
+		Point2D.Short physLoc = logicToPhys(currObj.getLocation());
 		
 		canvas.drawBitmap(bitmapPtr,
 				physLoc.getx()-objWidth/2,
@@ -276,7 +273,7 @@ public class MyView extends View {
 		float eventX = event.getX();
 		float eventY = event.getY();
 
-		Point2D point = null;
+		Point2D.Short point = null;
 
 
 
@@ -294,7 +291,7 @@ public class MyView extends View {
 			mPath.moveTo(eventX, eventY);
 
 
-			point = new Point2D(eventX,eventY);
+			point = new Point2D.Short((short)eventX,(short)eventY);
 
 			sendKeyEvent(event,point);
 
@@ -303,7 +300,7 @@ public class MyView extends View {
 
 			mPath.lineTo(eventX, eventY);
 
-			point = new Point2D(eventX,eventY);
+			point = new Point2D.Short((short)eventX,(short)eventY);
 
 			sendKeyEvent(event,point);
 
@@ -313,7 +310,7 @@ public class MyView extends View {
 
 			mPath.lineTo(eventX, eventY);
 
-			point = new Point2D(eventX,eventY);
+			point = new Point2D.Short((short)eventX,(short)eventY);
 
 			sendKeyEvent(event,point);
 
@@ -327,7 +324,7 @@ public class MyView extends View {
 
 	}
 
-	public void sendKeyEvent(MotionEvent event, Point2D point){
+	public void sendKeyEvent(MotionEvent event, Point2D.Short point){
 
 		point=PhysToLogic(point);
 

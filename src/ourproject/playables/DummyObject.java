@@ -21,11 +21,11 @@ public class DummyObject implements PlayingObject{
 	private int type;
 
 
-	private float speed=0.5f;
+	private short speed=1;
 
-	private Point2D location;
+	private Point2D.Short location;
 
-	private Vector2D orientation;
+	private Vector2D.Short orientation;
 
 
 	private PlayPath cuttingPath;		//paths that player cuts
@@ -33,8 +33,8 @@ public class DummyObject implements PlayingObject{
 
 
 
-	private Point2D userPointOnMap;		//user specified point to move near to
-	private Point2D closestPointOnPoly;	//point on polygon which is closest to userPointOnMap
+	private Point2D.Short userPointOnMap;		//user specified point to move near to
+	private Point2D.Short closestPointOnPoly;	//point on polygon which is closest to userPointOnMap
 	private boolean direction;			//bounds direction (2 options)
 	private int nextCheckpointIndex; 	//next index on a poly to move to, in boundaries moving phase
 
@@ -52,7 +52,7 @@ public class DummyObject implements PlayingObject{
 	 * finds closest point on polygon to what user specified, 
 	 */
 
-	public void setBoundMovingPhase(Point2D userPointOnMap,boolean direction,PlayPolygon pol){
+	public void setBoundMovingPhase(Point2D.Short userPointOnMap,boolean direction,PlayPolygon pol){
 
 		if(cuttingPhase)
 			return;
@@ -93,7 +93,7 @@ public class DummyObject implements PlayingObject{
 	 * 
 	 */
 
-	public void startCuting(Vector2D orientation,PlayPath path,PlayPolygon pol){
+	public void startCuting(Vector2D.Short orientation,PlayPath path,PlayPolygon pol){
 		
 		if(boundariesPhase){
 			boundariesPhase=false;
@@ -110,13 +110,13 @@ public class DummyObject implements PlayingObject{
 			cuttingPath.start(location.getx(), location.gety());
 			cuttingPath.proceed(location.getx(), location.gety());
 
-			this.orientation=new Vector2D(orientation.getVx(),orientation.getVy());
+			this.orientation=new Vector2D.Short(orientation.getVx(),orientation.getVy());
 
 		}
 
 	}
 
-	public void proceedCutting(Vector2D orientation){
+	public void proceedCutting(Vector2D.Short orientation){
 
 		if(!cuttingPhase)
 			return;
@@ -127,7 +127,7 @@ public class DummyObject implements PlayingObject{
 		
 		cuttingPath.proceed(location.getx(), location.gety());
 
-		this.orientation=new Vector2D(orientation.getVx(),orientation.getVy());
+		this.orientation=new Vector2D.Short(orientation.getVx(),orientation.getVy());
 	}
 
 
@@ -155,7 +155,7 @@ public class DummyObject implements PlayingObject{
 
 			int polsize = pol.getSize();
 
-			Point2D next = pol.getPoint(nextCheckpointIndex);	//next point destination
+			Point2D.Short next = pol.getPoint(nextCheckpointIndex);	//next point destination
 
 
 			if(closestPointOnPoly==null)
@@ -184,7 +184,9 @@ public class DummyObject implements PlayingObject{
 			}
 			else{	//else: proceed moving towards next point
 
-				Vector2D vec = new Vector2D(next.getx()-location.getx(),next.gety()-location.gety());
+				Vector2D.Short vec = new Vector2D.Short(
+						(short)(next.getx()-location.getx()),
+						(short)(next.gety()-location.gety()));
 
 				vec.setLength(speed);
 
@@ -198,9 +200,11 @@ public class DummyObject implements PlayingObject{
 		
 		if(cuttingPhase){
 
-			Point2D nextloc= new Point2D(location);
+			Point2D.Short nextloc= new Point2D.Short(location);
 			nextloc.add(orientation);
-
+			
+			//Log.e("",""+pol.contains(nextloc));
+			
 			if(pol.contains(nextloc)){
 				
 				location=nextloc;
@@ -211,9 +215,9 @@ public class DummyObject implements PlayingObject{
 
 				//Log.e("","bbbb");
 
-				Line2D traj = new Line2D(location,nextloc);
+				Line2D.Short traj = new Line2D.Short(location,nextloc);
 
-				Point2D newLoc = pol.intersectionPoint(traj);
+				Point2D.Short newLoc = pol.intersectionPoint(traj);
 
 				if(newLoc!=null){
 					location=newLoc;
@@ -236,9 +240,9 @@ public class DummyObject implements PlayingObject{
 	
 	
 	
-	public Point2D getLocation(){return new Point2D(location.getx(),location.gety());}
+	public Point2D.Short getLocation(){return new Point2D.Short(location.getx(),location.gety());}
 	
-	public void setLocation(Point2D loc){location=new Point2D(loc.getx(),loc.gety());}
+	public void setLocation(Point2D.Short loc){location=new Point2D.Short(loc.getx(),loc.gety());}
 	
 	
 	
@@ -247,32 +251,32 @@ public class DummyObject implements PlayingObject{
 	
 	
 
-	public DummyObject(float x,float y,int type){
+	public DummyObject(short x,short y,int type){
 
-		width=10;
-		height=10;
+		width=20;
+		height=20;
 
 		this.type=type;
 
-		//orientation=new Vector2D(0,0);
+		//orientation=new Vector2D.Short(0,0);
 
-		this.location=new Point2D(x,y);
+		this.location=new Point2D.Short(x,y);
 	}
 
 	public int getType(){return type;}
 
-	public float getCenterX(){return location.getx();}
-	public float getCenterY(){return location.gety();}
+	public short getCenterX(){return location.getx();}
+	public short getCenterY(){return location.gety();}
 
 
-	public void setCenter(Point2D loc){
+	public void setCenter(Point2D.Short loc){
 		location=loc;
 	}
 
 	public int getWidth(){return width;}
 	public int getHeight(){return height;}
 
-	public boolean intersects(Point2D point){
+	public boolean intersects(Point2D.Short point){
 
 		if(getDistToCenter(point)<Math.min(height/2,width/2))
 			return true;
@@ -282,7 +286,7 @@ public class DummyObject implements PlayingObject{
 
 
 
-	public float getDistToCenter(Point2D point){
+	public float getDistToCenter(Point2D.Short point){
 		return location.distance(point);
 	}
 

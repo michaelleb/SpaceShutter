@@ -1,34 +1,39 @@
 package mark.geometry;
 
 public class Vector2D {
-	
-	private float vx;
-	private float vy;
-	
-	
-	public Vector2D(float vvx,float vvy){
-		this.vx=vvx;
-		this.vy=vvy;
+
+
+	public static class Short{
+
+		private short vx;
+		private short vy;
+
+
+		public Short(short vvx,short vvy){
+			this.vx=vvx;
+			this.vy=vvy;
+		}
+
+		public void setLength(short newLength){
+
+			float len=getLength();
+
+			vx=(short)(vx/len*newLength);
+			vy=(short)(vy/len*newLength);
+
+		}
+
+		public float getLength(){
+
+			return (float)Math.sqrt(this.vx*this.vx+this.vy*this.vy);
+		}
+
+		public short getVx(){return this.vx;}
+		public short getVy(){return this.vy;}
+
+		public void setVx(short vx){this.vx=vx;}
+		public void setVy(short vy){this.vy=vy;}
+
 	}
-	
-	public void setLength(float newLength){
-		
-		float len=getLength();
-		
-		vx=vx/len*newLength;
-		vy=vy/len*newLength;
-		
-	}
-	
-	public float getLength(){
-		
-		return (new Line2D(new Point2D(0,0),new Point2D(vx,vy))).getLength();
-	}
-	
-	public float getVx(){return this.vx;}
-	public float getVy(){return this.vy;}
-	
-	public void setVx(float vx){this.vx=vx;}
-	public void setVy(float vy){this.vy=vy;}
-	
+
 }

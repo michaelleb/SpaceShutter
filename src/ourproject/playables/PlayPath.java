@@ -8,7 +8,7 @@ import android.graphics.Canvas;
 import android.util.Log;
 import mark.geometry.*;
 
-public class PlayPath extends Path2D implements PlayingObject{
+public class PlayPath extends Path2D.Short implements PlayingObject{
 	
 	
 	
@@ -24,7 +24,7 @@ public class PlayPath extends Path2D implements PlayingObject{
 		
 		PlayPath path = new PlayPath();
 		
-		path.coords=(ArrayList<Point2D>)coords.clone();
+		path.coords=(ArrayList<Point2D.Short>)coords.clone();
 		
 		return path;
 	}

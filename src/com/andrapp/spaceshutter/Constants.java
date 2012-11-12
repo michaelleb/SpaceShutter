@@ -7,8 +7,8 @@ public class Constants {
 	
 
 	//in game sizes
-	public static final int PROJ_HEIGHT=140;
-	public static final int PROJ_WIDTH=100;
+	public static final short PROJ_HEIGHT=280;
+	public static final short PROJ_WIDTH=200;
 	
 	
 	
@@ -24,5 +24,5 @@ public class Constants {
 	
 	
 	
-	public static final int MARGIN_PADDING=5;
+	public static final short MARGIN_PADDING=10;
 }

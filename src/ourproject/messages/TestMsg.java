@@ -5,20 +5,20 @@ import android.util.Log;
 
 public class TestMsg {
 	
-	private Point2D location;
-	private Vector2D orientation;
+	private Point2D.Short location;
+	private Vector2D.Short orientation;
 	
-	private float dir;
+	private short dir;
 	
-	private Point2D upoint;
+	private Point2D.Short upoint;
 	
-	private float purp;
+	private short purp;
 	
 	
-	public TestMsg(float purpose,Point2D location,Vector2D orientation,float dir,Point2D userPoint){
+	public TestMsg(short purpose,Point2D.Short location,Vector2D.Short orientation,short dir,Point2D.Short userPoint){
 		
 		this.location=location;
-		this.orientation=new Vector2D(orientation.getVx(),orientation.getVy());
+		this.orientation=new Vector2D.Short(orientation.getVx(),orientation.getVy());
 		
 		//Log.e(""," +++ "+orientation.getVx()+" "+orientation.getVy());
 		
@@ -32,13 +32,13 @@ public class TestMsg {
 	
 	public TestMsg(byte[] bytes){
 		
-		float[] msgarr = (float[])MySerialization.deserialize(bytes);
+		short[] msgarr = (short[])MySerialization.deserialize(bytes);
 		
-		this.location=new Point2D(msgarr[0],msgarr[1]);
-		this.orientation=new Vector2D(msgarr[2],msgarr[3]);
+		this.location=new Point2D.Short(msgarr[0],msgarr[1]);
+		this.orientation=new Vector2D.Short(msgarr[2],msgarr[3]);
 		this.dir=msgarr[4];
 		
-		this.upoint=new Point2D(msgarr[5],msgarr[6]);
+		this.upoint=new Point2D.Short(msgarr[5],msgarr[6]);
 		
 		this.purp=msgarr[7];
 		
@@ -47,7 +47,7 @@ public class TestMsg {
 	
 	public byte[] getBytes(){
 		
-		float[] msgarr=new float[8];
+		short[] msgarr=new short[8];
 		
 		msgarr[0]=location.getx();
 		msgarr[1]=location.gety();
@@ -64,13 +64,13 @@ public class TestMsg {
 		return bytemsg;
 	}
 	
-	public Point2D getLocation(){return location;}
+	public Point2D.Short getLocation(){return location;}
 	
-	public Vector2D getOrientation(){return orientation;}
+	public Vector2D.Short getOrientation(){return orientation;}
 	
-	public float getDirection(){return dir;}
+	public short getDirection(){return dir;}
 	
-	public Point2D getUserPoint(){return upoint;}
+	public Point2D.Short getUserPoint(){return upoint;}
 	
-	public float getPurp(){return purp;};
+	public short getPurp(){return purp;};
 }
