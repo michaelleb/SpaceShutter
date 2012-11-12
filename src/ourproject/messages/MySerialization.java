@@ -5,10 +5,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+
+
 public class MySerialization {
 	
-	
-	
+
 	
 	public static byte[] serialize(Object obj) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -45,11 +46,5 @@ public class MySerialization {
 			
 		}
 	}
-	
-	
-	
-	
-	
-	
 	
 }

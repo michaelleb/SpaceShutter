@@ -53,6 +53,10 @@ import mark.geometry.*;
 
 import ourproject.messages.*;
 
+
+
+import java.nio.*;
+
 /**
  * This is the main Activity that displays the current chat session.
  */
@@ -86,7 +90,12 @@ public class MainActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		
+		
+		
 
+		
+		
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		// Set up the window layout
 		setContentView(R.layout.main);
@@ -202,14 +211,14 @@ public class MainActivity extends Activity {
 			refreshEvery=Constants.ROUND_REFRESH;
 
 		//if(someoffset!=offset){
-			//someoffset=offset;
-			//Log.e("",""+someoffset);
+		//someoffset=offset;
+		//Log.e("",""+someoffset);
 		//}
-		
+
 		logicRound();
-		
+
 		roundDrawing();
-		
+
 		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_LOGIC_ROUND), refreshEvery);
 	}
 

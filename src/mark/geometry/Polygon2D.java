@@ -185,7 +185,7 @@ public class Polygon2D extends Path2D {
 			polyfirst=polysecond;
 		}
 
-		//log.e("",""+intersectCnt);
+		Log.e("",""+(intersectCnt));
 
 		return (intersectCnt%2)==1;
 
