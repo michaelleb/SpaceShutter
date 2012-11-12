@@ -123,16 +123,11 @@ public class MainActivity extends Activity {
 
 	}
 
-	public int times=0;
-	
-	public long startTime;
-	
-	
 	void logicRound(){
 
 		myObject.behave(myPoly);
 		otherObject.behave(myPoly);
-		
+
 		if(myPath!=null && myPath.getSize()>1){
 
 			if(!myObject.isCutting()){
@@ -166,57 +161,56 @@ public class MainActivity extends Activity {
 			}
 
 		}
-		
-	}
-	
-	public void LogicPart(){
-		
-		if(times==0){
-			startTime=System.currentTimeMillis();
-		}
-		
-		logicRound();
-		
-		times++;
-		
-		int diff =(int)((float)(System.currentTimeMillis()-startTime)/(float)Constants.ROUND_REFRESH);
-		
-		if(times<diff){
-			
-			Log.e("",""+(diff-times));
-			
-			logicRound();
-			
-			times++;
-		}
 
 	}
-	
-	public void updateGame(){
-		
-		LogicPart();
 
+	public void roundDrawing(){
 		mView.drawObject(myPoly);
-		
+
 		if(otherPath!=null && otherPath.getSize()>1)
 			mView.drawObject(otherPath);
 
 		if(myPath!=null && myPath.getSize()>1)
 			mView.drawObject(myPath);
-		
+
 		mView.drawObject(otherObject);
 
 		mView.drawObject(myObject);
-		
+
 		mView.executeDrawing();
 
 
-		//boolean cont = myPoly.contains(new Point2D(myObject.getCenterX(),myObject.getCenterY()));
+	}
 
-		////log.e("",">>>>>>> "+cont);
+	public int times=0;
+	public long startTime;
+	public int refreshEvery=Constants.ROUND_REFRESH;
+	public int someoffset=0;
 
-		mHandler.removeMessages(Constants.MESSAGE_LOGIC_ROUND);
-		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_LOGIC_ROUND), Constants.ROUND_REFRESH);
+	public void updateGame(){
+
+		if(times==0) startTime=System.currentTimeMillis();
+
+		times++;
+		int supposedTimes = (int)((float)(System.currentTimeMillis()-startTime)/(float)Constants.ROUND_REFRESH);
+
+		int offset = supposedTimes-times;
+
+		if(offset>0)
+			refreshEvery--;
+		else
+			refreshEvery=Constants.ROUND_REFRESH;
+
+		//if(someoffset!=offset){
+			//someoffset=offset;
+			//Log.e("",""+someoffset);
+		//}
+		
+		logicRound();
+		
+		roundDrawing();
+		
+		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_LOGIC_ROUND), refreshEvery);
 	}
 
 
