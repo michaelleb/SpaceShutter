@@ -1,6 +1,5 @@
 
 
-
 package com.andrapp.spaceshutter;
 
 import ourproject.playables.*;
@@ -81,7 +80,8 @@ public class MainActivity extends Activity {
 	private PlayPath otherPath;
 
 	private PlayPolygon myPoly;
-
+	
+	private boolean isJoiningGame=false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -129,14 +129,20 @@ public class MainActivity extends Activity {
 		otherObject.behave(myPoly);
 
 		if(myPath!=null && myPath.getSize()>1){
-
+			
+			
 			if(!myObject.isCutting()){
 				PlayPolygon sideA = new PlayPolygon();
 				PlayPolygon sideB = new PlayPolygon();
-
-				if(myPoly.cut(myPath, sideA, sideB)==true){
-					myPoly=sideA;
-
+				
+				if(!isJoiningGame && myPoly.cut(myPath, sideA, sideB)==true){
+					
+					myPoly.setPoly(sideA);
+					
+					
+					byte[] byteMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly));
+					mChatService.write(byteMsg);
+					
 					otherObject.recalcBoundMovingPhase(myPoly);
 				}
 
@@ -151,9 +157,13 @@ public class MainActivity extends Activity {
 				PlayPolygon sideA = new PlayPolygon();
 				PlayPolygon sideB = new PlayPolygon();
 
-				if(myPoly.cut(otherPath, sideA, sideB)==true){
-					myPoly=sideA;
-
+				if(!isJoiningGame && myPoly.cut(otherPath, sideA, sideB)==true){
+					
+					myPoly.setPoly(sideA);
+					
+					byte[] byteMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly));
+					mChatService.write(byteMsg);
+					
 					myObject.recalcBoundMovingPhase(myPoly);
 				}
 
@@ -229,9 +239,6 @@ public class MainActivity extends Activity {
 		} else {
 			if (mChatService == null) setupBT();
 		}
-
-		Intent serverIntent = new Intent(this, DeviceListActivity.class);
-		startActivityForResult(serverIntent, BlueToothDefaults.REQUEST_CONNECT_DEVICE);
 		
 	}
 
@@ -393,27 +400,10 @@ public class MainActivity extends Activity {
 
 					if(myObject.intersects(point) && vec.getLength()>0){
 
-						//Log.e("",""+vec.getVx()+"-"+vec.getVy());
-
-						byte[] msgb = (new TestMsg(
-								
-								
-								
-								(short)0,
-								myObject.getLocation(),
-								new Vector2D.Short(vec.getVx(),vec.getVy()),
-								(short)0,
-								new Point2D.Short((short)0,(short)0)
-								
-								
-								)).getBytes();
-
-						mChatService.write(msgb);
-
+						byte[] byteMsg = MessageConvertion.messageToBytes(new StartCutMsg(myObject.getLocation(),vec));
+						mChatService.write(byteMsg);
 						myObject.startCuting(vec,myPath,myPoly);
-
-						TestMsg messg = new TestMsg(msgb);
-
+						
 						//Log.e(" other: "," ("+messg.getLocation().getx()+","+messg.getLocation().gety()+") "
 						//		+", ["+messg.getOrientation().getVx()+","+messg.getOrientation().getVy()+"]");
 
@@ -423,11 +413,9 @@ public class MainActivity extends Activity {
 
 						//Log.e("",""+vec.getVx()+"-"+vec.getVy());
 
-						byte[] msgb = (new TestMsg((short)1,myObject.getLocation(),new Vector2D.Short(vec.getVx(),vec.getVy()),(short)0,new Point2D.Short((short)0,(short)0))).getBytes();
-
-						mChatService.write(msgb);
-
-						TestMsg messg = new TestMsg(msgb);
+						byte[] byteMsg = MessageConvertion.messageToBytes(new ProcCutMsg(myObject.getLocation(),vec));
+						mChatService.write(byteMsg);
+						myObject.startCuting(vec,myPath,myPoly);
 
 						//Log.e(" other: "," ("+messg.getLocation().getx()+","+messg.getLocation().gety()+") "
 						//		+", ["+messg.getOrientation().getVx()+","+messg.getOrientation().getVy()+"]");
@@ -451,54 +439,25 @@ public class MainActivity extends Activity {
 				point = (Point2D.Short)msg.obj;
 
 				if(!myObject.isCutting()){
+					
+					byte[] byteMsg = MessageConvertion.messageToBytes(new BorderWalkMsg(myObject.getLocation(),true,point));
+					mChatService.write(byteMsg);
+					
 					myObject.setBoundMovingPhase(point,true,myPoly);
-
-					mChatService.write((new TestMsg((short)2,myObject.getLocation(),new Vector2D.Short((short)0,(short)0),(short)1,point)).getBytes());
+					
+					//mChatService.write((new TestMsg((short)2,myObject.getLocation(),new Vector2D.Short((short)0,(short)0),(short)1,point)).getBytes());
 				}
 
 				break;
 
 			case BlueToothDefaults.MESSAGE_READ:
 
-
 				byte[] readBuf = (byte[]) msg.obj;
-
-				TestMsg messg = new TestMsg(readBuf);
-
-				//Log.e(">>>"," purpose: == "+messg.getPurp());
-
-				if(messg.getPurp()==0){
-
-					//Log.e(" other: "," ("+messg.getLocation().getx()+","+messg.getLocation().gety()+") "
-					//		+", ["+messg.getOrientation().getVx()+""+messg.getOrientation().getVy()+"]");
-
-					otherObject.setLocation(messg.getLocation());
-
-					otherObject.startCuting(messg.getOrientation(), otherPath, myPoly);
-
-					//messg.getOrientation();
-
-				}
-				if(messg.getPurp()==1){
-
-
-					//Log.e(" other: "," ("+messg.getLocation().getx()+","+messg.getLocation().gety()+") "
-					//+", ["+messg.getOrientation().getVx()+""+messg.getOrientation().getVy()+"]");
-
-					otherObject.setLocation(messg.getLocation());
-
-					otherObject.proceedCutting(messg.getOrientation());
-
-				}
-				if(messg.getPurp()==2){
-
-					otherObject.setLocation(messg.getLocation());
-
-					otherObject.setBoundMovingPhase(messg.getUserPoint(),true,myPoly);
-
-				}
-
-
+				
+				InterMessage incomingMsg = MessageConvertion.bytesToMessage(readBuf);
+				
+				messageProcessor.processMessage(incomingMsg);
+				
 			case BlueToothDefaults.MESSAGE_WRITE:
 				break;
 			case Constants.MESSAGE_LOGIC_ROUND:
@@ -545,36 +504,51 @@ public class MainActivity extends Activity {
 
 
 
+	MyMessageProcessing messageProcessor = new MyMessageProcessing();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	public class MyMessageProcessing extends MessageProcessing{
+		
+		@Override
+		public void process(StartCutMsg msg){
+			otherObject.setLocation(msg.getLocation());
+			otherObject.startCuting(msg.getOrientation(), otherPath, myPoly);
+		}
+		
+		@Override
+		public void process(ProcCutMsg msg){
+			otherObject.setLocation(msg.getLocation());
+			otherObject.proceedCutting(msg.getOrientation());
+		}
+		
+		@Override
+		public void process(BorderWalkMsg msg){
+			otherObject.setLocation(msg.getLocation());
+			otherObject.setBoundMovingPhase(msg.getUserPoint(),msg.getDirection(),myPoly);
+		}
+		
+		@Override
+		public void process(BoundsUpdateMsg msg){
+			myPoly.setPoly(msg.getPoly());
+		}
+	}
+	
 	/*
 ==========================================================================================================
     ACTIVITY EVENT HANDLER
 ==========================================================================================================
 	 */
-
+	
+	
+	
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-		//log.e("","onActivityResult");
+		//log.e("","onAc  tivityResult");
 
 		switch (requestCode) {
 		case BlueToothDefaults.REQUEST_CONNECT_DEVICE:
 
 			//log.e("","REQUEST_CONNECT_DEVICE");
-
+			
 			// When DeviceListActivity returns with a device to connect
 			if (resultCode == Activity.RESULT_OK) {
 				// Get the device MAC address
@@ -583,6 +557,9 @@ public class MainActivity extends Activity {
 				// Get the BLuetoothDevice object
 				BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
 				// Attempt to connect to the device
+				
+				isJoiningGame=true;
+				
 				mChatService.connect(device);
 			}
 			break;

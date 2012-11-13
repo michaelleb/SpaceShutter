@@ -17,7 +17,10 @@ public class Polygon2D extends Path2D{
 		public Short(){
 
 		}
-
+		
+		public void setPoly(Polygon2D.Short poly){
+			this.coords=poly.coords;
+		}
 
 		public boolean cut(Path2D.Short cuttingPath,Polygon2D.Short sideA,Polygon2D.Short sideB){
 
