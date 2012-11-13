@@ -30,8 +30,6 @@ public class DummyObject implements PlayingObject{
 	private PlayPath cuttingPath;		//paths that player cuts
 
 
-
-
 	private Point2D.Short userPointOnMap;		//user specified point to move near to
 	private Point2D.Short closestPointOnPoly;	//point on polygon which is closest to userPointOnMap
 	private boolean direction;			//bounds direction (2 options)
@@ -156,13 +154,8 @@ public class DummyObject implements PlayingObject{
 
 			Point2D.Short next = pol.getPoint(nextCheckpointIndex);	//next point destination
 
-
 			if(closestPointOnPoly==null)
-			{
-				boundariesPhase=false;
-
 				return;
-			}
 
 			if(location.distance(closestPointOnPoly)<=speed){	//if final destination within reach
 

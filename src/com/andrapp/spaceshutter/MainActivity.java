@@ -529,6 +529,9 @@ public class MainActivity extends Activity {
 		@Override
 		public void process(BoundsUpdateMsg msg){
 			myPoly.setPoly(msg.getPoly());
+			
+			myObject.recalcBoundMovingPhase(myPoly);
+			otherObject.recalcBoundMovingPhase(myPoly);
 		}
 	}
 	
