@@ -20,7 +20,7 @@ public class DummyObject implements PlayingObject{
 
 	private int type;
 
-	private short speed=2;
+	private short speed=1;
 
 	private Point2D.Short location;
 

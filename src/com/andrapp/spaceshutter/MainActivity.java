@@ -92,6 +92,11 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.main);
 
 
+		
+		
+		
+		
+		
 		myObject=new DummyObject((short)Constants.MARGIN_PADDING,(short)Constants.MARGIN_PADDING,0);
 
 		otherObject=new DummyObject(Constants.MARGIN_PADDING,Constants.MARGIN_PADDING,1);
@@ -108,7 +113,7 @@ public class MainActivity extends Activity {
 		myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING), Constants.MARGIN_PADDING);
 		myPoly.proceed(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
 
-		mHandler.sendEmptyMessage(Constants.MESSAGE_LOGIC_ROUND);
+		//mHandler.sendEmptyMessage(Constants.MESSAGE_LOGIC_ROUND);
 
 		// Get local Bluetooth adapter
 		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -228,7 +233,7 @@ public class MainActivity extends Activity {
 	public void onStart() {
 		super.onStart();
 
-		setGameScreen();
+		//setGameScreen();
 
 		// If BT is not on, request that it be enabled.
 		// setupChat() will then be called during onActivityResult
@@ -239,6 +244,24 @@ public class MainActivity extends Activity {
 		} else {
 			if (mChatService == null) setupBT();
 		}
+		
+		
+		
+		
+		
+		
+		
+	      Button btn = (Button) findViewById(R.id.main_btn_multiplayer);
+	      btn.setOnClickListener(new OnClickListener() {
+	            public void onClick(View v) {
+	            	
+	            	Intent serverIntent = new Intent(getBaseContext(), DeviceListActivity.class);
+	    			startActivityForResult(serverIntent, BlueToothDefaults.REQUEST_CONNECT_DEVICE);
+	            	
+	            }
+	        });
+		
+		
 		
 	}
 
@@ -341,18 +364,6 @@ public class MainActivity extends Activity {
 			mChatService.stop();
 
 	}
-
-	private void ensureDiscoverable() {
-		//log.e("", "ensureDiscoverable");
-		if (mBluetoothAdapter.getScanMode() !=
-				BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
-			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-			discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-			startActivity(discoverableIntent);
-		}
-	}
-
-
 
 	/*
 ==========================================================================================================
@@ -591,7 +602,7 @@ public class MainActivity extends Activity {
 OPTIONS MENU BUTTONS FOR BLUETOOTH OPERATIONS
 ==========================================================================================================
 	 */
-
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
@@ -603,13 +614,8 @@ OPTIONS MENU BUTTONS FOR BLUETOOTH OPERATIONS
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.scan:
-			// Launch the DeviceListActivity to see devices and do scan
-			Intent serverIntent = new Intent(this, DeviceListActivity.class);
-			startActivityForResult(serverIntent, BlueToothDefaults.REQUEST_CONNECT_DEVICE);
 			return true;
 		case R.id.discoverable:
-			// Ensure this device is discoverable by others
-			ensureDiscoverable();
 			return true;
 		}
 		return false;

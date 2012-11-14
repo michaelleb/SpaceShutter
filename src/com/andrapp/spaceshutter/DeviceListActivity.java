@@ -53,8 +53,11 @@ public class DeviceListActivity extends Activity {
 
     // Member fields
     private BluetoothAdapter mBtAdapter;
-    private ArrayAdapter<String> mPairedDevicesArrayAdapter;
-    private ArrayAdapter<String> mNewDevicesArrayAdapter;
+    //private ArrayAdapter<String> mPairedDevicesArrayAdapter;
+    //private ArrayAdapter<String> mNewDevicesArrayAdapter;
+    
+    private ArrayAdapter<String> mAllDevicesArrayAdapter;
+    
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +67,7 @@ public class DeviceListActivity extends Activity {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.device_list);
 
-        // Set result CANCELED incase the user backs out
+        // Set result CANCELED in case the user backs out
         setResult(Activity.RESULT_CANCELED);
 
         // Initialize the button to perform device discovery
@@ -72,24 +75,39 @@ public class DeviceListActivity extends Activity {
         scanButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 doDiscovery();
-                v.setVisibility(View.GONE);
+                //v.setVisibility(View.GONE);
             }
         });
+        
+        
+        Button discoverableButton = (Button) findViewById(R.id.button_discoverable);
+        discoverableButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+            	ensureDiscoverable();
+            }
+        });
+        
 
         // Initialize array adapters. One for already paired devices and
         // one for newly discovered devices
-        mPairedDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.device_name);
-        mNewDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.device_name);
+       // mPairedDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.device_name);
+       // mNewDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.device_name);
+        mAllDevicesArrayAdapter = new ArrayAdapter<String>(this, R.layout.device_name);
 
         // Find and set up the ListView for paired devices
-        ListView pairedListView = (ListView) findViewById(R.id.paired_devices);
-        pairedListView.setAdapter(mPairedDevicesArrayAdapter);
-        pairedListView.setOnItemClickListener(mDeviceClickListener);
+       // ListView pairedListView = (ListView) findViewById(R.id.paired_devices);
+      //  pairedListView.setAdapter(mPairedDevicesArrayAdapter);
+       // pairedListView.setOnItemClickListener(mDeviceClickListener);
 
         // Find and set up the ListView for newly discovered devices
-        ListView newDevicesListView = (ListView) findViewById(R.id.new_devices);
-        newDevicesListView.setAdapter(mNewDevicesArrayAdapter);
-        newDevicesListView.setOnItemClickListener(mDeviceClickListener);
+       // ListView newDevicesListView = (ListView) findViewById(R.id.new_devices);
+       // newDevicesListView.setAdapter(mNewDevicesArrayAdapter);
+      //  newDevicesListView.setOnItemClickListener(mDeviceClickListener);
+        
+        
+        ListView allDevicesListView = (ListView) findViewById(R.id.all_devices);
+        allDevicesListView.setAdapter(mAllDevicesArrayAdapter);
+        allDevicesListView.setOnItemClickListener(mDeviceClickListener);
 
         // Register for broadcasts when a device is discovered
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
@@ -107,16 +125,28 @@ public class DeviceListActivity extends Activity {
 
         // If there are paired devices, add each one to the ArrayAdapter
         if (pairedDevices.size() > 0) {
-            findViewById(R.id.title_paired_devices).setVisibility(View.VISIBLE);
+            //findViewById(R.id.title_paired_devices).setVisibility(View.VISIBLE);
             for (BluetoothDevice device : pairedDevices) {
-                mPairedDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+            	//mPairedDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+            	
+            	mAllDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
             }
         } else {
             String noDevices = getResources().getText(R.string.none_paired).toString();
-            mPairedDevicesArrayAdapter.add(noDevices);
+           // mPairedDevicesArrayAdapter.add(noDevices);
         }
     }
-
+    
+    private void ensureDiscoverable() {
+		//log.e("", "ensureDiscoverable");
+		if (mBtAdapter.getScanMode() !=
+				BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+			discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+			startActivity(discoverableIntent);
+		}
+	}
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -141,7 +171,7 @@ public class DeviceListActivity extends Activity {
         setTitle(R.string.scanning);
 
         // Turn on sub-title for new devices
-        findViewById(R.id.title_new_devices).setVisibility(View.VISIBLE);
+        //findViewById(R.id.title_new_devices).setVisibility(View.VISIBLE);
 
         // If we're already discovering, stop it
         if (mBtAdapter.isDiscovering()) {
@@ -185,16 +215,17 @@ public class DeviceListActivity extends Activity {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 // If it's already paired, skip it, because it's been listed already
                 if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
-                    mNewDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+                	//mNewDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+                	mAllDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
                 }
             // When discovery is finished, change the Activity title
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 setProgressBarIndeterminateVisibility(false);
                 setTitle(R.string.select_device);
-                if (mNewDevicesArrayAdapter.getCount() == 0) {
-                    String noDevices = getResources().getText(R.string.none_found).toString();
-                    mNewDevicesArrayAdapter.add(noDevices);
-                }
+             //   if (mNewDevicesArrayAdapter.getCount() == 0) {
+                   // String noDevices = getResources().getText(R.string.none_found).toString();
+                 //   mNewDevicesArrayAdapter.add(noDevices);
+               // }
             }
         }
     };
