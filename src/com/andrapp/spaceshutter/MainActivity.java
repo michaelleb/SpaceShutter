@@ -81,23 +81,25 @@ public class MainActivity extends Activity {
 	private PlayPath otherPath;
 
 	private PlayPolygon myPoly;
-	
+
 	private boolean isJoiningGame=false;
+
+	ProgressDialog dialog=null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		// Set up the window layout
 		setContentView(R.layout.main);
 
 
-		
-		
-		
-		
-		
+
+
+
+
+
 		myObject=new DummyObject((short)Constants.MARGIN_PADDING,(short)Constants.MARGIN_PADDING,0);
 
 		otherObject=new DummyObject(Constants.MARGIN_PADDING,Constants.MARGIN_PADDING,1);
@@ -113,8 +115,6 @@ public class MainActivity extends Activity {
 		myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING), (short)(Constants.PROJ_HEIGHT-Constants.MARGIN_PADDING));
 		myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING), Constants.MARGIN_PADDING);
 		myPoly.proceed(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
-
-		//mHandler.sendEmptyMessage(Constants.MESSAGE_LOGIC_ROUND);
 
 		// Get local Bluetooth adapter
 		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -135,20 +135,20 @@ public class MainActivity extends Activity {
 		otherObject.behave(myPoly);
 
 		if(myPath!=null && myPath.getSize()>1){
-			
-			
+
+
 			if(!myObject.isCutting()){
 				PlayPolygon sideA = new PlayPolygon();
 				PlayPolygon sideB = new PlayPolygon();
-				
+
 				if(!isJoiningGame && myPoly.cut(myPath, sideA, sideB)==true){
-					
+
 					myPoly.setPoly(sideA);
-					
-					
+
+
 					byte[] byteMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly));
 					mChatService.write(byteMsg);
-					
+
 					otherObject.recalcBoundMovingPhase(myPoly);
 				}
 
@@ -164,12 +164,12 @@ public class MainActivity extends Activity {
 				PlayPolygon sideB = new PlayPolygon();
 
 				if(!isJoiningGame && myPoly.cut(otherPath, sideA, sideB)==true){
-					
+
 					myPoly.setPoly(sideA);
-					
+
 					byte[] byteMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly));
 					mChatService.write(byteMsg);
-					
+
 					myObject.recalcBoundMovingPhase(myPoly);
 				}
 
@@ -233,13 +233,10 @@ public class MainActivity extends Activity {
 	@Override
 	public void onStart() {
 		super.onStart();
-		
-		//ProgressDialog dialog = ProgressDialog.show(this, "Loading", "Please wait...", true);
-		//dialog.dismiss();
-		
-		
-		
-		//setGameScreen();
+
+
+		//mHandler.sendEmptyMessage(Constants.MESSAGE_LOGIC_ROUND);
+		setGameScreen();
 
 		// If BT is not on, request that it be enabled.
 		// setupChat() will then be called during onActivityResult
@@ -250,33 +247,27 @@ public class MainActivity extends Activity {
 		} else {
 			if (mChatService == null) setupBT();
 		}
-		
-		
-		
-		
-		
-		
-		
-	      Button btn = (Button) findViewById(R.id.main_btn_multiplayer);
-	      btn.setOnClickListener(new OnClickListener() {
-	            public void onClick(View v) {
-	            	
-	            	Intent serverIntent = new Intent(getBaseContext(), DeviceListActivity.class);
-	    			startActivityForResult(serverIntent, BlueToothDefaults.REQUEST_CONNECT_DEVICE);
-	            	
-	            }
-	        });
-		
-		
+
+		Button btn = (Button) findViewById(R.id.main_btn_multiplayer);
+		btn.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+
+				Intent serverIntent = new Intent(getBaseContext(), DeviceListActivity.class);
+				startActivityForResult(serverIntent, BlueToothDefaults.REQUEST_CONNECT_DEVICE);
+
+			}
+		});
 		
 	}
 
 	private void setGameScreen(){
-
+		
 		LinearLayout root = (LinearLayout) findViewById(R.id.mainroot);
 
 		mView = new MyView(this,null,Constants.PROJ_HEIGHT,Constants.PROJ_WIDTH,mHandler);
-
+		
+		mView.setVisibility(View.GONE);
+		
 		root.addView(mView);
 
 		mView.post(new Runnable() { 
@@ -420,7 +411,7 @@ public class MainActivity extends Activity {
 						byte[] byteMsg = MessageConvertion.messageToBytes(new StartCutMsg(myObject.getLocation(),vec));
 						mChatService.write(byteMsg);
 						myObject.startCuting(vec,myPath,myPoly);
-						
+
 						//Log.e(" other: "," ("+messg.getLocation().getx()+","+messg.getLocation().gety()+") "
 						//		+", ["+messg.getOrientation().getVx()+","+messg.getOrientation().getVy()+"]");
 
@@ -456,12 +447,12 @@ public class MainActivity extends Activity {
 				point = (Point2D.Short)msg.obj;
 
 				if(!myObject.isCutting()){
-					
+
 					byte[] byteMsg = MessageConvertion.messageToBytes(new BorderWalkMsg(myObject.getLocation(),true,point));
 					mChatService.write(byteMsg);
-					
+
 					myObject.setBoundMovingPhase(point,true,myPoly);
-					
+
 					//mChatService.write((new TestMsg((short)2,myObject.getLocation(),new Vector2D.Short((short)0,(short)0),(short)1,point)).getBytes());
 				}
 
@@ -470,11 +461,11 @@ public class MainActivity extends Activity {
 			case BlueToothDefaults.MESSAGE_READ:
 
 				byte[] readBuf = (byte[]) msg.obj;
-				
+
 				InterMessage incomingMsg = MessageConvertion.bytesToMessage(readBuf);
-				
+
 				messageProcessor.processMessage(incomingMsg);
-				
+
 			case BlueToothDefaults.MESSAGE_WRITE:
 				break;
 			case Constants.MESSAGE_LOGIC_ROUND:
@@ -499,16 +490,34 @@ public class MainActivity extends Activity {
 
 			case BlueToothDefaults.MESSAGE_DEVICE_NAME:
 
+				if(dialog!=null && dialog.isShowing()) dialog.dismiss();
+
 				// save the connected device's name
 				mConnectedDeviceName = msg.getData().getString(BlueToothDefaults.DEVICE_NAME);
 
 				//log.e("", "Connected to " + mConnectedDeviceName);
-
+				
+				
+				Button btn1 = (Button) findViewById(R.id.main_btn_singleplayer);
+				Button btn2 = (Button) findViewById(R.id.main_btn_multiplayer);
+				btn1.setVisibility(View.GONE);
+				btn2.setVisibility(View.GONE);
+				mView.setVisibility(View.VISIBLE);
+				
+				
+				mHandler.sendEmptyMessage(Constants.MESSAGE_LOGIC_ROUND);
+				
 				Toast.makeText(getApplicationContext(), "Connected to "
 						+ mConnectedDeviceName, Toast.LENGTH_SHORT).show();
 
+
+
+
+
 				break;
 			case BlueToothDefaults.MESSAGE_TOAST:
+
+				if(dialog!=null && dialog.isShowing()) dialog.dismiss();
 
 				//log.e("", msg.getData().getString(BlueToothDefaults.TOAST));
 
@@ -524,42 +533,42 @@ public class MainActivity extends Activity {
 	MyMessageProcessing messageProcessor = new MyMessageProcessing();
 
 	public class MyMessageProcessing extends MessageProcessing{
-		
+
 		@Override
 		public void process(StartCutMsg msg){
 			otherObject.setLocation(msg.getLocation());
 			otherObject.startCuting(msg.getOrientation(), otherPath, myPoly);
 		}
-		
+
 		@Override
 		public void process(ProcCutMsg msg){
 			otherObject.setLocation(msg.getLocation());
 			otherObject.proceedCutting(msg.getOrientation());
 		}
-		
+
 		@Override
 		public void process(BorderWalkMsg msg){
 			otherObject.setLocation(msg.getLocation());
 			otherObject.setBoundMovingPhase(msg.getUserPoint(),msg.getDirection(),myPoly);
 		}
-		
+
 		@Override
 		public void process(BoundsUpdateMsg msg){
 			myPoly.setPoly(msg.getPoly());
-			
+
 			myObject.recalcBoundMovingPhase(myPoly);
 			otherObject.recalcBoundMovingPhase(myPoly);
 		}
 	}
-	
+
 	/*
 ==========================================================================================================
     ACTIVITY EVENT HANDLER
 ==========================================================================================================
 	 */
-	
-	
-	
+
+
+
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
 		//log.e("","onAc  tivityResult");
@@ -568,18 +577,21 @@ public class MainActivity extends Activity {
 		case BlueToothDefaults.REQUEST_CONNECT_DEVICE:
 
 			//log.e("","REQUEST_CONNECT_DEVICE");
-			
+
 			// When DeviceListActivity returns with a device to connect
 			if (resultCode == Activity.RESULT_OK) {
+
+				dialog = ProgressDialog.show(this, "Loading", "Please wait...", true);
+
 				// Get the device MAC address
 				String address = data.getExtras()
 						.getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
 				// Get the BLuetoothDevice object
 				BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
 				// Attempt to connect to the device
-				
+
 				isJoiningGame=true;
-				
+
 				mChatService.connect(device);
 			}
 			break;
@@ -602,23 +614,22 @@ public class MainActivity extends Activity {
 			}
 		}
 	}
-	
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.option_menu, menu);
-        return true;
-    }
-    
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Intent serverIntent = null;
-        switch (item.getItemId()) {
-        case R.id.scan:
-            return true;
-        case R.id.discoverable:
-            return true;
-        }
-        return false;
-    }
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.option_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.scan:
+			return true;
+		case R.id.discoverable:
+			return true;
+		}
+		return false;
+	}
 }
