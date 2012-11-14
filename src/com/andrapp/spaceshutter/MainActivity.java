@@ -52,6 +52,7 @@ import mark.geometry.*;
 
 import ourproject.messages.*;
 
+import android.app.ProgressDialog;
 
 /**
  * This is the main Activity that displays the current chat session.
@@ -232,7 +233,12 @@ public class MainActivity extends Activity {
 	@Override
 	public void onStart() {
 		super.onStart();
-
+		
+		//ProgressDialog dialog = ProgressDialog.show(this, "Loading", "Please wait...", true);
+		//dialog.dismiss();
+		
+		
+		
 		//setGameScreen();
 
 		// If BT is not on, request that it be enabled.
