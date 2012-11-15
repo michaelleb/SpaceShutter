@@ -86,20 +86,6 @@ public class MainActivity extends Activity {
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		// Set up the window layout
 		setContentView(R.layout.main);
-
-
-
-
-
-		// Get local Bluetooth adapter
-		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-		// If the adapter is null, then Bluetooth is not supported
-		if (mBluetoothAdapter == null) {
-			Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
-			finish();
-			return;
-		}
 	}
 
 	@Override
@@ -107,16 +93,6 @@ public class MainActivity extends Activity {
 		super.onStart();
 
 		Log.e("","++++ ONSTART ++++");
-
-		Button btn = (Button) findViewById(R.id.main_btn_multiplayer);
-		btn.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-
-				findBluetoothHost();
-			}
-		});
-
-
 
 		Button btn2 = (Button) findViewById(R.id.main_btn_singleplayer);
 		btn2.setOnClickListener(new OnClickListener() {
@@ -132,17 +108,39 @@ public class MainActivity extends Activity {
 			}
 		});
 
+		Button btn = (Button) findViewById(R.id.main_btn_multiplayer);
+		btn.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
 
+				startBTAndFindHosts();
+			}
+		});
+
+	}
+
+	public void startBTAndFindHosts(){
+
+		if(mBluetoothAdapter==null)
+			mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
 		if (!mBluetoothAdapter.isEnabled()) {
 			Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
 			startActivityForResult(enableIntent, BlueToothDefaults.REQUEST_ENABLE_BT);
-			// Otherwise, setup the chat session
 		} else {
-			if (mChatService == null) mChatService = new BluetoothChatService(this, mHandler);
+			startBTService();
+			
+			findBluetoothHost();
 		}
 	}
+	
+	public void startBTService(){
+		if (mChatService == null)
+			mChatService = new BluetoothChatService(this, mHandler);
 
+		if (mChatService.getState() == BluetoothChatService.STATE_NONE)
+			mChatService.start();
+	}
+	
 
 	public void findBluetoothHost(){
 		Intent serverIntent = new Intent(getBaseContext(), DeviceListActivity.class);
@@ -155,34 +153,6 @@ public class MainActivity extends Activity {
 		super.onResume();
 		Log.e("","++++ ONRESUME ++++");
 
-        if (mChatService != null) {
-            // Only if the state is STATE_NONE, do we know that we haven't started already
-            if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
-              // Start the Bluetooth chat services
-              mChatService.start();
-            }
-        }
-
-	}
-
-
-
-	@Override
-	public synchronized void onPause() {
-		super.onPause();
-		Log.e("","++++ ONPAUSE ++++");
-	}
-
-	@Override
-	public void onStop() {
-		super.onStop();
-	}
-
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		
-		if (mChatService != null) mChatService.stop();
 	}
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -200,31 +170,8 @@ public class MainActivity extends Activity {
 				// Get the device MAC address
 				String address = data.getExtras().getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
 
-				//mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-
 				BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
 				mChatService.connect(device);
-
-				/*
-
-				if(mChatService==null){
-
-					mChatService = new BluetoothChatService(this, mHandler);
-
-
-					if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
-						// Start the Bluetooth chat services
-						mChatService.start();
-
-
-
-
-						Log.e("",""+address);
-					}
-
-				}
-				 */
 
 			}
 			break;
@@ -232,9 +179,10 @@ public class MainActivity extends Activity {
 
 		case BlueToothDefaults.REQUEST_ENABLE_BT:
 			if (resultCode == Activity.RESULT_OK) {
-				
-				mChatService = new BluetoothChatService(this, mHandler);
-				
+
+				startBTService();
+
+				findBluetoothHost();
 				
 			}
 			else{
@@ -244,7 +192,23 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	@Override
+	public synchronized void onPause() {
+		super.onPause();
+		Log.e("","++++ ONPAUSE ++++");
+	}
 
+	@Override
+	public void onStop() {
+		super.onStop();
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+
+		if (mChatService != null) mChatService.stop();
+	}
 
 
 	private Handler mHandler = new Handler() {

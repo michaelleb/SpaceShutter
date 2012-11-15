@@ -103,7 +103,7 @@ public class DeviceListActivity extends Activity {
         // Get the local Bluetooth adapter
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
         
-        doDiscovery();
+        //doDiscovery();
     }
     
     private void ensureDiscoverable() {
