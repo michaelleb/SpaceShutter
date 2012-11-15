@@ -75,41 +75,72 @@ public class MainActivity extends Activity {
 
 	private ProgressDialog dialog=null;
 
+	private boolean isSinglePlayer=true;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		Log.e("","++++ ONCREATE ++++");
 
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		// Set up the window layout
 		setContentView(R.layout.main);
 
 
+
+
+
+		// Get local Bluetooth adapter
+		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+		// If the adapter is null, then Bluetooth is not supported
+		if (mBluetoothAdapter == null) {
+			Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
+			finish();
+			return;
+		}
 	}
 
 	@Override
 	public void onStart() {
 		super.onStart();
 
+		Log.e("","++++ ONSTART ++++");
+
 		Button btn = (Button) findViewById(R.id.main_btn_multiplayer);
 		btn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 
-				// Get local Bluetooth adapter
-				BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+				findBluetoothHost();
+			}
+		});
 
-				// If BT is not on, request that it be enabled.
-				// setupChat() will then be called during onActivityResult
-				if (!mBluetoothAdapter.isEnabled()) {
-					Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-					startActivityForResult(enableIntent, BlueToothDefaults.REQUEST_ENABLE_BT);
-					// Otherwise, setup the chat session
-				} else {
-					findBluetoothHost();		
-				}
+
+
+		Button btn2 = (Button) findViewById(R.id.main_btn_singleplayer);
+		btn2.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+
+				isSinglePlayer=true;
+
+				View menu = (View) findViewById(R.id.menu);
+				menu.setVisibility(View.GONE);
+
+				startGame();
 
 			}
 		});
 
+
+
+		if (!mBluetoothAdapter.isEnabled()) {
+			Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+			startActivityForResult(enableIntent, BlueToothDefaults.REQUEST_ENABLE_BT);
+			// Otherwise, setup the chat session
+		} else {
+			if (mChatService == null) mChatService = new BluetoothChatService(this, mHandler);
+		}
 	}
 
 
@@ -122,24 +153,36 @@ public class MainActivity extends Activity {
 	@Override
 	public synchronized void onResume() {
 		super.onResume();
+		Log.e("","++++ ONRESUME ++++");
+
+        if (mChatService != null) {
+            // Only if the state is STATE_NONE, do we know that we haven't started already
+            if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
+              // Start the Bluetooth chat services
+              mChatService.start();
+            }
+        }
+
 	}
+
+
 
 	@Override
 	public synchronized void onPause() {
 		super.onPause();
+		Log.e("","++++ ONPAUSE ++++");
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
-
-		if (mChatService != null)
-			mChatService.stop();
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		
+		if (mChatService != null) mChatService.stop();
 	}
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -157,9 +200,13 @@ public class MainActivity extends Activity {
 				// Get the device MAC address
 				String address = data.getExtras().getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
 
-				mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+				//mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
 
+				BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+				mChatService.connect(device);
+
+				/*
 
 				if(mChatService==null){
 
@@ -171,13 +218,13 @@ public class MainActivity extends Activity {
 						mChatService.start();
 
 
-						BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
 
-						mChatService.connect(device);
+
 						Log.e("",""+address);
 					}
 
 				}
+				 */
 
 			}
 			break;
@@ -185,7 +232,10 @@ public class MainActivity extends Activity {
 
 		case BlueToothDefaults.REQUEST_ENABLE_BT:
 			if (resultCode == Activity.RESULT_OK) {
-				findBluetoothHost();
+				
+				mChatService = new BluetoothChatService(this, mHandler);
+				
+				
 			}
 			else{
 				Toast.makeText(this, R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
@@ -193,20 +243,6 @@ public class MainActivity extends Activity {
 			}
 		}
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -263,6 +299,8 @@ public class MainActivity extends Activity {
 				View menu = (View) findViewById(R.id.menu);
 				menu.setVisibility(View.GONE);
 
+
+				isSinglePlayer=false;
 
 				startGame();
 
@@ -445,7 +483,9 @@ public class MainActivity extends Activity {
 	void logicRound(){
 
 		myObject.behave(myPoly);
-		otherObject.behave(myPoly);
+
+		if(!isSinglePlayer)
+			otherObject.behave(myPoly);
 
 		if(myPath!=null && myPath.getSize()>1){
 
@@ -460,7 +500,9 @@ public class MainActivity extends Activity {
 
 
 					byte[] byteMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly));
-					mChatService.write(byteMsg);
+
+					if(!isSinglePlayer)
+						mChatService.write(byteMsg);
 
 					otherObject.recalcBoundMovingPhase(myPoly);
 				}
@@ -481,7 +523,9 @@ public class MainActivity extends Activity {
 					myPoly.setPoly(sideA);
 
 					byte[] byteMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly));
-					mChatService.write(byteMsg);
+
+					if(!isSinglePlayer)
+						mChatService.write(byteMsg);
 
 					myObject.recalcBoundMovingPhase(myPoly);
 				}
@@ -502,7 +546,8 @@ public class MainActivity extends Activity {
 		if(myPath!=null && myPath.getSize()>1)
 			mView.drawObject(myPath);
 
-		mView.drawObject(otherObject);
+		if(!isSinglePlayer)
+			mView.drawObject(otherObject);
 
 		mView.drawObject(myObject);
 
@@ -521,9 +566,9 @@ public class MainActivity extends Activity {
 		int offset = supposedTimes-times;
 
 		if(offset>0)
-			;//refreshEvery--;
+			refreshEvery--;
 		else
-			;//refreshEvery=Constants.ROUND_REFRESH;
+			refreshEvery=Constants.ROUND_REFRESH;
 
 		//if(someoffset!=offset){
 		//someoffset=offset;
@@ -570,7 +615,10 @@ public class MainActivity extends Activity {
 				if(myObject.intersects(point) && vec.getLength()>0){
 
 					byte[] byteMsg = MessageConvertion.messageToBytes(new StartCutMsg(myObject.getLocation(),vec));
-					mChatService.write(byteMsg);
+
+					if(!isSinglePlayer)
+						mChatService.write(byteMsg);
+
 					myObject.startCuting(vec,myPath,myPoly);
 
 					//Log.e(" other: "," ("+messg.getLocation().getx()+","+messg.getLocation().gety()+") "
@@ -583,7 +631,10 @@ public class MainActivity extends Activity {
 					//Log.e("",""+vec.getVx()+"-"+vec.getVy());
 
 					byte[] byteMsg = MessageConvertion.messageToBytes(new ProcCutMsg(myObject.getLocation(),vec));
-					mChatService.write(byteMsg);
+
+					if(!isSinglePlayer)
+						mChatService.write(byteMsg);
+
 					myObject.startCuting(vec,myPath,myPoly);
 
 					//Log.e(" other: "," ("+messg.getLocation().getx()+","+messg.getLocation().gety()+") "
@@ -610,11 +661,11 @@ public class MainActivity extends Activity {
 			if(!myObject.isCutting()){
 
 				byte[] byteMsg = MessageConvertion.messageToBytes(new BorderWalkMsg(myObject.getLocation(),true,point));
-				mChatService.write(byteMsg);
+
+				if(!isSinglePlayer)
+					mChatService.write(byteMsg);
 
 				myObject.setBoundMovingPhase(point,true,myPoly);
-
-				//mChatService.write((new TestMsg((short)2,myObject.getLocation(),new Vector2D.Short((short)0,(short)0),(short)1,point)).getBytes());
 			}
 
 			break;
@@ -638,21 +689,6 @@ public class MainActivity extends Activity {
 
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
@@ -664,7 +700,7 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.scan:
-			
+
 			myPoly=new PlayPolygon();
 
 			myPoly.start(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
@@ -674,7 +710,9 @@ public class MainActivity extends Activity {
 			myPoly.proceed(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
 
 			byte[] byteMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly));
-			mChatService.write(byteMsg);
+
+			if(!isSinglePlayer)
+				mChatService.write(byteMsg);
 
 			myObject.recalcBoundMovingPhase(myPoly);
 			otherObject.recalcBoundMovingPhase(myPoly);

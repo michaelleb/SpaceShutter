@@ -134,30 +134,8 @@ public class Polygon2D extends Path2D{
 
 			return true;
 		}
-
-		public float getArea(){
-
-			float res=0;
-
-			int len = coords.size();
-
-			for(int i=0;i<len;i++)
-			{
-				float x1,x2,y1,y2;
-
-				x1=coords.get(i).getx();
-				x2=coords.get((i+1)%len).getx();
-				y1=coords.get(i).gety();
-				y2=coords.get((i+1)%len).gety();
-
-				res+=(x1*y2-x2*y1);
-			}
-
-			res/=2;
-
-			return res;
-		}
-
+		
+		
 		/*
 		 * 
 		 */
