@@ -144,7 +144,7 @@ public class MainActivity extends Activity {
 
 	public void findBluetoothHost(){
 		Intent serverIntent = new Intent(getBaseContext(), DeviceListActivity.class);
-		startActivityForResult(serverIntent, BlueToothDefaults.REQUEST_CONNECT_DEVICE);					
+		startActivityForResult(serverIntent, BlueToothDefaults.REQUEST_CONNECT_DEVICE);
 	}
 
 
@@ -376,6 +376,9 @@ public class MainActivity extends Activity {
 
 
 	private void startGame(){
+		
+		finishActivity(BlueToothDefaults.REQUEST_CONNECT_DEVICE);
+		
 		setGameScreen();
 		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_LOGIC_ROUND), refreshEvery);
 	}
