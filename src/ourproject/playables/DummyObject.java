@@ -58,8 +58,9 @@ public class DummyObject implements PlayingObject{
 
 	public void setBoundMovingPhase(Point2D.Short userPointOnMap,boolean direction,PlayPolygon pol){
 
-		if(cuttingPhase)
-			return;
+		if(cuttingPhase){
+			cuttingPhase=false;
+		}
 
 		this.userPointOnMap=userPointOnMap;
 
