@@ -42,14 +42,6 @@ public class Line2D {
 			return res;
 		}
 
-
-
-
-
-
-
-
-
 		public Point2D.Short lineIntersection(Line2D.Short line2,boolean left1,boolean right1,boolean left2,boolean right2){
 			return segIntersection(
 					this.getStart().getx(),this.getStart().gety(),

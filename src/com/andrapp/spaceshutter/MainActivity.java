@@ -157,8 +157,6 @@ public class MainActivity extends Activity {
 
 	}
 
-
-
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
 		//log.e("","onAc  tivityResult");
@@ -215,8 +213,7 @@ public class MainActivity extends Activity {
 
 		if (mChatService != null) mChatService.stop();
 	}
-
-
+	
 	private Handler mHandler = new Handler() {
 
 		@Override
@@ -225,14 +222,7 @@ public class MainActivity extends Activity {
 			switch (msg.what) {
 
 			case BlueToothDefaults.MESSAGE_READ:
-
-				byte[] readBuf = (byte[]) msg.obj;
-
-				InterMessage incomingMsg = MessageConvertion.bytesToMessage(readBuf);
-
-				MyMessageProcessing messageProcessor = new MyMessageProcessing();
-
-				messageProcessor.processMessage(incomingMsg);
+				break;
 
 			case BlueToothDefaults.MESSAGE_WRITE:
 				break;
@@ -276,7 +266,6 @@ public class MainActivity extends Activity {
 
 				startGame();
 
-
 				break;	
 
 			}
@@ -286,121 +275,56 @@ public class MainActivity extends Activity {
 	};
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	/*
-############################################################################################################################
-############################################################################################################################
-############################################################################################################################
-############################################################################################################################
-############################################################################################################################
-############################################################################################################################
-############################################################################################################################
-	 */
-
-	public class MyMessageProcessing extends MessageProcessing{
-
-		@Override
-		public void process(StartCutMsg msg){
-			otherObject.setLocation(msg.getLocation());
-			otherObject.startCuting(msg.getOrientation(), otherPath, myPoly);
-		}
-
-		@Override
-		public void process(ProcCutMsg msg){
-			otherObject.setLocation(msg.getLocation());
-			otherObject.proceedCutting(msg.getOrientation());
-		}
-
-		@Override
-		public void process(BorderWalkMsg msg){
-			otherObject.setLocation(msg.getLocation());
-			otherObject.setBoundMovingPhase(msg.getUserPoint(),msg.getDirection(),myPoly);
-		}
-
-		@Override
-		public void process(BoundsUpdateMsg msg){
-
-			if(msg.getNum()>otherBorderMsgCount){
-				myPoly.setPoly(msg.getPoly());
-				otherBorderMsgCount=msg.getNum();
-			}
-
-			myObject.recalcBoundMovingPhase(myPoly);
-			otherObject.recalcBoundMovingPhase(myPoly);
-		}
-
-		@Override
-		public void process(StopCutMsg msg){
-
-			//Toast.makeText(getBaseContext(), "StopCutMsg", Toast.LENGTH_SHORT).show();
-
-			otherObject.setLocation(msg.getLocation());
-			otherObject.stopCutting();
-
-
-			if(!isJoiningGame && otherPath!=null && otherPath.getSize()>1){
-
-				PlayPolygon sideA = new PlayPolygon();
-				PlayPolygon sideB = new PlayPolygon();
-
-				if(myPoly.cut(otherPath, sideA, sideB)==true){
-
-					myPoly.setPoly(sideA);
-
-					myBorderMsgCount++;
-
-					byte[] byteMsgBorder = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly,myBorderMsgCount));
-
-					if(!isSinglePlayer)
-						messageQueue.add(byteMsgBorder);
-
-					otherObject.recalcBoundMovingPhase(myPoly);
-				}
-			}
-			otherPath=new PlayPath();
-
-		}
-	}
-
-	/*
-############################################################################################################################
-############################################################################################################################
+###################################################################################################################################################
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###################################################################################################################################################
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###################################################################################################################################################
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###################################################################################################################################################
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###################################################################################################################################################
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###################################################################################################################################################
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###################################################################################################################################################
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###################################################################################################################################################
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###################################################################################################################################################
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###################################################################################################################################################
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###################################################################################################################################################
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###################################################################################################################################################
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###################################################################################################################################################
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###################################################################################################################################################
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###################################################################################################################################################
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###################################################################################################################################################
 	 */
 
 	//--------------------------------------------------
 
-	private DummyObject myObject;
-	private DummyObject otherObject;
+	private DummyObject myObject;		//my player
+	private DummyObject otherObject;	//other player
 
 
-	private PlayPath myPath;
-	private PlayPath otherPath;
+	private PlayPath myPath;			//path of my player
+	private PlayPath otherPath;			//path of other player
 
-	private PlayPolygon myPoly;
-
-
+	private PlayPolygon myPoly;			//boundaries polygon
 
 	//--------------------------------------------------
 
-	public int times=0;
-	public long startTime;
-	public int refreshEvery=Constants.ROUND_REFRESH;
-	public int someoffset=0;
+	public int roundsSinceStart=0;						//how much times was logic round made since start
+	public long startTime;								//time of game start
+	public int refreshRate=Constants.ROUND_REFRESH;	//logic round refresh time
 
 	//-------------------------------------------------
 
@@ -411,26 +335,49 @@ public class MainActivity extends Activity {
 
 	//-------------------------------------------------
 
-	private short myBorderMsgCount=0;
-	private short otherBorderMsgCount=0;
+	private short myBorderMsgCount=0;		//count of "BoundsUpdateMessage" messages sent to other player
+	private short otherBorderMsgCount=0;	//count of "BoundsUpdateMessage" messages sent to me
 
 	//-------------------------------------------------
 
-	ArrayList<byte[]> messageQueue = new ArrayList<byte[]>();
-	
+	ArrayList<byte[]> messageQueue = new ArrayList<byte[]>();	//queue for outgoing messages
+
+	MyMessageProcessing messageProc = new MyMessageProcessing();	//game custom message processor
+
 	//-------------------------------------------------
-	
+
 	private void startGame(){
 
-		Log.e("",""+isJoiningGame);
+		finishActivity(BlueToothDefaults.REQUEST_CONNECT_DEVICE);	//hide multiplayer screen
 
-		finishActivity(BlueToothDefaults.REQUEST_CONNECT_DEVICE);
+		setGameScreen();	//create game view
 
-		setGameScreen();
-		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_LOGIC_ROUND), refreshEvery);
+		initVars();	//init game variables
+
+		//start doing rounds
+		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_LOGIC_ROUND), refreshRate);
 		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_SEND_BT_MESSAGE_ROUND), 0);
 	}
 
+	public void initVars(){
+
+		myObject=new DummyObject((short)Constants.MARGIN_PADDING,(short)Constants.MARGIN_PADDING,0);
+
+		otherObject=new DummyObject(Constants.MARGIN_PADDING,Constants.MARGIN_PADDING,1);
+
+		myPath=new PlayPath();
+		otherPath=new PlayPath();
+
+		myPoly=new PlayPolygon();
+
+
+		myPoly.start(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
+		myPoly.proceed(Constants.MARGIN_PADDING, (short)(Constants.PROJ_HEIGHT-Constants.MARGIN_PADDING));
+		myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING), (short)(Constants.PROJ_HEIGHT-Constants.MARGIN_PADDING));
+		myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING), Constants.MARGIN_PADDING);
+		myPoly.proceed(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
+
+	}
 
 	private void setGameScreen(){
 
@@ -442,6 +389,7 @@ public class MainActivity extends Activity {
 
 		root.addView(mView);
 
+		//set view width/height when ready
 		mView.post(new Runnable() { 
 			public void run() { 
 				Rect rect = new Rect(); 
@@ -476,92 +424,116 @@ public class MainActivity extends Activity {
 
 		});
 
-		myObject=new DummyObject((short)Constants.MARGIN_PADDING,(short)Constants.MARGIN_PADDING,0);
-
-		otherObject=new DummyObject(Constants.MARGIN_PADDING,Constants.MARGIN_PADDING,1);
-
-		myPath=new PlayPath();
-		otherPath=new PlayPath();
-
-		myPoly=new PlayPolygon();
-
-
-		myPoly.start(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
-		myPoly.proceed(Constants.MARGIN_PADDING, (short)(Constants.PROJ_HEIGHT-Constants.MARGIN_PADDING));
-		myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING), (short)(Constants.PROJ_HEIGHT-Constants.MARGIN_PADDING));
-		myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING), Constants.MARGIN_PADDING);
-		myPoly.proceed(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
-
-
 	}
 
-	void logicRound(){
+
+	/*
+	 * border polygon cutting with path logic
+	 */
+	public void TryCutBorder(PlayPath path){
+
+		if(path!=null && path.getSize()>1){
+
+			PlayPolygon sideA = new PlayPolygon();
+			PlayPolygon sideB = new PlayPolygon();
+
+			if(myPoly.cut(path, sideA, sideB)==true){
+
+				myPoly.setPoly(sideA);
+
+				myBorderMsgCount++;
+				
+				//new border update message
+				
+				byte[] newBorderMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly,myBorderMsgCount));
+
+				if(!isSinglePlayer) messageQueue.add(newBorderMsg);
+
+				myObject.recalcBoundMovingPhase(myPoly);
+				otherObject.recalcBoundMovingPhase(myPoly);
+			}
+		}
+
+	}
+	
+	void doLogic(){
+
+		//------------------------------
 
 		myObject.behave(myPoly);
 
+		//if my object in cutting mode but collided with boundary
 		if(myObject.isCutting() && myPoly.getLineWithPointIndex(myObject.getLocation())>=0){
+
 			myObject.stopCutting();
 
-			byte[] byteMsg = MessageConvertion.messageToBytes(new StopCutMsg(myObject.getLocation()));
+			//stop cutting message
+			byte[] stopCutMsg = MessageConvertion.messageToBytes(new StopCutMsg(myObject.getLocation()));
 
-			if(!isSinglePlayer)
-				messageQueue.add(byteMsg);
+			if(!isSinglePlayer) messageQueue.add(stopCutMsg);
 
-			if(!isJoiningGame && myPath!=null && myPath.getSize()>1){
+			if(!isJoiningGame) TryCutBorder(myPath);
 
-				PlayPolygon sideA = new PlayPolygon();
-				PlayPolygon sideB = new PlayPolygon();
-
-				if(myPoly.cut(myPath, sideA, sideB)==true){
-
-					myPoly.setPoly(sideA);
-
-					myBorderMsgCount++;
-
-					byte[] byteMsgBorder = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly,myBorderMsgCount));
-					messageQueue.add(byteMsgBorder);
-
-					otherObject.recalcBoundMovingPhase(myPoly);
-				}
-			}
-
-			myPath=new PlayPath();
+			if(myPath!=null) myPath.clear();
 		}
+
+		//------------------------------
 
 		otherObject.behave(myPoly);
 
-		//if(otherObject.isCutting() && myPoly.getLineWithPointIndex(otherObject.getLocation())>=0){
-		//	otherObject.setOrientation(new Vector2D.Short((short)0,(short)0));
-		//}
+		if(!otherObject.isCutting()){
 
+			if(!isJoiningGame) TryCutBorder(otherPath);
 
-		if(otherPath!=null && otherPath.getSize()>1){
-
-			if(!otherObject.isCutting()){
-				PlayPolygon sideA = new PlayPolygon();
-				PlayPolygon sideB = new PlayPolygon();
-
-				if(!isJoiningGame && myPoly.cut(otherPath, sideA, sideB)==true){
-
-					myPoly.setPoly(sideA);
-
-					myBorderMsgCount++;
-					byte[] byteMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly,myBorderMsgCount));
-
-					if(!isSinglePlayer)
-						messageQueue.add(byteMsg);
-
-					myObject.recalcBoundMovingPhase(myPoly);
-				}
-
-				otherPath=new PlayPath();
-			}
-
+			if(otherPath!=null) otherPath.clear();
 		}
 
 	}
 
-	public void roundDrawing(){
+	/*
+	 * in game processor
+	 */
+	public class MyMessageProcessing extends MessageProcessing{
+
+		@Override
+		public void process(StartCutMsg msg){
+			otherObject.setLocation(msg.getLocation());
+			otherObject.startCuting(msg.getOrientation(), otherPath, myPoly);
+		}
+
+		@Override
+		public void process(ProcCutMsg msg){
+			otherObject.setLocation(msg.getLocation());
+			otherObject.proceedCutting(msg.getOrientation());
+		}
+
+		@Override
+		public void process(BorderWalkMsg msg){
+			otherObject.setLocation(msg.getLocation());
+			otherObject.setBoundMovingPhase(msg.getUserPoint(),msg.getDirection(),myPoly);
+		}
+
+		@Override
+		public void process(BoundsUpdateMsg msg){
+
+			if(msg.getNum()>otherBorderMsgCount){
+				myPoly.setPoly(msg.getPoly());
+				otherBorderMsgCount=msg.getNum();
+			}
+
+			myObject.recalcBoundMovingPhase(myPoly);	//recalc routes after poly change if in border walking phase
+			otherObject.recalcBoundMovingPhase(myPoly);
+		}
+
+		@Override
+		public void process(StopCutMsg msg){
+
+			otherObject.setLocation(msg.getLocation());
+			otherObject.stopCutting();
+		}
+	}
+
+	public void doDrawings(){
 		mView.drawObject(myPoly);
 
 		if(otherPath!=null && otherPath.getSize()>1)
@@ -576,37 +548,33 @@ public class MainActivity extends Activity {
 		mView.drawObject(myObject);
 
 		mView.executeDrawing();
-
-
 	}
 
 	public void updateGame(){
 
-		if(times==0) startTime=System.currentTimeMillis();
+		updateRefreshRate();
 
-		times++;
-		int supposedTimes = (int)((float)(System.currentTimeMillis()-startTime)/(float)Constants.ROUND_REFRESH);
+		doLogic();
 
-		int offset = supposedTimes-times;
+		doDrawings();
 
-		if(offset>0)
-			refreshEvery--;
-		else
-			refreshEvery=Constants.ROUND_REFRESH;
-
-		//if(someoffset!=offset){
-		//someoffset=offset;
-		//Log.e("",""+someoffset);
-		//}
-
-		logicRound();
-
-		roundDrawing();
-
-		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_LOGIC_ROUND), refreshEvery);
+		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_LOGIC_ROUND), refreshRate);
 	}
 
+	public void updateRefreshRate(){
+		if(roundsSinceStart==0) startTime=System.currentTimeMillis();
 
+		roundsSinceStart++;
+		int supposedTimes = (int)((float)(System.currentTimeMillis()-startTime)/(float)Constants.ROUND_REFRESH);
+
+		int offset = supposedTimes-roundsSinceStart;
+
+		if(offset>0)
+			refreshRate--;
+		else
+			refreshRate=Constants.ROUND_REFRESH;
+
+	}
 
 	public void notifyGame(Message msg){
 
@@ -642,7 +610,7 @@ public class MainActivity extends Activity {
 
 					if(myPoly.getLineWithPointIndex(pos)==-1){
 						myObject.startCuting(vec,myPath,myPoly);
-						
+
 						byte[] byteMsg = MessageConvertion.messageToBytes(new StartCutMsg(myObject.getLocation(),vec));
 
 						if(!isSinglePlayer)
@@ -654,9 +622,7 @@ public class MainActivity extends Activity {
 
 				}
 				else if(myObject.isCutting() && vec.getLength()>0){
-
-					//Log.e("",""+vec.getVx()+"-"+vec.getVy());
-
+					
 					byte[] byteMsg = MessageConvertion.messageToBytes(new ProcCutMsg(myObject.getLocation(),vec));
 
 					if(!isSinglePlayer)
@@ -705,10 +671,18 @@ public class MainActivity extends Activity {
 			mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_SEND_BT_MESSAGE_ROUND), Constants.SEND_BT_MESSG_REFRESH);
 
 			break;
+
+		case BlueToothDefaults.MESSAGE_READ:
+
+			byte[] readBuf = (byte[]) msg.obj;
+
+			InterMessage incomingMsg = MessageConvertion.bytesToMessage(readBuf);
+
+			messageProc.processMessage(incomingMsg);
+
+			break;
+
 		}
-
-
-
 	}
 
 	@Override

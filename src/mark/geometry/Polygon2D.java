@@ -153,7 +153,7 @@ public class Polygon2D extends Path2D{
 				polysecond = polyIter.next();
 
 
-				Line2D.Short line1 = new Line2D.Short(new Point2D.Short((short)-112,(short)-134),point);
+				Line2D.Short line1 = new Line2D.Short(new Point2D.Short((short)-1,(short)10000),point);
 				Line2D.Short line2 = new Line2D.Short(polyfirst,polysecond);
 
 
