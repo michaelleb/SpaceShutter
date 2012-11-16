@@ -1,5 +1,4 @@
 
-
 package com.andrapp.spaceshutter;
 
 import ourproject.playables.*;
