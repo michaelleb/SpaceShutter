@@ -14,8 +14,10 @@ public class Constants {
 	
 	
 	public static final int MESSAGE_LOGIC_ROUND=1234;
-	public static final int MESSAGE_SEND_POLY=1235;
+	public static final int MESSAGE_SEND_BT_MESSAGE_ROUND=12345;
 	public static final int ROUND_REFRESH=50;
+	
+	public static final int SEND_BT_MESSG_REFRESH=50;
 	
 	
 	

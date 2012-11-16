@@ -54,6 +54,8 @@ import ourproject.messages.*;
 
 import android.app.ProgressDialog;
 
+import java.util.ArrayList;
+
 /**
  * This is the main Activity that displays the current chat session.
  */
@@ -279,7 +281,7 @@ public class MainActivity extends Activity {
 
 			}
 
-			foooo(msg);
+			notifyGame(msg);
 		}
 	};
 
@@ -365,7 +367,7 @@ public class MainActivity extends Activity {
 					byte[] byteMsgBorder = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly,myBorderMsgCount));
 
 					if(!isSinglePlayer)
-						mChatService.write(byteMsgBorder);
+						messageQueue.add(byteMsgBorder);
 
 					otherObject.recalcBoundMovingPhase(myPoly);
 				}
@@ -414,6 +416,10 @@ public class MainActivity extends Activity {
 
 	//-------------------------------------------------
 
+	ArrayList<byte[]> messageQueue = new ArrayList<byte[]>();
+	
+	//-------------------------------------------------
+	
 	private void startGame(){
 
 		Log.e("",""+isJoiningGame);
@@ -422,6 +428,7 @@ public class MainActivity extends Activity {
 
 		setGameScreen();
 		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_LOGIC_ROUND), refreshEvery);
+		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_SEND_BT_MESSAGE_ROUND), 0);
 	}
 
 
@@ -498,7 +505,7 @@ public class MainActivity extends Activity {
 			byte[] byteMsg = MessageConvertion.messageToBytes(new StopCutMsg(myObject.getLocation()));
 
 			if(!isSinglePlayer)
-				mChatService.write(byteMsg);
+				messageQueue.add(byteMsg);
 
 			if(!isJoiningGame && myPath!=null && myPath.getSize()>1){
 
@@ -511,11 +518,8 @@ public class MainActivity extends Activity {
 
 					myBorderMsgCount++;
 
-					//byte[] byteMsgBorder = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly,myBorderMsgCount));
-					//mChatService.write(byteMsgBorder);
-
-					mHandler.sendEmptyMessageDelayed(Constants.MESSAGE_SEND_POLY, 50);
-					//mHandler.sendEmptyMessageDelayed(Constants.MESSAGE_SEND_POLY, 100);
+					byte[] byteMsgBorder = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly,myBorderMsgCount));
+					messageQueue.add(byteMsgBorder);
 
 					otherObject.recalcBoundMovingPhase(myPoly);
 				}
@@ -545,7 +549,7 @@ public class MainActivity extends Activity {
 					byte[] byteMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly,myBorderMsgCount));
 
 					if(!isSinglePlayer)
-						mChatService.write(byteMsg);
+						messageQueue.add(byteMsg);
 
 					myObject.recalcBoundMovingPhase(myPoly);
 				}
@@ -604,7 +608,7 @@ public class MainActivity extends Activity {
 
 
 
-	public void foooo(Message msg){
+	public void notifyGame(Message msg){
 
 		Point2D.Short point;
 
@@ -631,25 +635,23 @@ public class MainActivity extends Activity {
 					vec.setVx((short)0);
 
 				if(myObject.intersects(point) && vec.getLength()>0){
-					
+
 					Point2D.Short pos =myObject.getLocation();
-					
+
 					pos.add(vec);
-					
+
 					if(myPoly.getLineWithPointIndex(pos)==-1){
 						myObject.startCuting(vec,myPath,myPoly);
-
-						//firsttime=false;
 						
 						byte[] byteMsg = MessageConvertion.messageToBytes(new StartCutMsg(myObject.getLocation(),vec));
 
 						if(!isSinglePlayer)
-							mChatService.write(byteMsg);
-						
+							messageQueue.add(byteMsg);
+
 					}
-					
+
 					firsttime=false;
-					
+
 				}
 				else if(myObject.isCutting() && vec.getLength()>0){
 
@@ -658,7 +660,7 @@ public class MainActivity extends Activity {
 					byte[] byteMsg = MessageConvertion.messageToBytes(new ProcCutMsg(myObject.getLocation(),vec));
 
 					if(!isSinglePlayer)
-						mChatService.write(byteMsg);
+						messageQueue.add(byteMsg);
 
 					myObject.proceedCutting(vec);
 
@@ -679,7 +681,7 @@ public class MainActivity extends Activity {
 				byte[] byteMsg = MessageConvertion.messageToBytes(new BorderWalkMsg(myObject.getLocation(),true,point));
 
 				if(!isSinglePlayer)
-					mChatService.write(byteMsg);
+					messageQueue.add(byteMsg);
 
 				myObject.setBoundMovingPhase(point,true,myPoly);
 			}
@@ -689,14 +691,18 @@ public class MainActivity extends Activity {
 		case Constants.MESSAGE_LOGIC_ROUND:
 			updateGame();
 			break;
-		case Constants.MESSAGE_SEND_POLY:
 
-			if(!isSinglePlayer){
-				byte[] byteMsgBorder = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly,myBorderMsgCount));
 
-				mChatService.write(byteMsgBorder);
+		case Constants.MESSAGE_SEND_BT_MESSAGE_ROUND:
+			if(messageQueue.size()>0){
+
+				mChatService.write(messageQueue.get(0));
+
+				messageQueue.remove(0);
+
 			}
 
+			mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_SEND_BT_MESSAGE_ROUND), Constants.SEND_BT_MESSG_REFRESH);
 
 			break;
 		}
@@ -730,7 +736,7 @@ public class MainActivity extends Activity {
 
 
 			if(!isSinglePlayer)
-				mChatService.write(byteMsg);
+				messageQueue.add(byteMsg);
 
 			myObject.recalcBoundMovingPhase(myPoly);
 			otherObject.recalcBoundMovingPhase(myPoly);
@@ -741,6 +747,5 @@ public class MainActivity extends Activity {
 		}
 		return false;
 	}
-
 
 }
