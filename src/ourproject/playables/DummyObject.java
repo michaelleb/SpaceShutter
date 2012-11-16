@@ -203,7 +203,7 @@ public class DummyObject implements PlayingObject{
 			nextloc.add(orientation);
 
 			//Log.e("",""+pol.contains(nextloc));
-
+			
 			if(pol.contains(nextloc)){
 
 				location=nextloc;
@@ -239,6 +239,8 @@ public class DummyObject implements PlayingObject{
 	public Point2D.Short getLocation(){return new Point2D.Short(location.getx(),location.gety());}
 
 	public void setLocation(Point2D.Short loc){location=new Point2D.Short(loc.getx(),loc.gety());}
+	
+	public void setOrientation(Vector2D.Short orient){orientation=orient;}
 
 
 
