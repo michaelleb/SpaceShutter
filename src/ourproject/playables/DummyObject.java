@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 
 import mark.geometry.*;
+import mark.geometry.Vector2D.Short;
 import android.graphics.Canvas;
 import android.util.Log;
 
@@ -40,6 +41,12 @@ public class DummyObject implements PlayingObject{
 	public boolean cuttingPhase=false;		//path cutting phase
 
 	public boolean isCutting(){return cuttingPhase==true;}
+
+	public void stopCutting(){
+		cuttingPath.setValue(cuttingPath.getSize()-1, location.getx(), location.gety());
+		cuttingPhase=false;
+	}
+
 	public boolean isBoundariesMoving(){return boundariesPhase==true;}
 
 
@@ -61,17 +68,17 @@ public class DummyObject implements PlayingObject{
 		this.closestPointOnPoly=pol.closestPointSimplified(userPointOnMap);
 
 		nextCheckpointIndex = pol.getLineWithPointIndex(location);
-		
+
 		if(closestPointOnPoly!=null && nextCheckpointIndex>=0){
 			boundariesPhase=true;
-			
+
 			if(!direction)
 				nextCheckpointIndex=(nextCheckpointIndex+1+pol.getSize())%pol.getSize();
 		}
 		else{
-			
+
 			boundariesPhase=false;
-			
+
 			return;
 		}
 
@@ -91,13 +98,13 @@ public class DummyObject implements PlayingObject{
 	 */
 
 	public void startCuting(Vector2D.Short orientation,PlayPath path,PlayPolygon pol){
-		
+
 		if(boundariesPhase){
 			boundariesPhase=false;
 		}
-		
+
 		if(!cuttingPhase){
-			
+
 			orientation.setLength(speed);
 
 			cuttingPhase=true;
@@ -117,11 +124,11 @@ public class DummyObject implements PlayingObject{
 
 		if(!cuttingPhase)
 			return;
-		
+
 		orientation.setLength(speed);
-		
+
 		cuttingPath.setValue(cuttingPath.getSize()-1, location.getx(), location.gety());
-		
+
 		cuttingPath.proceed(location.getx(), location.gety());
 
 		this.orientation=new Vector2D.Short(orientation.getVx(),orientation.getVy());
@@ -133,15 +140,15 @@ public class DummyObject implements PlayingObject{
 
 
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
 
 	public void behave(PlayPolygon pol){
 
@@ -189,16 +196,16 @@ public class DummyObject implements PlayingObject{
 		}
 
 		//----------------------- cutting phase
-		
+
 		if(cuttingPhase){
 
 			Point2D.Short nextloc= new Point2D.Short(location);
 			nextloc.add(orientation);
-			
+
 			//Log.e("",""+pol.contains(nextloc));
-			
+
 			if(pol.contains(nextloc)){
-				
+
 				location=nextloc;
 
 				cuttingPath.setValue(cuttingPath.getSize()-1, location.getx(), location.gety());
@@ -215,33 +222,30 @@ public class DummyObject implements PlayingObject{
 					location=newLoc;
 				}
 
-				finnishCutting();
+				cuttingPath.setValue(cuttingPath.getSize()-1, location.getx(), location.gety());
+
+				orientation=new Vector2D.Short((short)0,(short)0);
+
+				//cuttingPhase=false;
 			}
 
 		}
 
 
 	}
-	
-	public void finnishCutting(){
-		cuttingPhase=false;
 
-		cuttingPath.setValue(cuttingPath.getSize()-1, location.getx(), location.gety());
-	}
 
-	
-	
-	
+
 	public Point2D.Short getLocation(){return new Point2D.Short(location.getx(),location.gety());}
-	
+
 	public void setLocation(Point2D.Short loc){location=new Point2D.Short(loc.getx(),loc.gety());}
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
 
 	public DummyObject(short x,short y,int type){
 

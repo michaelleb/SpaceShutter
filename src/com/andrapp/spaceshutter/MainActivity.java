@@ -128,11 +128,11 @@ public class MainActivity extends Activity {
 			startActivityForResult(enableIntent, BlueToothDefaults.REQUEST_ENABLE_BT);
 		} else {
 			startBTService();
-			
+
 			findBluetoothHost();
 		}
 	}
-	
+
 	public void startBTService(){
 		if (mChatService == null)
 			mChatService = new BluetoothChatService(this, mHandler);
@@ -140,7 +140,7 @@ public class MainActivity extends Activity {
 		if (mChatService.getState() == BluetoothChatService.STATE_NONE)
 			mChatService.start();
 	}
-	
+
 
 	public void findBluetoothHost(){
 		Intent serverIntent = new Intent(getBaseContext(), DeviceListActivity.class);
@@ -154,7 +154,9 @@ public class MainActivity extends Activity {
 		Log.e("","++++ ONRESUME ++++");
 
 	}
-
+	
+	
+	
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
 		//log.e("","onAc  tivityResult");
@@ -173,6 +175,8 @@ public class MainActivity extends Activity {
 				BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
 				mChatService.connect(device);
 
+				isJoiningGame=true;
+
 			}
 			break;
 
@@ -183,7 +187,7 @@ public class MainActivity extends Activity {
 				startBTService();
 
 				findBluetoothHost();
-				
+
 			}
 			else{
 				Toast.makeText(this, R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
@@ -328,17 +332,48 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void process(BoundsUpdateMsg msg){
-			myPoly.setPoly(msg.getPoly());
+			
+			if(msg.getNum()>otherBorderMsgCount){
+				myPoly.setPoly(msg.getPoly());
+				otherBorderMsgCount=msg.getNum();
+			}
 
 			myObject.recalcBoundMovingPhase(myPoly);
 			otherObject.recalcBoundMovingPhase(myPoly);
 		}
+
+		@Override
+		public void process(StopCutMsg msg){
+			
+			//Toast.makeText(getBaseContext(), "StopCutMsg", Toast.LENGTH_SHORT).show();
+			
+			otherObject.setLocation(msg.getLocation());
+			otherObject.stopCutting();
+			
+			
+			if(!isJoiningGame && otherPath!=null && otherPath.getSize()>1){
+				
+				PlayPolygon sideA = new PlayPolygon();
+				PlayPolygon sideB = new PlayPolygon();
+
+				if(myPoly.cut(otherPath, sideA, sideB)==true){
+
+					myPoly.setPoly(sideA);
+
+					myBorderMsgCount++;
+					
+					byte[] byteMsgBorder = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly,myBorderMsgCount));
+
+					if(!isSinglePlayer)
+						mChatService.write(byteMsgBorder);
+
+					otherObject.recalcBoundMovingPhase(myPoly);
+				}
+			}
+			otherPath=new PlayPath();
+			
+		}
 	}
-
-
-
-
-
 
 	/*
 ############################################################################################################################
@@ -374,11 +409,17 @@ public class MainActivity extends Activity {
 
 	//-------------------------------------------------
 
+	private short myBorderMsgCount=0;
+	private short otherBorderMsgCount=0;
+
+	//-------------------------------------------------
 
 	private void startGame(){
-		
+
+		Log.e("",""+isJoiningGame);
+
 		finishActivity(BlueToothDefaults.REQUEST_CONNECT_DEVICE);
-		
+
 		setGameScreen();
 		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_LOGIC_ROUND), refreshEvery);
 	}
@@ -451,34 +492,38 @@ public class MainActivity extends Activity {
 
 		myObject.behave(myPoly);
 
-		if(!isSinglePlayer)
-			otherObject.behave(myPoly);
+		if(myObject.isCutting() && myPoly.getLineWithPointIndex(myObject.getLocation())>=0){
+			myObject.stopCutting();
 
-		if(myPath!=null && myPath.getSize()>1){
+			byte[] byteMsg = MessageConvertion.messageToBytes(new StopCutMsg(myObject.getLocation()));
 
-
-			if(!myObject.isCutting()){
+			if(!isSinglePlayer)
+				mChatService.write(byteMsg);
+			
+			if(!isJoiningGame && myPath!=null && myPath.getSize()>1){
+				
 				PlayPolygon sideA = new PlayPolygon();
 				PlayPolygon sideB = new PlayPolygon();
 
-				if(!isJoiningGame && myPoly.cut(myPath, sideA, sideB)==true){
+				if(myPoly.cut(myPath, sideA, sideB)==true){
 
 					myPoly.setPoly(sideA);
 
-
-					byte[] byteMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly));
-
-					if(!isSinglePlayer)
-						mChatService.write(byteMsg);
+					myBorderMsgCount++;
+					
+					mHandler.sendEmptyMessageDelayed(Constants.MESSAGE_SEND_POLY, 100);
+					
+					
 
 					otherObject.recalcBoundMovingPhase(myPoly);
 				}
-
-				myPath=new PlayPath();
 			}
+			
+			myPath=new PlayPath();
 		}
-
-
+		
+		otherObject.behave(myPoly);
+		
 		if(otherPath!=null && otherPath.getSize()>1){
 
 			if(!otherObject.isCutting()){
@@ -489,7 +534,8 @@ public class MainActivity extends Activity {
 
 					myPoly.setPoly(sideA);
 
-					byte[] byteMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly));
+					myBorderMsgCount++;
+					byte[] byteMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly,myBorderMsgCount));
 
 					if(!isSinglePlayer)
 						mChatService.write(byteMsg);
@@ -570,8 +616,6 @@ public class MainActivity extends Activity {
 
 			if(firsttime){
 
-
-
 				Vector2D.Short vec = new Line2D.Short(prev,point).getVector();
 
 				if(Math.abs(vec.getVx())>Math.abs(vec.getVy()))
@@ -588,9 +632,6 @@ public class MainActivity extends Activity {
 
 					myObject.startCuting(vec,myPath,myPoly);
 
-					//Log.e(" other: "," ("+messg.getLocation().getx()+","+messg.getLocation().gety()+") "
-					//		+", ["+messg.getOrientation().getVx()+","+messg.getOrientation().getVy()+"]");
-
 					firsttime=false;
 				}
 				else if(myObject.isCutting() && vec.getLength()>0){
@@ -602,19 +643,10 @@ public class MainActivity extends Activity {
 					if(!isSinglePlayer)
 						mChatService.write(byteMsg);
 
-					myObject.startCuting(vec,myPath,myPoly);
-
-					//Log.e(" other: "," ("+messg.getLocation().getx()+","+messg.getLocation().gety()+") "
-					//		+", ["+messg.getOrientation().getVx()+","+messg.getOrientation().getVy()+"]");
-
 					myObject.proceedCutting(vec);
-
-
 
 					firsttime=false;
 				}
-
-
 
 			}
 
@@ -650,6 +682,16 @@ public class MainActivity extends Activity {
 		case Constants.MESSAGE_LOGIC_ROUND:
 			updateGame();
 			break;
+		case Constants.MESSAGE_SEND_POLY:
+			
+			if(!isSinglePlayer){
+				byte[] byteMsgBorder = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly,myBorderMsgCount));
+
+				mChatService.write(byteMsgBorder);
+			}
+			
+			
+			break;
 		}
 
 
@@ -676,7 +718,9 @@ public class MainActivity extends Activity {
 			myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING), Constants.MARGIN_PADDING);
 			myPoly.proceed(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
 
-			byte[] byteMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly));
+			myBorderMsgCount++;
+			byte[] byteMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly,myBorderMsgCount));
+
 
 			if(!isSinglePlayer)
 				mChatService.write(byteMsg);

@@ -10,6 +10,7 @@ public class MessageProcessing{
 	}
 	
 	public void process(StartCutMsg msg){}
+	public void process(StopCutMsg msg){}
 	
 	public void process(ProcCutMsg msg){}
 	
