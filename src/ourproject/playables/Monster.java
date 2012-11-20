@@ -90,24 +90,24 @@ public class Monster implements GameObject {
 		orient1.setVx((short)(-orient1.getVx()));
 
 		orient2.setVy((short)(-orient2.getVy()));
-		
-		
-		
 
 
-		body.add(orient1);
-		if(!object.isCollision(this)){
+
+		location.add(orient1);
+		body.setCenter(location);
+		if(!object.isCollision(this))
 			orientation=orient1;
-			Log.e("","orient1");
-		}
-		body.sub(orient1);
+			
+		location.sub(orient1);
 
-		body.add(orient2);
-		if(!object.isCollision(this)){
+		location.add(orient2);
+		body.setCenter(location);
+		if(!object.isCollision(this))
 			orientation=orient2;
-			Log.e("","orient2");
-		}
-		body.sub(orient2);
+		
+		location.sub(orient2);
+		
+		body.setCenter(location);
 
 	}
 
