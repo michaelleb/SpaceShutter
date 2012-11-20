@@ -311,8 +311,11 @@ public class MainActivity extends Activity {
 
 	//--------------------------------------------------
 
-	private DummyObject myObject;		//my player
-	private DummyObject otherObject;	//other player
+	private Player myObject;		//my player
+	private Player otherObject;	//other player
+	
+	
+	private Monster enemy;	//other player
 
 
 	private PlayPath myPath;			//path of my player
@@ -361,10 +364,14 @@ public class MainActivity extends Activity {
 
 	public void initVars(){
 
-		myObject=new DummyObject((short)Constants.MARGIN_PADDING,(short)Constants.MARGIN_PADDING,0);
+		myObject=new Player((short)Constants.MARGIN_PADDING,(short)Constants.MARGIN_PADDING,0);
 
-		otherObject=new DummyObject(Constants.MARGIN_PADDING,Constants.MARGIN_PADDING,1);
-
+		otherObject=new Player(Constants.MARGIN_PADDING,Constants.MARGIN_PADDING,1);
+		
+		enemy=new Monster((short)(Constants.PROJ_WIDTH/2),(short)(Constants.PROJ_HEIGHT/2));
+		
+		enemy.setOrientation(new Vector2D.Short((short)1,(short)-1));
+		
 		myPath=new PlayPath();
 		otherPath=new PlayPath();
 
@@ -487,6 +494,10 @@ public class MainActivity extends Activity {
 
 			if(otherPath!=null) otherPath.clear();
 		}
+		
+		//------------------------------
+		
+		enemy.behave(myPoly);
 
 	}
 
@@ -546,6 +557,8 @@ public class MainActivity extends Activity {
 			mView.drawObject(otherObject);
 
 		mView.drawObject(myObject);
+		
+		mView.drawObject(enemy);
 
 		mView.executeDrawing();
 	}

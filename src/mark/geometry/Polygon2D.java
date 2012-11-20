@@ -4,20 +4,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ListIterator;
 
-import android.util.Log;
+import mark.geometry.Vector2D.Short;
 
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Path;
+import android.util.Log;
 
 public class Polygon2D extends Path2D{
 
-	public static class Short extends Path2D.Short{
+	public static class Short extends Path2D.Short implements Shape2D{
 
 		public Short(){
 
 		}
-		
+
 		public void setPoly(Polygon2D.Short poly){
 			this.coords=poly.coords;
 		}
@@ -134,8 +132,8 @@ public class Polygon2D extends Path2D{
 
 			return true;
 		}
-		
-		
+
+
 		/*
 		 * 
 		 */
@@ -158,11 +156,11 @@ public class Polygon2D extends Path2D{
 
 
 				if(line2.isBetween(point)){
-					
+
 					//Log.e("","BETWEEN");
-					
+
 					return true;
-					
+
 				}
 
 				if(line1.lineIntersection(line2, false,false,false,true)!=null){
@@ -236,18 +234,18 @@ public class Polygon2D extends Path2D{
 			Line2D.Short linea=new Line2D.Short(
 					new Point2D.Short(point.getx(),(short)(point.gety()-1000)
 							),
-					new Point2D.Short(
-							point.getx(),(short)(point.gety()+1000)
-							)
+							new Point2D.Short(
+									point.getx(),(short)(point.gety()+1000)
+									)
 					);
 
 			Line2D.Short lineb=new Line2D.Short(
 					new Point2D.Short(
 							(short)(point.getx()-1000),point.gety()
 							),
-					new Point2D.Short(
-							(short)(point.getx()+1000),point.gety()
-							)
+							new Point2D.Short(
+									(short)(point.getx()+1000),point.gety()
+									)
 					);
 
 			ListIterator<Point2D.Short> polyIter = coords.listIterator();
@@ -389,6 +387,128 @@ public class Polygon2D extends Path2D{
 
 		}
 
-	}
 
+
+		public Polygon2D.Short clone(){
+			Polygon2D.Short path = new Polygon2D.Short();
+			path.coords=(ArrayList<Point2D.Short>)coords.clone();
+			return path;
+		}
+
+
+		public float maxDistance(Polygon2D.Short other, Vector2D.Short traj){
+
+			Vector2D.Short trajtmp = new Vector2D.Short(traj);
+
+			Polygon2D.Short tmpPoly=((Polygon2D.Short)other).clone();
+			
+			float start = 0;
+			float end = trajtmp.getLength();
+
+			for(int i=0;i<5;i++){
+
+				float middle = start+(float)((end-start)/2);
+
+				trajtmp.setLength(middle);
+				
+				tmpPoly.add(trajtmp);
+				
+				if(tmpPoly.isCollision(this)){
+					end=middle;
+				}
+				else{
+					start=middle;
+				}
+				tmpPoly.sub(trajtmp);
+			}
+
+			return (end);
+		}
+
+
+		public boolean isCollision(Polygon2D.Short other){
+
+			boolean containsOutside=false;
+			boolean containsInside=false;
+
+			for(int i=0;i<this.getSize()-1;i++){
+
+				Line2D.Short line1= new Line2D.Short(this.getPoint(i), this.getPoint(i+1));
+
+				for(int j=0;j<other.getSize()-1;j++){
+
+					Line2D.Short line2= new Line2D.Short(other.getPoint(j), other.getPoint(j+1));
+
+					if(line1.lineIntersection(line2, true, true, true, true)!=null){
+						return true;
+					}
+
+				}
+
+			}
+
+			return (containsInside && containsOutside);
+		}
+
+
+		public boolean isCollision(Circle2D.Short other){
+			return false;
+		}
+
+
+		public void add(Vector2D.Short vec){
+			for(int i=0;i<this.getSize();i++){
+				Point2D.Short pt = this.getPoint(i);
+				pt.add(vec);
+				this.setPoint(i,pt);
+			}
+		}
+
+		public void sub(Vector2D.Short vec){
+			for(int i=0;i<this.getSize();i++){
+				Point2D.Short pt = this.getPoint(i);
+				pt.sub(vec);
+				this.setPoint(i,pt);
+			}
+		}
+
+		public void setCenter(Point2D.Short center){
+
+
+			Point2D.Short currCenter = getCenter();
+
+			currCenter.setx((short)(currCenter.getx()-center.getx()));
+			currCenter.sety((short)(currCenter.gety()-center.gety()));
+
+			for(int i=0;i<this.getSize();i++){
+
+
+				//currCenter.sub(new Vector2D.Short(currCenter.getx(),currCenter.gety()));
+
+				Point2D.Short newPoint = this.getPoint(i);
+				newPoint.sub(new Vector2D.Short(currCenter.getx(),currCenter.gety()));
+
+				this.setPoint(i, newPoint);
+			}
+
+		}
+
+
+		public Point2D.Short getCenter(){
+			Point2D.Short currCenter= new Point2D.Short((short)0,(short)0);
+
+			for(int i=0;i<this.getSize()-1;i++){
+				Point2D.Short pt = this.getPoint(i);
+				currCenter.add(new Vector2D.Short(pt.getx(),pt.gety()));
+			}
+
+			currCenter.setx((short)(currCenter.getx()/(this.getSize()-1)));
+			currCenter.sety((short)(currCenter.gety()/(this.getSize()-1)));
+
+			return currCenter;
+		}
+
+
+
+	}
 }

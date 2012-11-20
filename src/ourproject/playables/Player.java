@@ -14,14 +14,14 @@ import mark.geometry.Vector2D.Short;
 import android.graphics.Canvas;
 import android.util.Log;
 
-public class DummyObject implements PlayingObject{
+public class Player implements GameObject{
 
 	private int width;
 	private int height;
 
 	private int type;
 
-	private short speed=1;
+	private short speed=2;
 
 	private Point2D.Short location;
 
@@ -244,13 +244,15 @@ public class DummyObject implements PlayingObject{
 	public void setOrientation(Vector2D.Short orient){orientation=orient;}
 
 
+	public Vector2D.Short getOrientation(){
+		return orientation;
+	}
 
 
 
 
 
-
-	public DummyObject(short x,short y,int type){
+	public Player(short x,short y,int type){
 
 		width=20;
 		height=20;
@@ -288,6 +290,24 @@ public class DummyObject implements PlayingObject{
 	public float getDistToCenter(Point2D.Short point){
 		return location.distance(point);
 	}
+	
+	
+	public void notifyCollision(GameObject object){}
+	
+	
+	public boolean isCollision(Monster object){
+		return true;
+	}
+	
+	public boolean isCollision(Player object){
+		return true;
+	}
+	
+	public boolean isCollision(PlayPolygon object){
+		return true;
+	}
+	
+	
 
 	public void draw(MyView view, Canvas canvas){
 

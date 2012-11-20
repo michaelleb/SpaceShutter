@@ -58,7 +58,7 @@ public class MyView extends View {
 
 	private Handler evHandler;
 
-	private ArrayList<PlayingObject> objectsQueue;
+	private ArrayList<GameObject> objectsQueue;
 
 
 	public MyView(Context context, AttributeSet attrs,int logicHeight,int logicWidth,Handler handler) {
@@ -85,12 +85,12 @@ public class MyView extends View {
 
 		evHandler=handler;
 
-		objectsQueue=new ArrayList<PlayingObject>();
+		objectsQueue=new ArrayList<GameObject>();
 	}
 
 
 
-	public void drawObject(DummyObject obj){
+	public void drawObject(Player obj){
 
 
 		objectsQueue.add(obj);
@@ -108,7 +108,11 @@ public class MyView extends View {
 
 		objectsQueue.add(obj);
 	}
-
+	
+	public void drawObject(Monster obj){
+		objectsQueue.add(obj);
+	}
+	
 	public void executeDrawing(){
 		invalidate();
 	}
@@ -155,7 +159,7 @@ public class MyView extends View {
 
 		for(int i=0;i<objectsQueue.size();i++){
 
-			PlayingObject currObj = objectsQueue.get(i);
+			GameObject currObj = objectsQueue.get(i);
 
 			currObj.draw(this,canvas);
 		}
@@ -222,7 +226,7 @@ public class MyView extends View {
 	public Bitmap p1=null;
 	public Bitmap p2=null;
 
-	public void DrawObject(DummyObject currObj,Canvas canvas){
+	public void DrawObject(Player currObj,Canvas canvas){
 
 		
 
@@ -265,7 +269,66 @@ public class MyView extends View {
 
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	
 
+	public Bitmap p3=null;
+
+	public void DrawObject(Monster currObj,Canvas canvas){
+
+		
+
+
+		int objHeight=LogicToPhysHeight(currObj.getHeight());
+		int objWidth=LogicToPhysWidth(currObj.getWidth());
+
+		Bitmap bitmapPtr;
+
+
+		bitmapPtr=p3;
+
+		if(bitmapPtr==null){
+
+			Resources r = this.getContext().getResources();
+
+			Drawable dwble;
+
+			dwble = r.getDrawable(R.drawable.yellowstar);
+
+			bitmapPtr = Bitmap.createBitmap(objWidth, objHeight, Bitmap.Config.ARGB_8888);
+			Canvas canvass = new Canvas(bitmapPtr);
+
+			dwble.setBounds(0, 0, objWidth, objHeight);
+
+			dwble.draw(canvass);
+		}
+		
+		Point2D.Short physLoc = logicToPhys(currObj.getLocation());
+		
+		canvas.drawBitmap(bitmapPtr,
+				physLoc.getx()-objWidth/2,
+				physLoc.gety()-objHeight/2, null);
+
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {

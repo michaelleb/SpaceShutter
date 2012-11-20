@@ -3,13 +3,9 @@ package mark.geometry;
 import java.util.ArrayList;
 import java.util.ListIterator;
 
-
-
 import android.util.Log;
 
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Path;
+
 
 
 public class Path2D {
@@ -64,27 +60,7 @@ public class Path2D {
 			return pt;
 		}
 
-		public Path getPath(){
-			Path path=new Path();
-
-			ListIterator<Point2D.Short> pathIter = this.coords.listIterator();
-
-			Point2D.Short elem;
-
-			if(pathIter.hasNext()){			
-
-				elem = pathIter.next();
-				path.moveTo(elem.getx(), elem.gety());
-
-				while (pathIter.hasNext()) {
-					elem = pathIter.next();
-
-					path.lineTo(elem.getx(), elem.gety());
-				}	
-			}
-
-			return path;
-		}
+		
 
 		public Path2D.Short clone(){
 
@@ -144,6 +120,10 @@ public class Path2D {
 		public void setValue(int index,short x,short y){
 			this.coords.get(index).setx(x);
 			this.coords.get(index).sety(y);
+		}
+		
+		public void setPoint(int index,Point2D.Short point){
+			this.coords.set(index, point);
 		}
 
 	}

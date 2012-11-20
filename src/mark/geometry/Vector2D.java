@@ -13,8 +13,13 @@ public class Vector2D {
 			this.vx=vvx;
 			this.vy=vvy;
 		}
-
-		public void setLength(short newLength){
+		
+		public Short(Short other){
+			this.vx=other.vx;
+			this.vy=other.vy;
+		}
+		
+		public void setLength(float newLength){
 
 			float len=getLength();
 

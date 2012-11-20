@@ -8,7 +8,7 @@ import android.graphics.Canvas;
 import android.util.Log;
 import mark.geometry.*;
 
-public class PlayPath extends Path2D.Short implements PlayingObject{
+public class PlayPath extends Path2D.Short implements GameObject{
 	
 	
 	
@@ -29,10 +29,27 @@ public class PlayPath extends Path2D.Short implements PlayingObject{
 		return path;
 	}
 	
+	public void behave(PlayPolygon pol){}
+	
+	public void notifyCollision(GameObject object){}
 	
 	
+	public Vector2D.Short getOrientation(){
+		return new Vector2D.Short((short)0,(short)0);
+	}
 	
 	
+	public boolean isCollision(Monster object){
+		return true;
+	}
+	
+	public boolean isCollision(Player object){
+		return true;
+	}
+	
+	public boolean isCollision(PlayPolygon object){
+		return true;
+	}
 
 
 }
