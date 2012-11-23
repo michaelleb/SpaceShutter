@@ -1,11 +1,11 @@
 package ourproject.playables;
 
-import mark.geometry.Point2D;
-import mark.geometry.Vector2D;
 
 import com.andrapp.spaceshutter.MyView;
 
 import android.graphics.Canvas;
+
+import mark.geometry.*;
 
 public interface GameObject {
 	
@@ -13,13 +13,8 @@ public interface GameObject {
 	
 	public void behave(PlayPolygon pol);
 	
-	public void notifyCollision(GameObject object);
+	public void notifyCollision(GameObject other);
 	
-	public Vector2D.Short getOrientation();
+	public boolean isBodyIntersection(Shape2D shape);
 	
-	public boolean isCollision(Monster object);
-	
-	public boolean isCollision(Player object);
-	
-	public boolean isCollision(PlayPolygon object);
 }

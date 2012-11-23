@@ -13,13 +13,9 @@ public class Circle2D {
 			this.location=location;
 			this.radius=radius;
 		}
-
-		public boolean isCollision(Polygon2D.Short other){
-			return false;
-		}
-
-		public boolean isCollision(Circle2D.Short other){
-			return false;
-		}
+		
+		public boolean isIntersection(Polygon2D.Short other){return true;}
+		public boolean isIntersection(Circle2D.Short other){return true;}
+		public boolean isIntersection(Path2D.Short other){return true;}
 	}
 }

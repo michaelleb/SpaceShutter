@@ -31,25 +31,25 @@ public class PlayPath extends Path2D.Short implements GameObject{
 	
 	public void behave(PlayPolygon pol){}
 	
-	public void notifyCollision(GameObject object){}
-	
-	
 	public Vector2D.Short getOrientation(){
 		return new Vector2D.Short((short)0,(short)0);
 	}
 	
 	
-	public boolean isCollision(Monster object){
-		return true;
+	public boolean[] collisionState(GameObject other){
+		boolean arr[] = this.collisionState(other);
+		return arr;
 	}
 	
-	public boolean isCollision(Player object){
-		return true;
+	public void notifyCollision(GameObject object){
+		
+		
+		
 	}
 	
-	public boolean isCollision(PlayPolygon object){
-		return true;
+	
+	public boolean isBodyIntersection(Shape2D shape){
+		return false;
 	}
-
 
 }

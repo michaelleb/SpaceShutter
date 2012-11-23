@@ -2,6 +2,9 @@ package ourproject.playables;
 
 import com.andrapp.spaceshutter.MyView;
 
+import android.util.Log;
+
+
 import android.graphics.Canvas;
 import mark.geometry.*;
 
@@ -27,16 +30,9 @@ public class PlayPolygon extends Polygon2D.Short implements GameObject{
 		return new Vector2D.Short((short)0,(short)0);
 	}
 	
-	public boolean isCollision(Monster object){
-		return true;
-	}
-	
-	public boolean isCollision(Player object){
-		return true;
-	}
-	
-	public boolean isCollision(PlayPolygon object){
-		return ((Polygon2D.Short)this).isCollision((Polygon2D.Short)object);
+	public boolean isBodyIntersection(Shape2D shape){
+		
+		return shape.isIntersection(this);
 	}
 	
 }

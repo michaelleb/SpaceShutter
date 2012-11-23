@@ -2,7 +2,12 @@ package mark.geometry;
 
 public interface Shape2D {
 	
-	public boolean isCollision(Circle2D.Short other);
+	/*
+	 * true if there exists intersection between boundaries of this and other
+	 */
+	public boolean isIntersection(Circle2D.Short other);
 	
-	public boolean isCollision(Polygon2D.Short other);
+	public boolean isIntersection(Polygon2D.Short other);
+	
+	public boolean isIntersection(Path2D.Short other);
 }

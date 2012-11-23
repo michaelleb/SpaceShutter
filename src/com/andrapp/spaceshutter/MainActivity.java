@@ -55,6 +55,7 @@ import ourproject.messages.*;
 import android.app.ProgressDialog;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * This is the main Activity that displays the current chat session.
@@ -315,8 +316,8 @@ public class MainActivity extends Activity {
 	private Player otherObject;	//other player
 	
 	
-	private Monster enemy;	//other player
-
+	private Monster[] enemy;	//other player
+	private int numOfMonsters=3;
 
 	private PlayPath myPath;			//path of my player
 	private PlayPath otherPath;			//path of other player
@@ -327,7 +328,7 @@ public class MainActivity extends Activity {
 
 	public int roundsSinceStart=0;						//how much times was logic round made since start
 	public long startTime;								//time of game start
-	public int refreshRate=Constants.ROUND_REFRESH;	//logic round refresh time
+	public int refreshRate=Constants.INIT_ROUND_REFRESH;	//logic round refresh time
 
 	//-------------------------------------------------
 
@@ -359,18 +360,37 @@ public class MainActivity extends Activity {
 
 		//start doing rounds
 		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_LOGIC_ROUND), refreshRate);
+		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_DRAW_ROUND), Constants.DRAW_REFRESH);
 		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_SEND_BT_MESSAGE_ROUND), 0);
 	}
 
 	public void initVars(){
 
-		myObject=new Player((short)Constants.MARGIN_PADDING,(short)Constants.MARGIN_PADDING,0);
+		myObject=new Player((short)(Constants.MARGIN_PADDING+10),(short)Constants.MARGIN_PADDING,0);
 
 		otherObject=new Player(Constants.MARGIN_PADDING,Constants.MARGIN_PADDING,1);
 		
-		enemy=new Monster((short)(Constants.PROJ_WIDTH/2),(short)(Constants.PROJ_HEIGHT/2));
+		enemy=new Monster[numOfMonsters];
 		
-		enemy.setOrientation(new Vector2D.Short((short)1,(short)-1));
+		Random randomGenerator = new Random();
+		
+		for(int i=0;i<numOfMonsters;i++){
+			enemy[i]=new Monster(
+				(short)(40+i*30),
+				(short)(40+i*30)
+			);
+			
+			short aa = (short)(randomGenerator.nextInt(100)-100);
+			short bb = (short)(randomGenerator.nextInt(100)-100);
+			
+			if(Math.abs(aa)<2) aa=50;
+			if(Math.abs(bb)<2) bb=-50;
+			
+			enemy[i].setOrientation(new Vector2D.Short(aa,bb));
+			
+		}
+		
+
 		
 		myPath=new PlayPath();
 		otherPath=new PlayPath();
@@ -470,16 +490,16 @@ public class MainActivity extends Activity {
 		myObject.behave(myPoly);
 
 		//if my object in cutting mode but collided with boundary
-		if(myObject.isCutting() && myPoly.getLineWithPointIndex(myObject.getLocation())>=0){
+		if(myObject.isCutting() && myPoly.getClosestPointIndex(myObject.getLocation())>=0){
 
 			myObject.stopCutting();
 
 			//stop cutting message
 			byte[] stopCutMsg = MessageConvertion.messageToBytes(new StopCutMsg(myObject.getLocation()));
 
-			if(!isSinglePlayer) messageQueue.add(stopCutMsg);
-
 			if(!isJoiningGame) TryCutBorder(myPath);
+			
+			if(!isSinglePlayer) messageQueue.add(stopCutMsg);	//stop cut msg comes after potential update border msg !!!
 
 			if(myPath!=null) myPath.clear();
 		}
@@ -496,8 +516,8 @@ public class MainActivity extends Activity {
 		}
 		
 		//------------------------------
-		
-		enemy.behave(myPoly);
+		for(int i=0;i<numOfMonsters;i++)
+			enemy[i].behave(myPoly);
 
 	}
 
@@ -558,7 +578,8 @@ public class MainActivity extends Activity {
 
 		mView.drawObject(myObject);
 		
-		mView.drawObject(enemy);
+		for(int i=0;i<numOfMonsters;i++)
+			mView.drawObject(enemy[i]);
 
 		mView.executeDrawing();
 	}
@@ -569,23 +590,26 @@ public class MainActivity extends Activity {
 
 		doLogic();
 
-		doDrawings();
-
 		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_LOGIC_ROUND), refreshRate);
+	}
+	
+	public void drawGame(){
+		doDrawings();
+		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_DRAW_ROUND), Constants.DRAW_REFRESH);
 	}
 
 	public void updateRefreshRate(){
 		if(roundsSinceStart==0) startTime=System.currentTimeMillis();
 
 		roundsSinceStart++;
-		int supposedTimes = (int)((float)(System.currentTimeMillis()-startTime)/(float)Constants.ROUND_REFRESH);
+		int supposedTimes = (int)((float)(System.currentTimeMillis()-startTime)/(float)Constants.INIT_ROUND_REFRESH);
 
 		int offset = supposedTimes-roundsSinceStart;
 
 		if(offset>0)
 			refreshRate--;
 		else
-			refreshRate=Constants.ROUND_REFRESH;
+			refreshRate=Constants.INIT_ROUND_REFRESH;
 
 	}
 
@@ -621,7 +645,7 @@ public class MainActivity extends Activity {
 
 					pos.add(vec);
 
-					if(myPoly.getLineWithPointIndex(pos)==-1){
+					if(myPoly.getClosestPointIndex(pos)==-1){
 						myObject.startCuting(vec,myPath,myPoly);
 
 						byte[] byteMsg = MessageConvertion.messageToBytes(new StartCutMsg(myObject.getLocation(),vec));
@@ -671,7 +695,10 @@ public class MainActivity extends Activity {
 			updateGame();
 			break;
 
-
+		case Constants.MESSAGE_DRAW_ROUND:
+			drawGame();
+			break;
+			
 		case Constants.MESSAGE_SEND_BT_MESSAGE_ROUND:
 			if(messageQueue.size()>0){
 

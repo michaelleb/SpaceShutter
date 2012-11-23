@@ -156,11 +156,7 @@ public class Polygon2D extends Path2D{
 
 
 				if(line2.isBetween(point)){
-
-					//Log.e("","BETWEEN");
-
 					return true;
-
 				}
 
 				if(line1.lineIntersection(line2, false,false,false,true)!=null){
@@ -282,37 +278,7 @@ public class Polygon2D extends Path2D{
 
 
 
-		/*
-		 * gets point P, returns the index of point in polygon such that the line (index,index+1) contains the point P between
-		 * 
-		 */
-		public int getLineWithPointIndex(Point2D.Short point){
 
-			ListIterator<Point2D.Short> polyIter = coords.listIterator();
-
-			Point2D.Short polyfirst = polyIter.next();
-			Point2D.Short polysecond;
-
-			int res=-1;
-
-			while (polyIter.hasNext()) {
-
-				int index=polyIter.nextIndex()-1;
-
-				polysecond = polyIter.next();
-
-				Line2D.Short currLine = new Line2D.Short(polyfirst,polysecond);
-
-				if(currLine.isBetween(point)){
-					res= index;
-				}
-
-				polyfirst=polysecond;
-			}
-
-			return res;
-
-		}
 
 
 
@@ -355,40 +321,6 @@ public class Polygon2D extends Path2D{
 
 		}
 
-
-
-
-
-
-
-
-
-
-
-
-
-		public void print(){
-			//log.e("-------------------------------------","");
-
-
-			for(int i=0;i<=this.getSize();i++){
-
-
-
-				int ii=i%this.getSize();
-
-				Point2D.Short pp = this.getPoint(ii);
-
-				//log.e("point:"+ii,"("+pp.getx()+","+pp.gety()+")");
-
-			}
-
-			//log.e("-------------------------------------","");
-
-		}
-
-
-
 		public Polygon2D.Short clone(){
 			Polygon2D.Short path = new Polygon2D.Short();
 			path.coords=(ArrayList<Point2D.Short>)coords.clone();
@@ -401,7 +333,7 @@ public class Polygon2D extends Path2D{
 			Vector2D.Short trajtmp = new Vector2D.Short(traj);
 
 			Polygon2D.Short tmpPoly=((Polygon2D.Short)other).clone();
-			
+
 			float start = 0;
 			float end = trajtmp.getLength();
 
@@ -410,10 +342,10 @@ public class Polygon2D extends Path2D{
 				float middle = start+(float)((end-start)/2);
 
 				trajtmp.setLength(middle);
-				
+
 				tmpPoly.add(trajtmp);
-				
-				if(tmpPoly.isCollision(this)){
+
+				if(this.isIntersection(other)){
 					end=middle;
 				}
 				else{
@@ -423,36 +355,6 @@ public class Polygon2D extends Path2D{
 			}
 
 			return (end);
-		}
-
-
-		public boolean isCollision(Polygon2D.Short other){
-
-			boolean containsOutside=false;
-			boolean containsInside=false;
-
-			for(int i=0;i<this.getSize()-1;i++){
-
-				Line2D.Short line1= new Line2D.Short(this.getPoint(i), this.getPoint(i+1));
-
-				for(int j=0;j<other.getSize()-1;j++){
-
-					Line2D.Short line2= new Line2D.Short(other.getPoint(j), other.getPoint(j+1));
-
-					if(line1.lineIntersection(line2, true, true, true, true)!=null){
-						return true;
-					}
-
-				}
-
-			}
-
-			return (containsInside && containsOutside);
-		}
-
-
-		public boolean isCollision(Circle2D.Short other){
-			return false;
 		}
 
 
@@ -508,7 +410,57 @@ public class Polygon2D extends Path2D{
 			return currCenter;
 		}
 
+		public boolean isIntersection(Polygon2D.Short other){
+
+			return super.isIntersection(other);
+		}
+
+		public boolean isIntersection(Circle2D.Short other){return true;}
+		
+		public Point2D.Short getNextPoint(Point2D.Short location,Point2D.Short dest,boolean dir){
+
+
+			int index1=getClosestPointIndex(location);
+			int index2=getClosestPointIndex(dest);
+
+			if((index1<index2 && dir) || (index1>index2 && !dir)){
+				return getNextPoint(location,dest);
+			}
+			else if(index1>index2 && dir){
+
+				if(index1<this.getSize()){
+					if(this.getPoint((index1+1)%this.getSize()).equals(location))
+						return this.getPoint((index1+2)%this.getSize());
+					return this.getPoint((index1+1)%this.getSize());
+				}
+			}
+			else if(index1<index2 && !dir){
+				if(location.equals(this.getPoint(0)))
+					return this.getPoint(this.getSize()-2);
+				return this.getPoint((this.getSize()+index1)%this.getSize());
+			}
+			else if(index1==index2){
+				Line2D.Short line1 = new Line2D.Short(this.getPoint(index1),dest);
+				Line2D.Short line2 = new Line2D.Short(dest,this.getPoint((index1+1)%this.getSize()));
+				
+				if((line1.isBetween(location) && dir) || (line2.isBetween(location) && !dir))
+					return dest;
+				else{
+					if(dir)
+						if(this.getPoint((index1+1)%this.getSize()).equals(location))
+							return this.getPoint((index1+2)%this.getSize());
+						else
+							return this.getPoint((index1+1)%this.getSize());
+					else
+						return this.getPoint(index1);
+				}
+			}
+
+			return getNextPoint(location,location);
+		}
 
 
 	}
+
+
 }

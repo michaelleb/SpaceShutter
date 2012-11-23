@@ -34,7 +34,6 @@ public class Player implements GameObject{
 	private Point2D.Short userPointOnMap;		//user specified point to move near to
 	private Point2D.Short closestPointOnPoly;	//point on polygon which is closest to userPointOnMap
 	private boolean direction;			//bounds direction (2 options)
-	private int nextCheckpointIndex; 	//next index on a poly to move to, in boundaries moving phase
 
 	public boolean boundariesPhase=false;	//boundaries moving phase
 
@@ -67,23 +66,8 @@ public class Player implements GameObject{
 		this.direction=direction;
 
 		this.closestPointOnPoly=pol.closestPointSimplified(userPointOnMap);
-
-		nextCheckpointIndex = pol.getLineWithPointIndex(location);
-
-		if(closestPointOnPoly!=null && nextCheckpointIndex>=0){
-			boundariesPhase=true;
-
-			if(!direction)
-				nextCheckpointIndex=(nextCheckpointIndex+1+pol.getSize())%pol.getSize();
-		}
-		else{
-
-			boundariesPhase=false;
-
-			return;
-		}
-
-		//log.e("closest point !!!>>>",""+closestPointOnPoly.getx()+"-"+closestPointOnPoly.gety()+" next="+nextCheckpointIndex);
+		
+		boundariesPhase=true;
 
 	}
 
@@ -138,61 +122,25 @@ public class Player implements GameObject{
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 	public void behave(PlayPolygon pol){
 
 
 		//----------------------- boundary moving phase
 
 		if(boundariesPhase){
-
-			int polsize = pol.getSize();
-
-			Point2D.Short next = pol.getPoint(nextCheckpointIndex);	//next point destination
-
-			if(closestPointOnPoly==null)
-				return;
-
-			if(location.distance(closestPointOnPoly)<=speed){	//if final destination within reach
-
-				location=closestPointOnPoly;
-
-				boundariesPhase=false;
+			
+			Point2D.Short next = pol.getNextPoint(location,closestPointOnPoly,direction);
+			
+			if(next.sub(location).getLength()>=speed){
+				
+				orientation = next.sub(location);
+				orientation.setLength(speed);
+				
+				location.add(orientation);
 			}
-			else if(location.distance(next)<=speed){	//if next point within reach
-
-				int diff=1;
-
-				if(direction)
-					diff=-1;
-
-				nextCheckpointIndex=(nextCheckpointIndex+diff+pol.getSize())%polsize;
-
+			else{
 				location=next;
 			}
-			else{	//else: proceed moving towards next point
-
-				Vector2D.Short vec = new Vector2D.Short(
-						(short)(next.getx()-location.getx()),
-						(short)(next.gety()-location.gety()));
-
-				vec.setLength(speed);
-
-				location.add(vec);
-			}
-
 
 		}
 
@@ -203,8 +151,6 @@ public class Player implements GameObject{
 			Point2D.Short nextloc= new Point2D.Short(location);
 			nextloc.add(orientation);
 
-			//Log.e("",""+pol.contains(nextloc));
-			
 			if(pol.contains(nextloc)){
 
 				location=nextloc;
@@ -212,8 +158,6 @@ public class Player implements GameObject{
 				cuttingPath.setValue(cuttingPath.getSize()-1, location.getx(), location.gety());
 			}
 			else{
-
-				//Log.e("","bbbb");
 
 				Line2D.Short traj = new Line2D.Short(location,nextloc);
 
@@ -226,8 +170,6 @@ public class Player implements GameObject{
 				cuttingPath.setValue(cuttingPath.getSize()-1, location.getx(), location.gety());
 
 				orientation=new Vector2D.Short((short)0,(short)0);
-
-				//cuttingPhase=false;
 			}
 
 		}
@@ -291,20 +233,9 @@ public class Player implements GameObject{
 		return location.distance(point);
 	}
 	
-	
-	public void notifyCollision(GameObject object){}
-	
-	
-	public boolean isCollision(Monster object){
-		return true;
-	}
-	
-	public boolean isCollision(Player object){
-		return true;
-	}
-	
-	public boolean isCollision(PlayPolygon object){
-		return true;
+	public boolean[] collisionState(GameObject other){
+		boolean arr[] = this.collisionState(other);
+		return arr;
 	}
 	
 	
@@ -315,8 +246,17 @@ public class Player implements GameObject{
 
 	}
 
-
-
+	
+	public void notifyCollision(GameObject object){
+		
+		
+		
+	}
+	
+	
+	public boolean isBodyIntersection(Shape2D shape){
+		return false;
+	}
 
 
 }

@@ -11,7 +11,7 @@ import android.util.Log;
 public class Path2D {
 
 
-	public static class Short{
+	public static class Short implements Shape2D{
 
 		protected ArrayList<Point2D.Short> coords = new ArrayList<Point2D.Short>();
 
@@ -60,7 +60,7 @@ public class Path2D {
 			return pt;
 		}
 
-		
+
 
 		public Path2D.Short clone(){
 
@@ -121,10 +121,118 @@ public class Path2D {
 			this.coords.get(index).setx(x);
 			this.coords.get(index).sety(y);
 		}
-		
+
 		public void setPoint(int index,Point2D.Short point){
 			this.coords.set(index, point);
 		}
+
+
+
+
+
+
+
+
+
+		/*
+		 * gets point P, returns the index of point in polygon such that the line (index,index+1) contains the point P between
+		 * 
+		 */
+		public int getClosestPointIndex(Point2D.Short point){
+
+			ListIterator<Point2D.Short> polyIter = coords.listIterator();
+
+			Point2D.Short polyfirst = polyIter.next();
+			Point2D.Short polysecond;
+			
+			while (polyIter.hasNext()) {
+
+				int index=polyIter.nextIndex()-1;
+
+				polysecond = polyIter.next();
+
+				Line2D.Short currLine = new Line2D.Short(polyfirst,polysecond);
+
+				if(currLine.isBetween(point)){
+					return index;
+				}
+
+				polyfirst=polysecond;
+			}
+
+			return -1;
+
+		}
+
+
+
+
+
+
+
+
+
+
+
+		public boolean isIntersection(Path2D.Short other){
+
+			Line2D.Short line1;
+			Line2D.Short line2;
+
+			for(int i=0;i<this.getSize()-1;i++){
+				for(int j=0;j<other.getSize()-1;j++){
+
+					line1=new Line2D.Short(this.getPoint(i),this.getPoint(i+1));
+					line2=new Line2D.Short(other.getPoint(j),other.getPoint(j+1));
+
+					if(line1.lineIntersection(line2, true, true, true, true)!=null){
+						return true;
+					}
+				}
+			}
+
+
+			return false;
+		}
+
+
+		public boolean isIntersection(Polygon2D.Short other){
+
+			return isIntersection(((Path2D.Short)other));
+		}
+
+
+		public boolean isIntersection(Circle2D.Short other){return true;}
+
+
+
+
+
+
+
+
+		public Point2D.Short getNextPoint(Point2D.Short location,Point2D.Short dest){
+
+			int index1=getClosestPointIndex(location);
+			int index2=getClosestPointIndex(dest);
+			
+			if(index1<index2){
+				
+				if(this.getPoint(index1+1).equals(location))
+					return this.getPoint((index1+2)%this.getSize());
+				else
+					return this.getPoint(index1+1);
+			}
+			else if(index1>index2)
+				return this.getPoint(index1);
+			else
+				return dest;
+		}
+
+
+
+
+
 
 	}
 
