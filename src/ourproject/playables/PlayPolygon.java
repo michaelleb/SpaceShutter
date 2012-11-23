@@ -22,7 +22,7 @@ public class PlayPolygon extends Polygon2D.Short implements GameObject{
 	}
 	
 	
-	public void behave(PlayPolygon pol){}
+	public void behave(MyEnvironment env){}
 	
 	public void notifyCollision(GameObject object){}
 	

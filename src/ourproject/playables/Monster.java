@@ -38,10 +38,10 @@ public class Monster implements GameObject {
 
 		this.location=new Point2D.Short(x,y);
 		this.orientation=new Vector2D.Short((short)0,(short)0);
-		
+
 	}
 
-	public void behave(PlayPolygon pol){
+	public void behave(MyEnvironment env){
 
 
 
@@ -51,8 +51,8 @@ public class Monster implements GameObject {
 		Vector2D.Short dir = new Vector2D.Short(orientation);
 
 		body.setCenter(nextloc);
-		
-		if(!pol.isIntersection(body)){
+
+		if(!env.myPoly.isIntersection(body)){
 
 			location=nextloc;
 		}
@@ -60,17 +60,32 @@ public class Monster implements GameObject {
 
 			body.setCenter(location);
 
-			float max = pol.maxDistance(body,orientation);
+			float max = env.myPoly.maxDistance(body,orientation);
 
 			dir.setLength(max);
 
 			location.add(dir);
 
-			notifyCollision(pol);
+			notifyCollision(env.myPoly);
 
 		}
 
 		body.setCenter(location);
+
+
+
+		if(this.isBodyIntersection(env.myPath)){
+			
+			if(env.chasingPath.getSize()==0){
+
+				Point2D.Short first = env.myPath.closestPointSimplified(location);
+
+				env.chasingPath.start(first.getx(), first.gety());
+
+			}
+
+		}
+
 	}
 
 	public Polygon2D.Short getBounds(){return body;}
@@ -80,8 +95,8 @@ public class Monster implements GameObject {
 	public void setLocation(Point2D.Short loc){location=new Point2D.Short(loc.getx(),loc.gety());}
 
 	public void setOrientation(Vector2D.Short orient){orientation=orient;orientation.setLength(speed);}
-	
-	
+
+
 	public void notifyCollision(GameObject object){
 
 		Vector2D.Short orient1 = new Vector2D.Short(orientation);
@@ -93,29 +108,29 @@ public class Monster implements GameObject {
 		orient2.setVy((short)(-orient2.getVy()));
 
 		boolean set=false;
-		
+
 		location.add(orient1);
 		body.setCenter(location);
-		
+
 		if(!object.isBodyIntersection(body)){
 			orientation=orient1;
 			set=true;
 		}
-			
+
 		location.sub(orient1);
 
 		location.add(orient2);
 		body.setCenter(location);
-		
+
 		if(!object.isBodyIntersection(body)){
 			orientation=orient2;
 			set=true;
 		}
-		
+
 		location.sub(orient2);
-		
+
 		body.setCenter(location);
-		
+
 		if(set==false){
 			orientation=new Vector2D.Short(
 					(short)-orientation.getVx(),
@@ -123,7 +138,7 @@ public class Monster implements GameObject {
 		}
 
 	}
-	
+
 	public int getWidth(){return width;}
 	public int getHeight(){return height;}
 
@@ -135,8 +150,8 @@ public class Monster implements GameObject {
 	public Vector2D.Short getOrientation(){
 		return orientation;
 	}
-	
-	
+
+
 	public boolean isBodyIntersection(Shape2D shape){
 		return shape.isIntersection(body);
 	}

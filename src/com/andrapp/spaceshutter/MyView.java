@@ -191,6 +191,13 @@ public class MyView extends View {
 
 			//Log.e("",""+phys.getx()+" "+phys.gety());
 		}
+		
+		if(currObj.getType()==0)
+			pathpaint.setColor(Color.RED);
+		if(currObj.getType()==1)
+			pathpaint.setColor(Color.GREEN);
+		if(currObj.getType()==2)
+			pathpaint.setColor(Color.YELLOW);
 
 		canvas.drawPath(path, pathpaint);
 

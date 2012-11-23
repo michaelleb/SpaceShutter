@@ -11,7 +11,7 @@ public interface GameObject {
 	
 	public void draw(MyView view, Canvas canvas);
 	
-	public void behave(PlayPolygon pol);
+	public void behave(MyEnvironment env);
 	
 	public void notifyCollision(GameObject other);
 	

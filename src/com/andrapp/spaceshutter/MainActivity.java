@@ -309,21 +309,9 @@ public class MainActivity extends Activity {
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ###################################################################################################################################################
 	 */
-
-	//--------------------------------------------------
-
-	private Player myObject;		//my player
-	private Player otherObject;	//other player
 	
+	MyEnvironment env=null;
 	
-	private Monster[] enemy;	//other player
-	private int numOfMonsters=3;
-
-	private PlayPath myPath;			//path of my player
-	private PlayPath otherPath;			//path of other player
-
-	private PlayPolygon myPoly;			//boundaries polygon
-
 	//--------------------------------------------------
 
 	public int roundsSinceStart=0;						//how much times was logic round made since start
@@ -366,44 +354,8 @@ public class MainActivity extends Activity {
 
 	public void initVars(){
 
-		myObject=new Player((short)(Constants.MARGIN_PADDING+10),(short)Constants.MARGIN_PADDING,0);
-
-		otherObject=new Player(Constants.MARGIN_PADDING,Constants.MARGIN_PADDING,1);
 		
-		enemy=new Monster[numOfMonsters];
-		
-		Random randomGenerator = new Random();
-		
-		for(int i=0;i<numOfMonsters;i++){
-			enemy[i]=new Monster(
-				(short)(40+i*30),
-				(short)(40+i*30)
-			);
-			
-			short aa = (short)(randomGenerator.nextInt(100)-100);
-			short bb = (short)(randomGenerator.nextInt(100)-100);
-			
-			if(Math.abs(aa)<2) aa=50;
-			if(Math.abs(bb)<2) bb=-50;
-			
-			enemy[i].setOrientation(new Vector2D.Short(aa,bb));
-			
-		}
-		
-
-		
-		myPath=new PlayPath();
-		otherPath=new PlayPath();
-
-		myPoly=new PlayPolygon();
-
-
-		myPoly.start(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
-		myPoly.proceed(Constants.MARGIN_PADDING, (short)(Constants.PROJ_HEIGHT-Constants.MARGIN_PADDING));
-		myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING), (short)(Constants.PROJ_HEIGHT-Constants.MARGIN_PADDING));
-		myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING), Constants.MARGIN_PADDING);
-		myPoly.proceed(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
-
+		env = new MyEnvironment();
 	}
 
 	private void setGameScreen(){
@@ -464,60 +416,104 @@ public class MainActivity extends Activity {
 			PlayPolygon sideA = new PlayPolygon();
 			PlayPolygon sideB = new PlayPolygon();
 
-			if(myPoly.cut(path, sideA, sideB)==true){
+			if(env.myPoly.cut(path, sideA, sideB)==true){
 
-				myPoly.setPoly(sideA);
+				env.myPoly.setPoly(sideA);
 
 				myBorderMsgCount++;
 				
 				//new border update message
 				
-				byte[] newBorderMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly,myBorderMsgCount));
+				byte[] newBorderMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(env.myPoly,myBorderMsgCount));
 
 				if(!isSinglePlayer) messageQueue.add(newBorderMsg);
 
-				myObject.recalcBoundMovingPhase(myPoly);
-				otherObject.recalcBoundMovingPhase(myPoly);
+				env.myObject.recalcBoundMovingPhase(env.myPoly);
+				env.otherObject.recalcBoundMovingPhase(env.myPoly);
 			}
 		}
 
 	}
 	
+	Vector2D.Short previous=null;
+	
 	void doLogic(){
 
 		//------------------------------
 
-		myObject.behave(myPoly);
+		env.myObject.behave(env);
 
 		//if my object in cutting mode but collided with boundary
-		if(myObject.isCutting() && myPoly.getClosestPointIndex(myObject.getLocation())>=0){
+		if(env.myObject.isCutting() && env.myPoly.getClosestPointIndex(env.myObject.getLocation())>=0){
 
-			myObject.stopCutting();
-
+			env.myObject.stopCutting();
+			
+			env.chasingPath.clear();
+			
 			//stop cutting message
-			byte[] stopCutMsg = MessageConvertion.messageToBytes(new StopCutMsg(myObject.getLocation()));
+			byte[] stopCutMsg = MessageConvertion.messageToBytes(new StopCutMsg(env.myObject.getLocation()));
 
-			if(!isJoiningGame) TryCutBorder(myPath);
+			if(!isJoiningGame) TryCutBorder(env.myPath);
 			
 			if(!isSinglePlayer) messageQueue.add(stopCutMsg);	//stop cut msg comes after potential update border msg !!!
 
-			if(myPath!=null) myPath.clear();
+			if(env.myPath!=null) env.myPath.clear();
 		}
 
 		//------------------------------
 
-		otherObject.behave(myPoly);
+		env.otherObject.behave(env);
 
-		if(!otherObject.isCutting()){
+		if(!env.otherObject.isCutting()){
 
-			if(!isJoiningGame) TryCutBorder(otherPath);
+			if(!isJoiningGame) TryCutBorder(env.otherPath);
 
-			if(otherPath!=null) otherPath.clear();
+			if(env.otherPath!=null) env.otherPath.clear();
 		}
 		
 		//------------------------------
-		for(int i=0;i<numOfMonsters;i++)
-			enemy[i].behave(myPoly);
+		for(int i=0;i<env.numOfMonsters;i++)
+			env.enemy[i].behave(env);
+		
+		if(env.chasingPath.getSize()>0){
+			
+			
+			Point2D.Short last = env.chasingPath.getPoint(env.chasingPath.getSize()-1);
+			
+			if(previous==null || previous.getLength()==0){
+				
+				Point2D.Short nexxt = env.myPath.getNextPoint(last,env.myPath.getPoint(env.myPath.getSize()-1));
+				
+				Vector2D.Short vec = nexxt.sub(last);
+				
+				previous=vec;
+				
+				env.chasingPath.proceed(last.getx(), last.gety());
+			}
+			
+			
+			
+
+			Vector2D.Short addition = new Vector2D.Short(previous);
+			
+			if(addition.getLength()>=2){
+				addition.setLength(2);
+			}
+		
+			
+			last.add(addition);
+			
+			
+			previous.setVx((short)(previous.getVx()-addition.getVx()));
+			previous.setVy((short)(previous.getVy()-addition.getVy()));
+			
+			env.chasingPath.removeLast();
+			env.chasingPath.proceed(last.getx(), last.gety());
+			
+			
+			//env.chasingPath.setValue(env.chasingPath.getSize()-1, x, y)
+			
+		}
 
 	}
 
@@ -528,58 +524,61 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void process(StartCutMsg msg){
-			otherObject.setLocation(msg.getLocation());
-			otherObject.startCuting(msg.getOrientation(), otherPath, myPoly);
+			env.otherObject.setLocation(msg.getLocation());
+			env.otherObject.startCuting(msg.getOrientation(), env.otherPath, env.myPoly);
 		}
 
 		@Override
 		public void process(ProcCutMsg msg){
-			otherObject.setLocation(msg.getLocation());
-			otherObject.proceedCutting(msg.getOrientation());
+			env.otherObject.setLocation(msg.getLocation());
+			env.otherObject.proceedCutting(msg.getOrientation());
 		}
 
 		@Override
 		public void process(BorderWalkMsg msg){
-			otherObject.setLocation(msg.getLocation());
-			otherObject.setBoundMovingPhase(msg.getUserPoint(),msg.getDirection(),myPoly);
+			env.otherObject.setLocation(msg.getLocation());
+			env.otherObject.setBoundMovingPhase(msg.getUserPoint(),msg.getDirection(),env.myPoly);
 		}
 
 		@Override
 		public void process(BoundsUpdateMsg msg){
 
 			if(msg.getNum()>otherBorderMsgCount){
-				myPoly.setPoly(msg.getPoly());
+				env.myPoly.setPoly(msg.getPoly());
 				otherBorderMsgCount=msg.getNum();
 			}
 
-			myObject.recalcBoundMovingPhase(myPoly);	//recalc routes after poly change if in border walking phase
-			otherObject.recalcBoundMovingPhase(myPoly);
+			env.myObject.recalcBoundMovingPhase(env.myPoly);	//recalc routes after poly change if in border walking phase
+			env.otherObject.recalcBoundMovingPhase(env.myPoly);
 		}
 
 		@Override
 		public void process(StopCutMsg msg){
 
-			otherObject.setLocation(msg.getLocation());
-			otherObject.stopCutting();
+			env.otherObject.setLocation(msg.getLocation());
+			env.otherObject.stopCutting();
 		}
 	}
 
 	public void doDrawings(){
-		mView.drawObject(myPoly);
+		mView.drawObject(env.myPoly);
 
-		if(otherPath!=null && otherPath.getSize()>1)
-			mView.drawObject(otherPath);
+		if(env.otherPath!=null && env.otherPath.getSize()>1)
+			mView.drawObject(env.otherPath);
 
-		if(myPath!=null && myPath.getSize()>1)
-			mView.drawObject(myPath);
+		if(env.myPath!=null && env.myPath.getSize()>1)
+			mView.drawObject(env.myPath);
 
-		if(!isSinglePlayer)
-			mView.drawObject(otherObject);
-
-		mView.drawObject(myObject);
+		if(env.chasingPath!=null && env.chasingPath.getSize()>1)
+			mView.drawObject(env.chasingPath);
 		
-		for(int i=0;i<numOfMonsters;i++)
-			mView.drawObject(enemy[i]);
+		if(!isSinglePlayer)
+			mView.drawObject(env.otherObject);
+
+		mView.drawObject(env.myObject);
+		
+		for(int i=0;i<env.numOfMonsters;i++)
+			mView.drawObject(env.enemy[i]);
 
 		mView.executeDrawing();
 	}
@@ -639,16 +638,16 @@ public class MainActivity extends Activity {
 				else
 					vec.setVx((short)0);
 
-				if(myObject.intersects(point) && vec.getLength()>0){
+				if(env.myObject.intersects(point) && vec.getLength()>0){
 
-					Point2D.Short pos =myObject.getLocation();
+					Point2D.Short pos = env.myObject.getLocation();
 
 					pos.add(vec);
 
-					if(myPoly.getClosestPointIndex(pos)==-1){
-						myObject.startCuting(vec,myPath,myPoly);
+					if(env.myPoly.getClosestPointIndex(pos)==-1){
+						env.myObject.startCuting(vec,env.myPath,env.myPoly);
 
-						byte[] byteMsg = MessageConvertion.messageToBytes(new StartCutMsg(myObject.getLocation(),vec));
+						byte[] byteMsg = MessageConvertion.messageToBytes(new StartCutMsg(env.myObject.getLocation(),vec));
 
 						if(!isSinglePlayer)
 							messageQueue.add(byteMsg);
@@ -658,14 +657,14 @@ public class MainActivity extends Activity {
 					firsttime=false;
 
 				}
-				else if(myObject.isCutting() && vec.getLength()>0){
+				else if(env.myObject.isCutting() && vec.getLength()>0){
 					
-					byte[] byteMsg = MessageConvertion.messageToBytes(new ProcCutMsg(myObject.getLocation(),vec));
+					byte[] byteMsg = MessageConvertion.messageToBytes(new ProcCutMsg(env.myObject.getLocation(),vec));
 
 					if(!isSinglePlayer)
 						messageQueue.add(byteMsg);
 
-					myObject.proceedCutting(vec);
+					env.myObject.proceedCutting(vec);
 
 					firsttime=false;
 				}
@@ -679,14 +678,14 @@ public class MainActivity extends Activity {
 
 			point = (Point2D.Short)msg.obj;
 
-			if(!myObject.isCutting()){
+			if(!env.myObject.isCutting()){
 
-				byte[] byteMsg = MessageConvertion.messageToBytes(new BorderWalkMsg(myObject.getLocation(),true,point));
+				byte[] byteMsg = MessageConvertion.messageToBytes(new BorderWalkMsg(env.myObject.getLocation(),true,point));
 
 				if(!isSinglePlayer)
 					messageQueue.add(byteMsg);
 
-				myObject.setBoundMovingPhase(point,true,myPoly);
+				env.myObject.setBoundMovingPhase(point,true,env.myPoly);
 			}
 
 			break;
@@ -737,23 +736,23 @@ public class MainActivity extends Activity {
 		switch (item.getItemId()) {
 		case R.id.scan:
 
-			myPoly=new PlayPolygon();
+			env.myPoly=new PlayPolygon();
 
-			myPoly.start(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
-			myPoly.proceed(Constants.MARGIN_PADDING, (short)(Constants.PROJ_HEIGHT-Constants.MARGIN_PADDING));
-			myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING), (short)(Constants.PROJ_HEIGHT-Constants.MARGIN_PADDING));
-			myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING), Constants.MARGIN_PADDING);
-			myPoly.proceed(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
+			env.myPoly.start(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
+			env.myPoly.proceed(Constants.MARGIN_PADDING, (short)(Constants.PROJ_HEIGHT-Constants.MARGIN_PADDING));
+			env.myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING), (short)(Constants.PROJ_HEIGHT-Constants.MARGIN_PADDING));
+			env.myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING), Constants.MARGIN_PADDING);
+			env.myPoly.proceed(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
 
 			myBorderMsgCount++;
-			byte[] byteMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(myPoly,myBorderMsgCount));
+			byte[] byteMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(			env.myPoly,myBorderMsgCount));
 
 
 			if(!isSinglePlayer)
 				messageQueue.add(byteMsg);
 
-			myObject.recalcBoundMovingPhase(myPoly);
-			otherObject.recalcBoundMovingPhase(myPoly);
+			env.myObject.recalcBoundMovingPhase(env.myPoly);
+			env.otherObject.recalcBoundMovingPhase(env.myPoly);
 
 			return true;
 		case R.id.discoverable:
@@ -761,5 +760,6 @@ public class MainActivity extends Activity {
 		}
 		return false;
 	}
+	
 
 }

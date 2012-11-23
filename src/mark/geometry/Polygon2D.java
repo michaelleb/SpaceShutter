@@ -216,73 +216,7 @@ public class Polygon2D extends Path2D{
 			return null;
 
 		}
-
-
-
-		/*
-		 * gets point P, returns closest point on some polygon line
-		 * 
-		 */
-		public Point2D.Short closestPointSimplified(Point2D.Short point){
-
-			Point2D.Short result=null;
-
-			Line2D.Short linea=new Line2D.Short(
-					new Point2D.Short(point.getx(),(short)(point.gety()-1000)
-							),
-							new Point2D.Short(
-									point.getx(),(short)(point.gety()+1000)
-									)
-					);
-
-			Line2D.Short lineb=new Line2D.Short(
-					new Point2D.Short(
-							(short)(point.getx()-1000),point.gety()
-							),
-							new Point2D.Short(
-									(short)(point.getx()+1000),point.gety()
-									)
-					);
-
-			ListIterator<Point2D.Short> polyIter = coords.listIterator();
-
-			Point2D.Short polyfirst = polyIter.next();
-			Point2D.Short polysecond;
-
-			while (polyIter.hasNext()) {
-				polysecond = polyIter.next();
-
-
-				Line2D.Short currLine = new Line2D.Short(polyfirst,polysecond);
-
-
-				Point2D.Short interPta = currLine.lineIntersection(linea, true,true,true,true);
-				Point2D.Short interPtb = currLine.lineIntersection(lineb, true,true,true,true);
-
-				if(interPta!=null){
-					if(result==null || (result.distance(point)>interPta.distance(point)))
-						result=interPta;
-				}
-
-				if(interPtb!=null){
-					if(result==null || (result.distance(point)>interPtb.distance(point)))
-						result=interPtb;
-				}
-
-				polyfirst=polysecond;
-			}
-
-			return result;
-
-		}
-
-
-
-
-
-
-
-
+		
 		public Line2D.Short polyIntersectionLine(Polygon2D.Short poly){
 
 			ListIterator<Point2D.Short> polyIter = coords.listIterator();
@@ -423,6 +357,9 @@ public class Polygon2D extends Path2D{
 			int index1=getClosestPointIndex(location);
 			int index2=getClosestPointIndex(dest);
 
+			if(index1==-1 || index2==-1)
+				return null;
+			
 			if((index1<index2 && dir) || (index1>index2 && !dir)){
 				return getNextPoint(location,dest);
 			}

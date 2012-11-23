@@ -12,7 +12,13 @@ public class PlayPath extends Path2D.Short implements GameObject{
 	
 	
 	
+	private int type;
 	
+	public int getType(){return type;}
+	
+	public PlayPath(int type){
+		this.type=type;
+	}
 	
 	public void draw(MyView view, Canvas canvas){
 		
@@ -22,14 +28,14 @@ public class PlayPath extends Path2D.Short implements GameObject{
 	
 	public PlayPath clone(){
 		
-		PlayPath path = new PlayPath();
+		PlayPath path = new PlayPath(getType());
 		
 		path.coords=(ArrayList<Point2D.Short>)coords.clone();
 		
 		return path;
 	}
 	
-	public void behave(PlayPolygon pol){}
+	public void behave(MyEnvironment env){}
 	
 	public Vector2D.Short getOrientation(){
 		return new Vector2D.Short((short)0,(short)0);

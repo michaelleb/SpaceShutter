@@ -122,14 +122,17 @@ public class Player implements GameObject{
 
 
 
-	public void behave(PlayPolygon pol){
+	public void behave(MyEnvironment env){
 
 
 		//----------------------- boundary moving phase
 
 		if(boundariesPhase){
 			
-			Point2D.Short next = pol.getNextPoint(location,closestPointOnPoly,direction);
+			Point2D.Short next = env.myPoly.getNextPoint(location,closestPointOnPoly,direction);
+			
+			if(next==null)
+				return;
 			
 			if(next.sub(location).getLength()>=speed){
 				
@@ -151,7 +154,7 @@ public class Player implements GameObject{
 			Point2D.Short nextloc= new Point2D.Short(location);
 			nextloc.add(orientation);
 
-			if(pol.contains(nextloc)){
+			if(env.myPoly.contains(nextloc)){
 
 				location=nextloc;
 
@@ -161,7 +164,7 @@ public class Player implements GameObject{
 
 				Line2D.Short traj = new Line2D.Short(location,nextloc);
 
-				Point2D.Short newLoc = pol.intersectionPoint(traj);
+				Point2D.Short newLoc = env.myPoly.intersectionPoint(traj);
 
 				if(newLoc!=null){
 					location=newLoc;
