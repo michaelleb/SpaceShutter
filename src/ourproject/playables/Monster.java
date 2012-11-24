@@ -21,7 +21,7 @@ public class Monster implements GameObject {
 
 	private Vector2D.Short orientation;
 
-	private short speed=5;
+	private short speed=4;
 
 	public Monster(short x,short y){
 
@@ -52,19 +52,19 @@ public class Monster implements GameObject {
 
 		body.setCenter(nextloc);
 
-		if(!env.myPoly.isIntersection(body)){
-
+		//if(!env.myPoly.isIntersection(body)){
+		if(env.myPoly.contains(nextloc)){
 			location=nextloc;
 		}
 		else{
 
-			body.setCenter(location);
+			//body.setCenter(location);
 
-			float max = env.myPoly.maxDistance(body,orientation);
+			//float max = env.myPoly.maxDistance(body,orientation);
 
-			dir.setLength(max);
+			//dir.setLength(max);
 
-			location.add(dir);
+			//location.add(dir);
 
 			notifyCollision(env.myPoly);
 
@@ -75,12 +75,14 @@ public class Monster implements GameObject {
 
 
 		if(this.isBodyIntersection(env.myPath)){
-			
+
 			if(env.chasingPath.getSize()==0){
 
 				Point2D.Short first = env.myPath.closestPointSimplified(location);
 
-				env.chasingPath.start(first.getx(), first.gety());
+
+				if(first!=null)
+					env.chasingPath.start(first.getx(), first.gety());
 
 			}
 

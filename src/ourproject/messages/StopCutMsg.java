@@ -16,4 +16,8 @@ public class StopCutMsg implements InterMessage{
 	public void getProcessed(MessageProcessing msgprcs){
 		msgprcs.process(this);
 	}
+	
+	public byte[] toBytes(MessageConvertion mc){
+		return mc.messageToBytes(this);
+	}
 }

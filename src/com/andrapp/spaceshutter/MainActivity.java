@@ -57,6 +57,11 @@ import android.app.ProgressDialog;
 import java.util.ArrayList;
 import java.util.Random;
 
+
+import android.content.DialogInterface;
+
+import android.app.AlertDialog;
+
 /**
  * This is the main Activity that displays the current chat session.
  */
@@ -106,6 +111,8 @@ public class MainActivity extends Activity {
 				View menu = (View) findViewById(R.id.menu);
 				menu.setVisibility(View.GONE);
 
+
+
 				startGame();
 
 			}
@@ -118,6 +125,30 @@ public class MainActivity extends Activity {
 				startBTAndFindHosts();
 			}
 		});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	}
 
@@ -214,7 +245,7 @@ public class MainActivity extends Activity {
 
 		if (mChatService != null) mChatService.stop();
 	}
-	
+
 	private Handler mHandler = new Handler() {
 
 		@Override
@@ -258,11 +289,12 @@ public class MainActivity extends Activity {
 				Toast.makeText(getApplicationContext(), "Connected to "
 						+ mConnectedDeviceName, Toast.LENGTH_SHORT).show();
 
-
 				View menu = (View) findViewById(R.id.menu);
 				menu.setVisibility(View.GONE);
 
-
+				
+				finishActivity(BlueToothDefaults.REQUEST_CONNECT_DEVICE);
+				
 				isSinglePlayer=false;
 
 				startGame();
@@ -275,6 +307,45 @@ public class MainActivity extends Activity {
 		}
 	};
 
+
+	public void foo(){
+
+
+		finishActivity(BlueToothDefaults.REQUEST_CONNECT_DEVICE);
+
+		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+
+			public void onClick(DialogInterface dialog, int which) {
+				switch (which){
+				case DialogInterface.BUTTON_POSITIVE:
+
+
+					View menu = (View) findViewById(R.id.menu);
+					menu.setVisibility(View.GONE);
+
+
+					isSinglePlayer=false;
+
+					startGame();
+
+
+					break;
+
+				case DialogInterface.BUTTON_NEGATIVE:
+					//No button clicked
+					break;
+				}
+			}
+		};
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage("wants to invite you to the game, want to start?").setPositiveButton("Yes", dialogClickListener)
+		.setNegativeButton("No", dialogClickListener).show();
+
+
+
+
+	}
 
 	/*
 ###################################################################################################################################################
@@ -309,9 +380,9 @@ public class MainActivity extends Activity {
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ###################################################################################################################################################
 	 */
-	
+
 	MyEnvironment env=null;
-	
+
 	//--------------------------------------------------
 
 	public int roundsSinceStart=0;						//how much times was logic round made since start
@@ -332,15 +403,15 @@ public class MainActivity extends Activity {
 
 	//-------------------------------------------------
 
-	ArrayList<byte[]> messageQueue = new ArrayList<byte[]>();	//queue for outgoing messages
+	ArrayList<InterMessage> messageQueue = new ArrayList<InterMessage>();	//queue for outgoing messages
 
 	MyMessageProcessing messageProc = new MyMessageProcessing();	//game custom message processor
+
+	MessageConvertion messConv = new MessageConvertion();
 
 	//-------------------------------------------------
 
 	private void startGame(){
-
-		finishActivity(BlueToothDefaults.REQUEST_CONNECT_DEVICE);	//hide multiplayer screen
 
 		setGameScreen();	//create game view
 
@@ -354,7 +425,7 @@ public class MainActivity extends Activity {
 
 	public void initVars(){
 
-		
+
 		env = new MyEnvironment();
 	}
 
@@ -421,22 +492,34 @@ public class MainActivity extends Activity {
 				env.myPoly.setPoly(sideA);
 
 				myBorderMsgCount++;
-				
-				//new border update message
-				
-				byte[] newBorderMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(env.myPoly,myBorderMsgCount));
 
-				if(!isSinglePlayer) messageQueue.add(newBorderMsg);
+				if(!isSinglePlayer) messageQueue.add(new BoundsUpdateMsg(env.myPoly,myBorderMsgCount));
+
+				if(!isSinglePlayer) updateMonsterToOtherPlayer();
 
 				env.myObject.recalcBoundMovingPhase(env.myPoly);
 				env.otherObject.recalcBoundMovingPhase(env.myPoly);
+
 			}
 		}
 
 	}
-	
+
+	public void updateMonsterToOtherPlayer(){
+		MonsterUpdateMsg msg = new MonsterUpdateMsg();
+
+		for(int i=0;i<env.numOfMonsters;i++){
+
+			msg.positions.add(env.enemy[i].getLocation());
+			msg.orientations.add(env.enemy[i].getOrientation());
+
+		}
+
+		messageQueue.add(msg);
+	}
+
 	Vector2D.Short previous=null;
-	
+
 	void doLogic(){
 
 		//------------------------------
@@ -447,15 +530,14 @@ public class MainActivity extends Activity {
 		if(env.myObject.isCutting() && env.myPoly.getClosestPointIndex(env.myObject.getLocation())>=0){
 
 			env.myObject.stopCutting();
-			
+
 			env.chasingPath.clear();
-			
-			//stop cutting message
-			byte[] stopCutMsg = MessageConvertion.messageToBytes(new StopCutMsg(env.myObject.getLocation()));
+
+			previous=null;
 
 			if(!isJoiningGame) TryCutBorder(env.myPath);
-			
-			if(!isSinglePlayer) messageQueue.add(stopCutMsg);	//stop cut msg comes after potential update border msg !!!
+
+			if(!isSinglePlayer) messageQueue.add(new StopCutMsg(env.myObject.getLocation()));	//stop cut msg comes after potential update border msg !!!
 
 			if(env.myPath!=null) env.myPath.clear();
 		}
@@ -470,49 +552,39 @@ public class MainActivity extends Activity {
 
 			if(env.otherPath!=null) env.otherPath.clear();
 		}
-		
+
 		//------------------------------
 		for(int i=0;i<env.numOfMonsters;i++)
 			env.enemy[i].behave(env);
-		
+
 		if(env.chasingPath.getSize()>0){
-			
-			
+
+
 			Point2D.Short last = env.chasingPath.getPoint(env.chasingPath.getSize()-1);
-			
+
 			if(previous==null || previous.getLength()==0){
-				
-				Point2D.Short nexxt = env.myPath.getNextPoint(last,env.myPath.getPoint(env.myPath.getSize()-1));
-				
-				Vector2D.Short vec = nexxt.sub(last);
-				
+
+				Point2D.Short nextDest = env.myPath.getNextPoint(last,env.myPath.getPoint(env.myPath.getSize()-1));
+
+				Vector2D.Short vec = nextDest.sub(last);
+
 				previous=vec;
-				
+
 				env.chasingPath.proceed(last.getx(), last.gety());
 			}
-			
-			
-			
 
 			Vector2D.Short addition = new Vector2D.Short(previous);
-			
+
 			if(addition.getLength()>=2){
 				addition.setLength(2);
 			}
-		
-			
+
 			last.add(addition);
-			
-			
+
 			previous.setVx((short)(previous.getVx()-addition.getVx()));
 			previous.setVy((short)(previous.getVy()-addition.getVy()));
-			
-			env.chasingPath.removeLast();
-			env.chasingPath.proceed(last.getx(), last.gety());
-			
-			
-			//env.chasingPath.setValue(env.chasingPath.getSize()-1, x, y)
-			
+
+			env.chasingPath.setPoint(env.chasingPath.getSize()-1, last);
 		}
 
 	}
@@ -558,6 +630,18 @@ public class MainActivity extends Activity {
 			env.otherObject.setLocation(msg.getLocation());
 			env.otherObject.stopCutting();
 		}
+
+		@Override
+		public void process(MonsterUpdateMsg msg){
+
+			for(int i=0;i<env.numOfMonsters;i++){
+
+				env.enemy[i].setLocation(msg.positions.get(i));
+
+				env.enemy[i].setOrientation(msg.orientations.get(i));
+			}
+		}
+
 	}
 
 	public void doDrawings(){
@@ -571,12 +655,12 @@ public class MainActivity extends Activity {
 
 		if(env.chasingPath!=null && env.chasingPath.getSize()>1)
 			mView.drawObject(env.chasingPath);
-		
+
 		if(!isSinglePlayer)
 			mView.drawObject(env.otherObject);
 
 		mView.drawObject(env.myObject);
-		
+
 		for(int i=0;i<env.numOfMonsters;i++)
 			mView.drawObject(env.enemy[i]);
 
@@ -591,7 +675,7 @@ public class MainActivity extends Activity {
 
 		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_LOGIC_ROUND), refreshRate);
 	}
-	
+
 	public void drawGame(){
 		doDrawings();
 		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_DRAW_ROUND), Constants.DRAW_REFRESH);
@@ -647,10 +731,8 @@ public class MainActivity extends Activity {
 					if(env.myPoly.getClosestPointIndex(pos)==-1){
 						env.myObject.startCuting(vec,env.myPath,env.myPoly);
 
-						byte[] byteMsg = MessageConvertion.messageToBytes(new StartCutMsg(env.myObject.getLocation(),vec));
-
 						if(!isSinglePlayer)
-							messageQueue.add(byteMsg);
+							messageQueue.add(new StartCutMsg(env.myObject.getLocation(),vec));
 
 					}
 
@@ -658,11 +740,9 @@ public class MainActivity extends Activity {
 
 				}
 				else if(env.myObject.isCutting() && vec.getLength()>0){
-					
-					byte[] byteMsg = MessageConvertion.messageToBytes(new ProcCutMsg(env.myObject.getLocation(),vec));
 
 					if(!isSinglePlayer)
-						messageQueue.add(byteMsg);
+						messageQueue.add(new ProcCutMsg(env.myObject.getLocation(),vec));
 
 					env.myObject.proceedCutting(vec);
 
@@ -680,10 +760,8 @@ public class MainActivity extends Activity {
 
 			if(!env.myObject.isCutting()){
 
-				byte[] byteMsg = MessageConvertion.messageToBytes(new BorderWalkMsg(env.myObject.getLocation(),true,point));
-
 				if(!isSinglePlayer)
-					messageQueue.add(byteMsg);
+					messageQueue.add(new BorderWalkMsg(env.myObject.getLocation(),true,point));
 
 				env.myObject.setBoundMovingPhase(point,true,env.myPoly);
 			}
@@ -696,15 +774,18 @@ public class MainActivity extends Activity {
 
 		case Constants.MESSAGE_DRAW_ROUND:
 			drawGame();
+
 			break;
-			
+
 		case Constants.MESSAGE_SEND_BT_MESSAGE_ROUND:
+
 			if(messageQueue.size()>0){
+				
+				byte[] bytes = messConv.messagesToBytes(messageQueue);
 
-				mChatService.write(messageQueue.get(0));
+				mChatService.write(bytes);
 
-				messageQueue.remove(0);
-
+				messageQueue.clear();
 			}
 
 			mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_SEND_BT_MESSAGE_ROUND), Constants.SEND_BT_MESSG_REFRESH);
@@ -715,9 +796,11 @@ public class MainActivity extends Activity {
 
 			byte[] readBuf = (byte[]) msg.obj;
 
-			InterMessage incomingMsg = MessageConvertion.bytesToMessage(readBuf);
+			InterMessage[] incomingMsg = messConv.bytesToMessages(readBuf);
 
-			messageProc.processMessage(incomingMsg);
+			for(int i=0;i<incomingMsg.length;i++){
+				messageProc.processMessage(incomingMsg[i]);
+			}
 
 			break;
 
@@ -744,12 +827,13 @@ public class MainActivity extends Activity {
 			env.myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING), Constants.MARGIN_PADDING);
 			env.myPoly.proceed(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
 
-			myBorderMsgCount++;
-			byte[] byteMsg = MessageConvertion.messageToBytes(new BoundsUpdateMsg(			env.myPoly,myBorderMsgCount));
 
 
-			if(!isSinglePlayer)
-				messageQueue.add(byteMsg);
+			if(!isSinglePlayer){
+
+				myBorderMsgCount++;
+				messageQueue.add(new BoundsUpdateMsg(env.myPoly,myBorderMsgCount));
+			}
 
 			env.myObject.recalcBoundMovingPhase(env.myPoly);
 			env.otherObject.recalcBoundMovingPhase(env.myPoly);
@@ -760,6 +844,6 @@ public class MainActivity extends Activity {
 		}
 		return false;
 	}
-	
+
 
 }

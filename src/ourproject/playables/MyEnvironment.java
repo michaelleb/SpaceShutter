@@ -14,7 +14,7 @@ public class MyEnvironment {
 	
 	public Monster[] enemy;	//monsters
 	
-	public int numOfMonsters=3;
+	public short numOfMonsters=3;
 
 	public PlayPath myPath;			//path of my player
 	public PlayPath otherPath;			//path of other player

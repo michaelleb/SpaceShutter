@@ -17,4 +17,6 @@ public class MessageProcessing{
 	public void process(BorderWalkMsg msg){}
 	
 	public void process(BoundsUpdateMsg msg){}
+	
+	public void process(MonsterUpdateMsg msg){}
 }
