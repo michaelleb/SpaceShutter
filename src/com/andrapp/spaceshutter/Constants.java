@@ -33,4 +33,11 @@ public class Constants {
 	
 	
 	public static final short MARGIN_PADDING=10;
+	
+	
+	
+	
+	
+	public static final byte BLUETOOTH_CONTROL_START_GAME=0x22;
+	
 }

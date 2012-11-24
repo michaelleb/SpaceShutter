@@ -81,9 +81,11 @@ public class MainActivity extends Activity {
 
 	private boolean isJoiningGame=false;
 
-	private ProgressDialog dialog=null;
+	private AlertDialog dialog=null;
 
 	private boolean isSinglePlayer=true;
+
+
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -205,10 +207,13 @@ public class MainActivity extends Activity {
 				String address = data.getExtras().getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
 
 				BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+				
+				waitForInviteChoice();
+				
 				mChatService.connect(device);
 
 				isJoiningGame=true;
-
+				
 			}
 			break;
 
@@ -254,6 +259,15 @@ public class MainActivity extends Activity {
 			switch (msg.what) {
 
 			case BlueToothDefaults.MESSAGE_READ:
+				
+				byte[] reply = (byte[])msg.obj;
+				
+				if(dialog.isShowing() && reply[0]==Constants.BLUETOOTH_CONTROL_START_GAME){
+					dialog.dismiss();
+					
+					showGameScreen();
+				}
+				
 				break;
 
 			case BlueToothDefaults.MESSAGE_WRITE:
@@ -275,13 +289,29 @@ public class MainActivity extends Activity {
 				}
 				break;
 
-			case BlueToothDefaults.MESSAGE_TOAST:
+			case BlueToothDefaults.MESSAGE_CONN_FAILED:
+
+				isJoiningGame=false;
+				
+				if(dialog!=null && dialog.isShowing()) dialog.dismiss();
 
 				Toast.makeText(getApplicationContext(), msg.getData().getString(BlueToothDefaults.TOAST),
 						Toast.LENGTH_SHORT).show();
 				break;
 
+			case BlueToothDefaults.MESSAGE_CONN_LOST:
+
+				isJoiningGame=false;
+				
+				if(dialog!=null && dialog.isShowing()) dialog.dismiss();
+				
+				Toast.makeText(getApplicationContext(), msg.getData().getString(BlueToothDefaults.TOAST),
+						Toast.LENGTH_SHORT).show();
+				break;
+
 			case BlueToothDefaults.MESSAGE_DEVICE_NAME:
+
+				finishActivity(BlueToothDefaults.REQUEST_CONNECT_DEVICE);
 
 				// save the connected device's name
 				String mConnectedDeviceName = msg.getData().getString(BlueToothDefaults.DEVICE_NAME);
@@ -289,15 +319,10 @@ public class MainActivity extends Activity {
 				Toast.makeText(getApplicationContext(), "Connected to "
 						+ mConnectedDeviceName, Toast.LENGTH_SHORT).show();
 
-				View menu = (View) findViewById(R.id.menu);
-				menu.setVisibility(View.GONE);
 
-				
-				finishActivity(BlueToothDefaults.REQUEST_CONNECT_DEVICE);
-				
-				isSinglePlayer=false;
-
-				startGame();
+				if(!isJoiningGame){
+					promptGameInvitation(mConnectedDeviceName);
+				}
 
 				break;	
 
@@ -308,7 +333,7 @@ public class MainActivity extends Activity {
 	};
 
 
-	public void foo(){
+	public void promptGameInvitation(String mConnectedDeviceName){
 
 
 		finishActivity(BlueToothDefaults.REQUEST_CONNECT_DEVICE);
@@ -318,34 +343,82 @@ public class MainActivity extends Activity {
 			public void onClick(DialogInterface dialog, int which) {
 				switch (which){
 				case DialogInterface.BUTTON_POSITIVE:
-
-
-					View menu = (View) findViewById(R.id.menu);
-					menu.setVisibility(View.GONE);
-
-
-					isSinglePlayer=false;
-
-					startGame();
-
-
+					
+					byte[] messg = new byte[1];
+					messg[0]=Constants.BLUETOOTH_CONTROL_START_GAME;
+					
+					mChatService.write(messg);
+					
+					showGameScreen();
+					
 					break;
 
 				case DialogInterface.BUTTON_NEGATIVE:
-					//No button clicked
+
+					mChatService.stop();
+
+					mChatService.start();
+
 					break;
 				}
 			}
 		};
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("wants to invite you to the game, want to start?").setPositiveButton("Yes", dialogClickListener)
-		.setNegativeButton("No", dialogClickListener).show();
+		
+		dialog = builder.setMessage(mConnectedDeviceName+" wants to invite you to the game, would you like to start?").setPositiveButton("Yes", dialogClickListener)
+		.setNegativeButton("No", dialogClickListener).create();
+		
+		dialog.show();
+	}
+	
+	
+	
+	
+	
+	public void waitForInviteChoice(){
 
 
+		finishActivity(BlueToothDefaults.REQUEST_CONNECT_DEVICE);
 
+		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+
+			public void onClick(DialogInterface dialog, int which) {
+				switch (which){
+				
+				case DialogInterface.BUTTON_NEGATIVE:
+
+					mChatService.stop();
+
+					mChatService.start();
+
+					break;
+				}
+			}
+		};
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		
+		dialog = builder.setMessage("Waiting for response..").setNegativeButton("Cancel", dialogClickListener).create();
+		
+		dialog.show();
+	}
+	
+	public void showGameScreen(){
+		View menu = (View) findViewById(R.id.menu);
+		menu.setVisibility(View.GONE);
+
+
+		isSinglePlayer=false;
+
+		startGame();
 
 	}
+
+	
+	
+	
+	
 
 	/*
 ###################################################################################################################################################
@@ -639,6 +712,8 @@ public class MainActivity extends Activity {
 				env.enemy[i].setLocation(msg.positions.get(i));
 
 				env.enemy[i].setOrientation(msg.orientations.get(i));
+
+
 			}
 		}
 
@@ -780,7 +855,7 @@ public class MainActivity extends Activity {
 		case Constants.MESSAGE_SEND_BT_MESSAGE_ROUND:
 
 			if(messageQueue.size()>0){
-				
+
 				byte[] bytes = messConv.messagesToBytes(messageQueue);
 
 				mChatService.write(bytes);

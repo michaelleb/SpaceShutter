@@ -7,7 +7,8 @@ public class BlueToothDefaults {
     public static final int MESSAGE_READ = 22;
     public static final int MESSAGE_WRITE = 33;
     public static final int MESSAGE_DEVICE_NAME = 44;
-    public static final int MESSAGE_TOAST = 55;
+    public static final int MESSAGE_CONN_LOST = 55;
+    public static final int MESSAGE_CONN_FAILED = 66;
 
     // Key names received from the BluetoothChatService Handler
     public static final String DEVICE_NAME = "device_name";

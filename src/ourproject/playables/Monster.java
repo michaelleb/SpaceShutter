@@ -52,19 +52,19 @@ public class Monster implements GameObject {
 
 		body.setCenter(nextloc);
 
-		//if(!env.myPoly.isIntersection(body)){
-		if(env.myPoly.contains(nextloc)){
+		if(!env.myPoly.isIntersection(body)){
+		//if(env.myPoly.contains(nextloc)){
 			location=nextloc;
 		}
 		else{
 
-			//body.setCenter(location);
+			body.setCenter(location);
 
-			//float max = env.myPoly.maxDistance(body,orientation);
+			float max = env.myPoly.maxDistance(body,orientation);
 
-			//dir.setLength(max);
+			dir.setLength(max);
 
-			//location.add(dir);
+			location.add(dir);
 
 			notifyCollision(env.myPoly);
 

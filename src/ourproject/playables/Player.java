@@ -42,7 +42,9 @@ public class Player implements GameObject{
 	public boolean isCutting(){return cuttingPhase==true;}
 
 	public void stopCutting(){
+		
 		cuttingPath.setValue(cuttingPath.getSize()-1, location.getx(), location.gety());
+		
 		cuttingPhase=false;
 	}
 

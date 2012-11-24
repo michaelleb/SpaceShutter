@@ -39,13 +39,15 @@ public class MyEnvironment {
 				(short)(40+i*30)
 			);
 			
-			short aa = (short)(randomGenerator.nextInt(100)-100);
-			short bb = (short)(randomGenerator.nextInt(100)-100);
 			
-			if(Math.abs(aa)<2) aa=50;
-			if(Math.abs(bb)<2) bb=-50;
-			
-			enemy[i].setOrientation(new Vector2D.Short(aa,bb));
+			if(i==0)
+				enemy[i].setOrientation(new Vector2D.Short((short)1,(short)1));
+			if(i==1)
+				enemy[i].setOrientation(new Vector2D.Short((short)1,(short)-1));
+			if(i==2)
+				enemy[i].setOrientation(new Vector2D.Short((short)-1,(short)-1));
+			if(i==3)
+				enemy[i].setOrientation(new Vector2D.Short((short)-1,(short)1));
 			
 		}
 		

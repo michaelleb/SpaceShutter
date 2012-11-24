@@ -82,7 +82,9 @@ public class MessageConvertion {
 		if(myBuffer.get(0)==MONS_UPD_MSG){
 
 			int num = myBuffer.getShort(1)/8;
-
+			
+			Log.e("",""+num);
+			
 			message=new MonsterUpdateMsg();
 
 			for(int i=0;i<num;i++){

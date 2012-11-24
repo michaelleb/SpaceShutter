@@ -201,7 +201,7 @@ public class BluetoothChatService {
         setState(STATE_LISTEN);
 
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(BlueToothDefaults.MESSAGE_TOAST);
+        Message msg = mHandler.obtainMessage(BlueToothDefaults.MESSAGE_CONN_FAILED);
         Bundle bundle = new Bundle();
         bundle.putString(BlueToothDefaults.TOAST, "Unable to connect device");
         msg.setData(bundle);
@@ -215,7 +215,7 @@ public class BluetoothChatService {
         setState(STATE_LISTEN);
 
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(BlueToothDefaults.MESSAGE_TOAST);
+        Message msg = mHandler.obtainMessage(BlueToothDefaults.MESSAGE_CONN_LOST);
         Bundle bundle = new Bundle();
         bundle.putString(BlueToothDefaults.TOAST, "Device connection was lost");
         msg.setData(bundle);
