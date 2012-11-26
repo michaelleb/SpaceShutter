@@ -1,0 +1,8 @@
+.settings/org.eclipse.ltk.core.refactoring.prefs
+bin/classes/com/andrapp/spaceshutter/activity/BuildConfig.class
+bin/classes/com/andrapp/spaceshutter/activity/R$attr.class
+bin/classes/com/andrapp/spaceshutter/activity/R$drawable.class
+bin/
+gen/
+bin/
+bin/SpaceShutter.apk
