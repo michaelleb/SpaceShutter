@@ -17,5 +17,6 @@ public class Circle2D {
 		public boolean isIntersection(Polygon2D.Short other){return true;}
 		public boolean isIntersection(Circle2D.Short other){return true;}
 		public boolean isIntersection(Path2D.Short other){return true;}
+		public boolean isIntersection(Box2D.Short other){return true;}
 	}
 }

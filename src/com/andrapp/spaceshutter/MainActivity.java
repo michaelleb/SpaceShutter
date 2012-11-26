@@ -81,7 +81,7 @@ public class MainActivity extends Activity {
 
 	private boolean isJoiningGame=false;
 
-	private AlertDialog dialog=null;
+	private AlertDialog invitationDialog=null;		//dialog for peer invitation & peer waiting
 
 	private boolean isSinglePlayer=true;
 
@@ -262,8 +262,8 @@ public class MainActivity extends Activity {
 				
 				byte[] reply = (byte[])msg.obj;
 				
-				if(dialog.isShowing() && reply[0]==Constants.BLUETOOTH_CONTROL_START_GAME){
-					dialog.dismiss();
+				if(invitationDialog.isShowing() && reply[0]==Constants.BLUETOOTH_CONTROL_START_GAME){
+					invitationDialog.dismiss();
 					
 					showGameScreen();
 				}
@@ -293,7 +293,7 @@ public class MainActivity extends Activity {
 
 				isJoiningGame=false;
 				
-				if(dialog!=null && dialog.isShowing()) dialog.dismiss();
+				if(invitationDialog!=null && invitationDialog.isShowing()) invitationDialog.dismiss();
 
 				Toast.makeText(getApplicationContext(), msg.getData().getString(BlueToothDefaults.TOAST),
 						Toast.LENGTH_SHORT).show();
@@ -303,7 +303,7 @@ public class MainActivity extends Activity {
 
 				isJoiningGame=false;
 				
-				if(dialog!=null && dialog.isShowing()) dialog.dismiss();
+				if(invitationDialog!=null && invitationDialog.isShowing()) invitationDialog.dismiss();
 				
 				Toast.makeText(getApplicationContext(), msg.getData().getString(BlueToothDefaults.TOAST),
 						Toast.LENGTH_SHORT).show();
@@ -366,10 +366,10 @@ public class MainActivity extends Activity {
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		
-		dialog = builder.setMessage(mConnectedDeviceName+" wants to invite you to the game, would you like to start?").setPositiveButton("Yes", dialogClickListener)
+		invitationDialog = builder.setMessage(mConnectedDeviceName+" wants to invite you to the game, would you like to start?").setPositiveButton("Yes", dialogClickListener)
 		.setNegativeButton("No", dialogClickListener).create();
 		
-		dialog.show();
+		invitationDialog.show();
 	}
 	
 	
@@ -399,9 +399,9 @@ public class MainActivity extends Activity {
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		
-		dialog = builder.setMessage("Waiting for response..").setNegativeButton("Cancel", dialogClickListener).create();
+		invitationDialog = builder.setMessage("Waiting for response..").setNegativeButton("Cancel", dialogClickListener).create();
 		
-		dialog.show();
+		invitationDialog.show();
 	}
 	
 	public void showGameScreen(){
@@ -591,7 +591,7 @@ public class MainActivity extends Activity {
 		messageQueue.add(msg);
 	}
 
-	Vector2D.Short previous=null;
+	
 
 	void doLogic(){
 
@@ -606,7 +606,7 @@ public class MainActivity extends Activity {
 
 			env.chasingPath.clear();
 
-			previous=null;
+			env.chasingPathRest=null;
 
 			if(!isJoiningGame) TryCutBorder(env.myPath);
 
@@ -635,18 +635,18 @@ public class MainActivity extends Activity {
 
 			Point2D.Short last = env.chasingPath.getPoint(env.chasingPath.getSize()-1);
 
-			if(previous==null || previous.getLength()==0){
+			if(env.chasingPathRest==null || env.chasingPathRest.getLength()==0){
 
 				Point2D.Short nextDest = env.myPath.getNextPoint(last,env.myPath.getPoint(env.myPath.getSize()-1));
 
 				Vector2D.Short vec = nextDest.sub(last);
 
-				previous=vec;
+				env.chasingPathRest=vec;
 
 				env.chasingPath.proceed(last.getx(), last.gety());
 			}
 
-			Vector2D.Short addition = new Vector2D.Short(previous);
+			Vector2D.Short addition = new Vector2D.Short(env.chasingPathRest);
 
 			if(addition.getLength()>=2){
 				addition.setLength(2);
@@ -654,8 +654,7 @@ public class MainActivity extends Activity {
 
 			last.add(addition);
 
-			previous.setVx((short)(previous.getVx()-addition.getVx()));
-			previous.setVy((short)(previous.getVy()-addition.getVy()));
+			env.chasingPathRest.sub(addition);
 
 			env.chasingPath.setPoint(env.chasingPath.getSize()-1, last);
 		}
@@ -893,7 +892,8 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.scan:
-
+			
+			/*
 			env.myPoly=new PlayPolygon();
 
 			env.myPoly.start(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
@@ -912,6 +912,15 @@ public class MainActivity extends Activity {
 
 			env.myObject.recalcBoundMovingPhase(env.myPoly);
 			env.otherObject.recalcBoundMovingPhase(env.myPoly);
+			
+			*/
+			
+			
+			
+			for(int i=0;i<env.myPoly.getSize();i++){
+				
+				env.myPoly.getPoint(i);
+			}
 
 			return true;
 		case R.id.discoverable:

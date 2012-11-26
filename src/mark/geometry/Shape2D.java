@@ -10,4 +10,6 @@ public interface Shape2D {
 	public boolean isIntersection(Polygon2D.Short other);
 	
 	public boolean isIntersection(Path2D.Short other);
+	
+	public boolean isIntersection(Box2D.Short other);
 }

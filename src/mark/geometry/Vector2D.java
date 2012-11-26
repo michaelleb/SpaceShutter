@@ -38,6 +38,16 @@ public class Vector2D {
 
 		public void setVx(short vx){this.vx=vx;}
 		public void setVy(short vy){this.vy=vy;}
+		
+		public void add(Vector2D.Short other){
+			this.vx+=other.vx;
+			this.vy+=other.vy;
+		}
+		
+		public void sub(Vector2D.Short other){
+			this.vx-=other.vx;
+			this.vy-=other.vy;
+		}
 
 	}
 

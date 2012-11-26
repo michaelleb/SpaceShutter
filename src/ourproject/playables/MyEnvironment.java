@@ -14,12 +14,13 @@ public class MyEnvironment {
 	
 	public Monster[] enemy;	//monsters
 	
-	public short numOfMonsters=3;
+	public short numOfMonsters=1;
 
-	public PlayPath myPath;			//path of my player
+	public PlayPath myPath;				//path of my player
 	public PlayPath otherPath;			//path of other player
 	
 	public PlayPath chasingPath;
+	public Vector2D.Short chasingPathRest=null;
 
 	public PlayPolygon myPoly;			//boundaries polygon
 	
@@ -31,23 +32,21 @@ public class MyEnvironment {
 		
 		enemy=new Monster[numOfMonsters];
 		
-		Random randomGenerator = new Random();
-		
 		for(int i=0;i<numOfMonsters;i++){
 			enemy[i]=new Monster(
-				(short)(40+i*30),
-				(short)(40+i*30)
+				(short)(100),
+				(short)(40)
 			);
 			
 			
 			if(i==0)
-				enemy[i].setOrientation(new Vector2D.Short((short)1,(short)1));
+				enemy[i].setOrientation(new Vector2D.Short((short)2,(short)2));
 			if(i==1)
-				enemy[i].setOrientation(new Vector2D.Short((short)1,(short)-1));
+				enemy[i].setOrientation(new Vector2D.Short((short)2,(short)-2));
 			if(i==2)
-				enemy[i].setOrientation(new Vector2D.Short((short)-1,(short)-1));
+				enemy[i].setOrientation(new Vector2D.Short((short)-2,(short)-2));
 			if(i==3)
-				enemy[i].setOrientation(new Vector2D.Short((short)-1,(short)1));
+				enemy[i].setOrientation(new Vector2D.Short((short)-2,(short)2));
 			
 		}
 		
@@ -61,11 +60,15 @@ public class MyEnvironment {
 		myPoly=new PlayPolygon();
 
 
-		myPoly.start(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
-		myPoly.proceed(Constants.MARGIN_PADDING, (short)(Constants.PROJ_HEIGHT-Constants.MARGIN_PADDING));
-		myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING), (short)(Constants.PROJ_HEIGHT-Constants.MARGIN_PADDING));
-		myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING), Constants.MARGIN_PADDING);
-		myPoly.proceed(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
+		myPoly.start((short)10,(short)10);
+		
+		myPoly.proceed((short)10, (short)(190));
+		
+		myPoly.proceed((short)(190), (short)(190));
+		
+		myPoly.proceed((short)(190), (short)10);
+		
+		myPoly.proceed((short)10, (short)10);
 		
 	}
 	

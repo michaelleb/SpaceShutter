@@ -6,7 +6,6 @@ import java.util.ListIterator;
 
 import mark.geometry.Vector2D.Short;
 
-import android.util.Log;
 
 public class Polygon2D extends Path2D{
 
@@ -173,124 +172,13 @@ public class Polygon2D extends Path2D{
 
 		}
 
-		/*
-		 * gets segment line L, returns some polygon line, that intersects segment L
-		 * 
-		 */
-		public Line2D.Short interSectionLine(Line2D.Short line){
-
-			ListIterator<Point2D.Short> polyIter = coords.listIterator();
-
-			Point2D.Short polyfirst = polyIter.next();
-			Point2D.Short polysecond;
-
-			while (polyIter.hasNext()) {
-				polysecond = polyIter.next();
-
-				Point2D.Short intersect = line.lineIntersection(new Line2D.Short(polyfirst,polysecond),false,false,false,false);
-
-				if(intersect!=null){
-
-					return new Line2D.Short(polyfirst,polysecond);
-				}
-
-				polyfirst=polysecond;
-			}
-
-			return null;
-
-		}
-
-
-
-		/*
-		 * gets segment line L, returns intersection point of L with polygon
-		 * 
-		 */
-		public Point2D.Short intersectionPoint(Line2D.Short line){
-
-			Line2D.Short iline = this.interSectionLine(line);
-
-			if(iline!=null)
-				return iline.lineIntersection(line, true,true,true,true);
-			return null;
-
-		}
 		
-		public Line2D.Short polyIntersectionLine(Polygon2D.Short poly){
-
-			ListIterator<Point2D.Short> polyIter = coords.listIterator();
-
-			Point2D.Short polyfirst = polyIter.next();
-			Point2D.Short polysecond;
-
-			while (polyIter.hasNext()) {
-				polysecond = polyIter.next();
-
-				{
-					ListIterator<Point2D.Short> secondPolyIter = poly.coords.listIterator();
-
-					Point2D.Short secondpolyfirst = secondPolyIter.next();
-					Point2D.Short secondpolysecond;
-
-					while (secondPolyIter.hasNext()) {
-						secondpolysecond = secondPolyIter.next();
-
-						{
-							Point2D.Short intersect = (new Line2D.Short(polyfirst,polysecond)).lineIntersection(new Line2D.Short(secondpolyfirst,secondpolysecond),true,true,true,true);
-
-							if(intersect!=null){
-								return new Line2D.Short(polyfirst,polysecond);
-							}
-						}
-
-						secondpolyfirst=secondpolysecond;
-					}
-				}
-
-				polyfirst=polysecond;
-			}
-
-			return null;
-
-		}
 
 		public Polygon2D.Short clone(){
 			Polygon2D.Short path = new Polygon2D.Short();
 			path.coords=(ArrayList<Point2D.Short>)coords.clone();
 			return path;
 		}
-
-
-		public float maxDistance(Polygon2D.Short other, Vector2D.Short traj){
-
-			Vector2D.Short trajtmp = new Vector2D.Short(traj);
-
-			Polygon2D.Short tmpPoly=((Polygon2D.Short)other).clone();
-
-			float start = 0;
-			float end = trajtmp.getLength();
-
-			for(int i=0;i<5;i++){
-
-				float middle = start+(float)((end-start)/2);
-
-				trajtmp.setLength(middle);
-
-				tmpPoly.add(trajtmp);
-
-				if(this.isIntersection(other)){
-					end=middle;
-				}
-				else{
-					start=middle;
-				}
-				tmpPoly.sub(trajtmp);
-			}
-
-			return (end);
-		}
-
 
 		public void add(Vector2D.Short vec){
 			for(int i=0;i<this.getSize();i++){
@@ -351,6 +239,8 @@ public class Polygon2D extends Path2D{
 
 		public boolean isIntersection(Circle2D.Short other){return true;}
 		
+		public boolean isIntersection(Box2D.Short other){return true;}
+		
 		public Point2D.Short getNextPoint(Point2D.Short location,Point2D.Short dest,boolean dir){
 
 
@@ -395,6 +285,7 @@ public class Polygon2D extends Path2D{
 
 			return getNextPoint(location,location);
 		}
+		
 
 
 	}

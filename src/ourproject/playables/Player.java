@@ -16,14 +16,11 @@ import android.util.Log;
 
 public class Player implements GameObject{
 
-	private int width;
-	private int height;
+	private Box2D.Short body;
 
 	private int type;
 
 	private short speed=2;
-
-	private Point2D.Short location;
 
 	private Vector2D.Short orientation;
 
@@ -43,7 +40,9 @@ public class Player implements GameObject{
 
 	public void stopCutting(){
 		
-		cuttingPath.setValue(cuttingPath.getSize()-1, location.getx(), location.gety());
+		
+		
+		cuttingPath.setValue(cuttingPath.getSize()-1, body.getLocation().getx(), body.getLocation().gety());
 		
 		cuttingPhase=false;
 	}
@@ -98,8 +97,8 @@ public class Player implements GameObject{
 
 			cuttingPath=path;
 
-			cuttingPath.start(location.getx(), location.gety());
-			cuttingPath.proceed(location.getx(), location.gety());
+			cuttingPath.start(body.getLocation().getx(), body.getLocation().gety());
+			cuttingPath.proceed(body.getLocation().getx(), body.getLocation().gety());
 
 			this.orientation=new Vector2D.Short(orientation.getVx(),orientation.getVy());
 
@@ -114,9 +113,10 @@ public class Player implements GameObject{
 
 		orientation.setLength(speed);
 
-		cuttingPath.setValue(cuttingPath.getSize()-1, location.getx(), location.gety());
+		cuttingPath.setValue(cuttingPath.getSize()-1, body.getLocation().getx(), body.getLocation().gety());
 
-		cuttingPath.proceed(location.getx(), location.gety());
+		if(!(this.orientation.getVx()==-orientation.getVx() && this.orientation.getVy()==-orientation.getVy()))
+			cuttingPath.proceed(body.getLocation().getx(), body.getLocation().gety());
 
 		this.orientation=new Vector2D.Short(orientation.getVx(),orientation.getVy());
 	}
@@ -131,20 +131,20 @@ public class Player implements GameObject{
 
 		if(boundariesPhase){
 			
-			Point2D.Short next = env.myPoly.getNextPoint(location,closestPointOnPoly,direction);
+			Point2D.Short next = env.myPoly.getNextPoint(body.getLocation(),closestPointOnPoly,direction);
 			
 			if(next==null)
 				return;
 			
-			if(next.sub(location).getLength()>=speed){
+			if(next.sub(body.getLocation()).getLength()>=speed){
 				
-				orientation = next.sub(location);
+				orientation = next.sub(body.getLocation());
 				orientation.setLength(speed);
 				
-				location.add(orientation);
+				body.getLocation().add(orientation);
 			}
 			else{
-				location=next;
+				body.setLocation(next);
 			}
 
 		}
@@ -153,26 +153,26 @@ public class Player implements GameObject{
 
 		if(cuttingPhase){
 
-			Point2D.Short nextloc= new Point2D.Short(location);
+			Point2D.Short nextloc= new Point2D.Short(body.getLocation());
 			nextloc.add(orientation);
 
 			if(env.myPoly.contains(nextloc)){
 
-				location=nextloc;
+				body.setLocation(nextloc);
 
-				cuttingPath.setValue(cuttingPath.getSize()-1, location.getx(), location.gety());
+				cuttingPath.setValue(cuttingPath.getSize()-1, body.getLocation().getx(), body.getLocation().gety());
 			}
 			else{
 
-				Line2D.Short traj = new Line2D.Short(location,nextloc);
+				Line2D.Short traj = new Line2D.Short(body.getLocation(),nextloc);
 
 				Point2D.Short newLoc = env.myPoly.intersectionPoint(traj);
 
 				if(newLoc!=null){
-					location=newLoc;
+					body.setLocation(nextloc);
 				}
 
-				cuttingPath.setValue(cuttingPath.getSize()-1, location.getx(), location.gety());
+				cuttingPath.setValue(cuttingPath.getSize()-1, body.getLocation().getx(), body.getLocation().gety());
 
 				orientation=new Vector2D.Short((short)0,(short)0);
 			}
@@ -184,9 +184,12 @@ public class Player implements GameObject{
 
 
 
-	public Point2D.Short getLocation(){return new Point2D.Short(location.getx(),location.gety());}
+	public Point2D.Short getLocation(){return new Point2D.Short(body.getLocation());}
 
-	public void setLocation(Point2D.Short loc){location=new Point2D.Short(loc.getx(),loc.gety());}
+	public void setLocation(Point2D.Short loc){
+		body.setLocation(loc);
+		
+	}
 	
 	public void setOrientation(Vector2D.Short orient){orientation=orient;}
 
@@ -201,32 +204,29 @@ public class Player implements GameObject{
 
 	public Player(short x,short y,int type){
 
-		width=20;
-		height=20;
+		body=new Box2D.Short(new Point2D.Short(x,y), (short)20, (short)20);
 
 		this.type=type;
 
-		//orientation=new Vector2D.Short(0,0);
-
-		this.location=new Point2D.Short(x,y);
+		orientation=new Vector2D.Short((short)0,(short)0);
 	}
 
 	public int getType(){return type;}
 
-	public short getCenterX(){return location.getx();}
-	public short getCenterY(){return location.gety();}
+	public short getCenterX(){return body.getLocation().getx();}
+	public short getCenterY(){return body.getLocation().gety();}
 
 
 	public void setCenter(Point2D.Short loc){
-		location=loc;
+		body.setLocation(loc);
 	}
 
-	public int getWidth(){return width;}
-	public int getHeight(){return height;}
+	public int getWidth(){return body.getWidth();}
+	public int getHeight(){return body.getHeight();}
 
 	public boolean intersects(Point2D.Short point){
 
-		if(getDistToCenter(point)<Math.min(height/2,width/2))
+		if(getDistToCenter(point)<Math.min(body.getHeight()/2,body.getWidth()/2))
 			return true;
 
 		return false;
@@ -235,7 +235,7 @@ public class Player implements GameObject{
 
 
 	public float getDistToCenter(Point2D.Short point){
-		return location.distance(point);
+		return body.getLocation().distance(point);
 	}
 	
 	public boolean[] collisionState(GameObject other){
