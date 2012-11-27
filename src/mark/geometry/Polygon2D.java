@@ -238,7 +238,9 @@ public class Polygon2D extends Path2D{
 		public boolean isIntersection(Box2D.Short other){return true;}
 		
 		public Point2D.Short getNextPoint(Point2D.Short location,Point2D.Short dest,boolean dir){
-
+			
+			if(dest==null)
+				return null;
 
 			int index1=getClosestPointIndex(location);
 			int index2=getClosestPointIndex(dest);

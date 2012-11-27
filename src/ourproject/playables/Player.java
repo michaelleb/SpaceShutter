@@ -41,8 +41,8 @@ public class Player implements GameObject{
 	public void stopCutting(){
 
 
-
-		cuttingPath.setValue(cuttingPath.getSize()-1, body.getLocation().getx(), body.getLocation().gety());
+		if(cuttingPath.getSize()>0)
+			cuttingPath.setValue(cuttingPath.getSize()-1, body.getLocation().getx(), body.getLocation().gety());
 
 		cuttingPhase=false;
 	}
@@ -143,7 +143,7 @@ public class Player implements GameObject{
 		//----------------------- boundary moving phase
 
 		if(boundariesPhase){
-
+			
 			Point2D.Short next = env.myPoly.getNextPoint(body.getLocation(),closestPointOnPoly,direction);
 
 			if(next==null)
