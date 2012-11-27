@@ -17,6 +17,11 @@ public class MessageConvertion {
 	private static byte MONS_UPD_MSG=0x06;
 
 	public InterMessage bytesToMessage(byte[] bytes){
+		
+		if(bytes.length<3){
+			return null;
+		}
+		
 		ByteBuffer myBuffer = ByteBuffer.allocateDirect(bytes.length);
 		myBuffer.put(bytes);
 
@@ -56,7 +61,7 @@ public class MessageConvertion {
 
 			Polygon2D.Short poly = new Polygon2D.Short();
 
-			int num = myBuffer.getShort(1)/4;
+			int num = (myBuffer.getShort(1)-2)/4;
 
 			short cnt = myBuffer.getShort(3);
 
@@ -307,7 +312,7 @@ public class MessageConvertion {
 
 		int i=0;
 
-		while(i<bytes.length-2){
+		while(i<bytes.length-3){
 			
 			if(bytes[i] <0x01 || bytes[i]>0x06)
 				break;

@@ -5,8 +5,9 @@ import android.util.Log;
 public class MessageProcessing{
 
 	public void processMessage(InterMessage msg){
-
-		msg.getProcessed(this);
+		
+		if(msg!=null)
+			msg.getProcessed(this);
 	}
 	
 	public void process(StartCutMsg msg){}
