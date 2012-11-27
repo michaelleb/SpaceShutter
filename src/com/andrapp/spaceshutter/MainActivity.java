@@ -266,6 +266,8 @@ public class MainActivity extends Activity {
 					invitationDialog.dismiss();
 					
 					showGameScreen();
+					
+					if(!isSinglePlayer) updateMonsterToOtherPlayer();
 				}
 				
 				break;
@@ -715,7 +717,7 @@ public class MainActivity extends Activity {
 
 				env.enemy[i].setOrientation(msg.orientations.get(i));
 
-
+				env.enemy[i].recalcOrientation(env);
 			}
 		}
 

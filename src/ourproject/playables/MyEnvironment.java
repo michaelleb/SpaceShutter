@@ -14,7 +14,7 @@ public class MyEnvironment {
 	
 	public Monster[] enemy;	//monsters
 	
-	public short numOfMonsters=10;
+	public short numOfMonsters=4;
 
 	public PlayPath myPath;				//path of my player
 	public PlayPath otherPath;			//path of other player
@@ -26,7 +26,7 @@ public class MyEnvironment {
 	
 	public MyEnvironment(){
 		
-		myObject=new Player((short)(Constants.MARGIN_PADDING+10),(short)Constants.MARGIN_PADDING,0);
+		myObject=new Player((short)(Constants.MARGIN_PADDING),(short)Constants.MARGIN_PADDING,0);
 
 		otherObject=new Player(Constants.MARGIN_PADDING,Constants.MARGIN_PADDING,1);
 		

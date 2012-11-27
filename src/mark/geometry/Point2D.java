@@ -44,7 +44,7 @@ public class Point2D{
 		}
 		
 		public boolean equals(Point2D.Short other){
-			return(this.x==other.x && this.y==other.y);
+			return(this.x==other.getx() && this.y==other.gety());
 		}
 		
 		public Vector2D.Short sub(Point2D.Short other){

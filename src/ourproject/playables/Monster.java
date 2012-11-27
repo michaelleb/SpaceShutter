@@ -18,10 +18,6 @@ public class Monster implements GameObject {
 
 	private Vector2D.Short orientation;
 
-	private short speed=4;
-
-	private float distToWall=0;
-
 	public Monster(short x,short y){
 
 		body=new Box2D.Short(new Point2D.Short(x,y), (short)20, (short)20);

@@ -27,12 +27,8 @@ public class Polygon2D extends Path2D{
 
 			Point2D.Short polyfirst = polyIter.next();
 			Point2D.Short polysecond;
-
+			
 			Point2D.Short start = path.getPoint(0);
-			Point2D.Short start2 = path.getPoint(1);
-
-			Line2D.Short startLine = new Line2D.Short(start,start2);
-
 			Point2D.Short end = path.getPoint(path.getSize()-1);
 
 
