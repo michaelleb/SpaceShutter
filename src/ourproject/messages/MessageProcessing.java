@@ -10,6 +10,7 @@ public class MessageProcessing{
 			msg.getProcessed(this);
 	}
 	
+	
 	public void process(StartCutMsg msg){}
 	public void process(StopCutMsg msg){}
 	
