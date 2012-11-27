@@ -422,7 +422,7 @@ public class Path2D {
 			float minh=10000;
 			float minw=10000;
 
-			Point2D.Short origin=null,phoriz=null,pvert=null;
+			Point2D.Short origin=null;
 
 			Vector2D.Short vec = new Vector2D.Short(origvec);
 			vec.setLength(10000);
@@ -450,18 +450,10 @@ public class Path2D {
 						(short)(box.getLocation().getx()-box.getWidth()/2),
 						(short)(box.getLocation().gety()+box.getHeight()/2));
 			}
-
-
-
-
-
-
+			
 
 			Point2D.Short originend;
-
-
-
-
+			
 			originend=new Point2D.Short(origin);
 
 
@@ -469,22 +461,17 @@ public class Path2D {
 			
 			Line2D.Short originline=new Line2D.Short(origin,originend);
 			
-			
-			//System.out.println("origin: "+origin.getx()+","+origin.gety()+"");
-
-			//Line2D.Short line= new Line2D.Short(origin, origin2);
-
-			//System.out.println("origin "+origin.getx()+" "+origin.gety());
-
 
 			while (polyIter.hasNext()) {
 
 
 				if(isInRange(origin,origvec,box.getWidth(),false,pt2)){
-
-
-
-					float diff = Math.abs(pt2.getx()-origin.getx());
+					//pt2.getx()
+					
+					
+					
+					
+					float diff = Math.abs(pt2.gety()-origin.gety());
 
 					if(minh>diff){
 						minh=diff;
@@ -492,18 +479,13 @@ public class Path2D {
 
 				}
 
-				//System.out.println("test: "+pt2.getx()+" "+pt2.gety());
-
 				if(isInRange(origin,origvec,box.getHeight(),true,pt2)){
-
-					float diff = Math.abs(pt2.gety()-origin.gety());
-
-					//.out.println("yes");
+					
+					float diff = Math.abs(pt2.getx()-origin.getx());
 
 					if(minw>diff){
 						minw=diff;
 					}
-
 				}
 
 
@@ -511,40 +493,14 @@ public class Path2D {
 				pt=pt2;
 				pt2 = polyIter.next();
 
-
-				//System.out.println(""+pt.getx()+","+pt.gety()+" | "+pt2.getx()+","+pt2.gety());
-
 				Line2D.Short polyline = new Line2D.Short(pt, pt2);
 
 				Point2D.Short pppp =  polyline.lineIntersection(originline, true, true, true, true);
-				
-				if(pppp!=null){
-					/*
-					System.out.println("polyline: "+polyline.start.getx()+","+polyline.start.gety()+" | "
-							
-							+polyline.end.getx()+","+polyline.end.gety());
-					
-					System.out.println("vertline: "+vertline.start.getx()+","+vertline.start.gety()+" | "
-							
-							+vertline.end.getx()+","+vertline.end.gety());
-
-					
-					
-					
-					
-					System.out.println("test "+p22.getx()+" "+p22.gety());
-					*/
-					
-				}
 
 				
 				if(pppp!=null){
-
-					//System.out.println("test "+p11.getx()+" "+p11.gety());
 
 					if(isInRange(origin,origvec,box.getWidth(),false,pppp)){
-
-						//System.out.println("test "+p11.getx()+" "+p11.gety()+" acc");
 
 						float diff = Math.abs(pppp.gety()-origin.gety());
 
@@ -556,32 +512,20 @@ public class Path2D {
 				}
 				if(pppp!=null){
 
-					//System.out.println("test "+p22.getx()+" "+p22.gety());
-
 					if(isInRange(origin,origvec,box.getHeight(),true,pppp)){
 
-						//System.out.println("test "+p22.getx()+" "+p22.gety()+" acc");
-
 						float diff = Math.abs(pppp.getx()-origin.getx());
-
-						//.out.println("yes");
 
 						if(minw>diff){
 							minw=diff;
 						}
-
 					}
 				}
 
 
 
 			}
-
-
-
-			//System.out.println(">>>"+minw+" "+minh);
-
-
+			
 			float len1=vecLen(origvec, minw, true);
 
 			float len2=vecLen(origvec, minh, false);
@@ -601,12 +545,7 @@ public class Path2D {
 
 			if(isVertical){
 
-
-
-
 				if(dir.getVx()!=0){
-
-					//System.out.println(" is ver: "+isVertical+" ("+subject.getx()+","+subject.gety()+") +ox: "+origin.getx()+" oy: "+origin.gety());
 
 					float n = ((float)origin.gety()-(float)dir.getVy()/(float)dir.getVx()*(float)origin.getx());
 
@@ -636,21 +575,8 @@ public class Path2D {
 							&&
 							(foundSize<=size)
 							;
-
-					//if(res)
-					//System.out.println("acc");
-
+					
 					return res;
-
-					/*
-					return (
-							((y-subject.gety())<=size && (y-subject.gety())>=0 && (dir.getVy()>=0 && subject.gety()>=origin.gety()))
-							||
-							((subject.gety()-y)<=size && (subject.gety()-y)>=0 && (dir.getVy()<=0 && subject.gety()<=origin.gety()))
-							)
-							; 
-
-					 */
 
 				}
 				else{
@@ -695,17 +621,6 @@ public class Path2D {
 							;
 
 
-					/*
-					return (
-							((x-subject.getx())<=size && (x-subject.getx())>=0 && (dir.getVx()>=0 && subject.getx()>=origin.getx()))
-							||
-							((subject.getx()-x)<=size && (subject.getx()-x)>=0 && (dir.getVx()<=0 && subject.getx()<=origin.getx()))
-							)
-							; 
-
-
-					 */
-
 				}
 				else{
 					return origin.getx()==subject.getx();
@@ -723,7 +638,7 @@ public class Path2D {
 
 			Vector2D.Short newVec = new Vector2D.Short(vec);
 
-			//System.out.println("-1-- "+newVec.getVx()+" "+newVec.getVy());
+			////System.out.println("-1-- "+newVec.getVx()+" "+newVec.getVy());
 
 			if(isX){
 
@@ -744,7 +659,7 @@ public class Path2D {
 			}
 
 
-			//System.out.println("-2-- "+newVec.getVx()+" "+newVec.getVy());
+			////System.out.println("-2-- "+newVec.getVx()+" "+newVec.getVy());
 
 			return newVec.getLength();
 		}

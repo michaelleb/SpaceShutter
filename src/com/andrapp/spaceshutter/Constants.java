@@ -7,7 +7,7 @@ public class Constants {
 	
 
 	//in game sizes
-	public static final short PROJ_HEIGHT=200;
+	public static final short PROJ_HEIGHT=280;
 	public static final short PROJ_WIDTH=200;
 	
 	

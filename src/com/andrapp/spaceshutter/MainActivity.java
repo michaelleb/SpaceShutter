@@ -572,6 +572,9 @@ public class MainActivity extends Activity {
 
 				env.myObject.recalcBoundMovingPhase(env.myPoly);
 				env.otherObject.recalcBoundMovingPhase(env.myPoly);
+				
+				for(int i=0;i<env.numOfMonsters;i++)
+					env.enemy[i].recalcOrientation(env);
 
 			}
 		}

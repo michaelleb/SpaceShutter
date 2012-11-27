@@ -86,7 +86,7 @@ public class Line2D {
 					){ 
 				return null;
 			}
-			return new Point2D.Short((short)(x1+t*bx), (short)(y1+t*by));
+			return new Point2D.Short((short)(x1+t*bx+0.5), (short)(y1+t*by+0.5));
 		}
 
 

@@ -14,7 +14,7 @@ public class MyEnvironment {
 	
 	public Monster[] enemy;	//monsters
 	
-	public short numOfMonsters=1;
+	public short numOfMonsters=10;
 
 	public PlayPath myPath;				//path of my player
 	public PlayPath otherPath;			//path of other player
@@ -32,21 +32,23 @@ public class MyEnvironment {
 		
 		enemy=new Monster[numOfMonsters];
 		
+		 Random randomGenerator = new Random();
+		
 		for(int i=0;i<numOfMonsters;i++){
 			enemy[i]=new Monster(
 				(short)(100),
-				(short)(40)
+				(short)(100)
 			);
 			
+			int xx=(short)(randomGenerator.nextInt(100)-40);
+			int yy=(short)(randomGenerator.nextInt(100)-60);
 			
-			if(i==0)
-				enemy[i].setOrientation(new Vector2D.Short((short)2,(short)2));
-			if(i==1)
-				enemy[i].setOrientation(new Vector2D.Short((short)2,(short)-2));
-			if(i==2)
-				enemy[i].setOrientation(new Vector2D.Short((short)-2,(short)-2));
-			if(i==3)
-				enemy[i].setOrientation(new Vector2D.Short((short)-2,(short)2));
+			Vector2D.Short veeecc = new Vector2D.Short((short)(xx),(short)(yy));
+			
+			veeecc.setLength(4);
+			
+			enemy[i].setOrientation(veeecc);
+
 			
 		}
 		
@@ -60,15 +62,11 @@ public class MyEnvironment {
 		myPoly=new PlayPolygon();
 
 
-		myPoly.start((short)10,(short)10);
-		
-		myPoly.proceed((short)10, (short)(190));
-		
-		myPoly.proceed((short)(190), (short)(190));
-		
-		myPoly.proceed((short)(190), (short)10);
-		
-		myPoly.proceed((short)10, (short)10);
+		myPoly.start((short)(Constants.MARGIN_PADDING),(short)(Constants.MARGIN_PADDING));
+		myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING),(short)(Constants.MARGIN_PADDING));
+		myPoly.proceed((short)(Constants.PROJ_WIDTH-Constants.MARGIN_PADDING),(short)(Constants.PROJ_HEIGHT-Constants.MARGIN_PADDING));
+		myPoly.proceed((short)(Constants.MARGIN_PADDING),(short)(Constants.PROJ_HEIGHT-Constants.MARGIN_PADDING));
+		myPoly.proceed((short)(Constants.MARGIN_PADDING), (short)(Constants.MARGIN_PADDING));
 		
 	}
 	
