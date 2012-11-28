@@ -89,8 +89,6 @@ public class MessageConvertion {
 
 			int num = myBuffer.getShort(1)/8;
 			
-			Log.e("",""+num);
-			
 			message=new MonsterUpdateMsg();
 
 			for(int i=0;i<num;i++){
@@ -315,7 +313,7 @@ public class MessageConvertion {
 
 		while(true){
 			
-			if(bytes[i] <0x011 || bytes[i]>0x016)
+			if(i>=bytes.length-2 || bytes[i] <0x011 || bytes[i]>0x016)
 				break;
 			
 			short len = myBuffer.getShort(i+1);

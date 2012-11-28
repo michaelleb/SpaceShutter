@@ -562,9 +562,8 @@ public class MainActivity extends Activity {
 			PlayPolygon sideA = new PlayPolygon();
 			PlayPolygon sideB = new PlayPolygon();
 			
-			for(int i=0;i<path.getSize();i++){
-				Log.e("",""+path.getPoint(i).getx()+" "+path.getPoint(i).gety());
-			}
+			//for(int i=0;i<path.getSize();i++) Log.e("",""+path.getPoint(i).getx()+" "+path.getPoint(i).gety());
+			
 			
 			if(env.myPoly.cut(path, sideA, sideB)==true){
 
