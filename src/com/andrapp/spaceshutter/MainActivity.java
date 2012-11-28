@@ -621,7 +621,7 @@ public class MainActivity extends Activity {
 
 			if(!isSinglePlayer) messageQueue.add(new StopCutMsg(env.myObject.getLocation()));	//stop cut msg comes after potential update border msg !!!
 
-			if(env.myPath!=null) env.myPath.clear();
+			env.myPath.clear();
 		}
 
 		//------------------------------
@@ -632,7 +632,7 @@ public class MainActivity extends Activity {
 
 			if(!isJoiningGame) TryCutBorder(env.otherPath);
 
-			if(env.otherPath!=null) env.otherPath.clear();
+			env.otherPath.clear();
 		}
 
 		//------------------------------
@@ -730,13 +730,13 @@ public class MainActivity extends Activity {
 	public void doDrawings(){
 		mView.drawObject(env.myPoly);
 
-		if(env.otherPath!=null && env.otherPath.getSize()>1)
+		if(env.otherPath!=null)
 			mView.drawObject(env.otherPath);
 
-		if(env.myPath!=null && env.myPath.getSize()>1)
+		if(env.myPath!=null)
 			mView.drawObject(env.myPath);
 
-		if(env.chasingPath!=null && env.chasingPath.getSize()>1)
+		if(env.chasingPath!=null)
 			mView.drawObject(env.chasingPath);
 
 		if(!isSinglePlayer)
@@ -902,7 +902,7 @@ public class MainActivity extends Activity {
 		switch (item.getItemId()) {
 		case R.id.scan:
 			
-			/*
+			
 			env.myPoly=new PlayPolygon();
 
 			env.myPoly.start(Constants.MARGIN_PADDING, Constants.MARGIN_PADDING);
@@ -922,7 +922,7 @@ public class MainActivity extends Activity {
 			env.myObject.recalcBoundMovingPhase(env.myPoly);
 			env.otherObject.recalcBoundMovingPhase(env.myPoly);
 			
-			*/
+			
 			
 			
 			

@@ -22,7 +22,7 @@ public class Constants {
 	public static final int INIT_ROUND_REFRESH=50;
 	public static final int DRAW_REFRESH=50;
 	
-	public static final int SEND_BT_MESSG_REFRESH=50;
+	public static final int SEND_BT_MESSG_REFRESH=60;
 	
 	
 	

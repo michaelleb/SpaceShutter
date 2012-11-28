@@ -8,19 +8,20 @@ import mark.geometry.Point2D.Short;
 import android.util.Log;
 
 public class MessageConvertion {
-
-	private static byte START_CUT_MSG=0x01;
-	private static byte PROCEED_CUT_MSG=0x02;
-	private static byte BOUND_WALK=0x03;
-	private static byte UPDATE_POLY_MSG=0x04;
-	private static byte STOP_CUT_MSG=0x05;
-	private static byte MONS_UPD_MSG=0x06;
+	
+	private static int PREFIX_SIZE=3;
+	
+	private static byte START_CUT_MSG=0x011;
+	private static byte PROCEED_CUT_MSG=0x012;
+	private static byte BOUND_WALK=0x013;
+	private static byte UPDATE_POLY_MSG=0x014;
+	private static byte STOP_CUT_MSG=0x015;
+	private static byte MONS_UPD_MSG=0x016;
 
 	public InterMessage bytesToMessage(byte[] bytes){
 		
-		if(bytes.length<3){
+		if(bytes.length<PREFIX_SIZE)
 			return null;
-		}
 		
 		ByteBuffer myBuffer = ByteBuffer.allocateDirect(bytes.length);
 		myBuffer.put(bytes);
@@ -116,7 +117,7 @@ public class MessageConvertion {
 	public byte[] messageToBytes(MonsterUpdateMsg Message){
 
 		short length=(short)(Message.positions.size()*8);
-		short bufflength=(short)(length+3);
+		short bufflength=(short)(length+PREFIX_SIZE);
 
 		ByteBuffer myBuffer = ByteBuffer.allocateDirect(bufflength);
 		myBuffer.put(MONS_UPD_MSG);
@@ -149,7 +150,7 @@ public class MessageConvertion {
 		Polygon2D.Short poly = Message.getPoly();
 
 		short length=(short)(poly.getSize()*4+2);
-		short bufflength=(short)(length+3);
+		short bufflength=(short)(length+PREFIX_SIZE);
 
 		ByteBuffer myBuffer = ByteBuffer.allocateDirect(bufflength);
 		myBuffer.put(UPDATE_POLY_MSG);
@@ -176,7 +177,7 @@ public class MessageConvertion {
 	public byte[] messageToBytes(StartCutMsg Message){
 
 		short length=8;
-		short bufflength=(short)(length+3);
+		short bufflength=(short)(length+PREFIX_SIZE);
 
 		ByteBuffer myBuffer = ByteBuffer.allocateDirect(bufflength);
 
@@ -200,7 +201,7 @@ public class MessageConvertion {
 
 
 		short length=8;
-		short bufflength=(short)(length+3);
+		short bufflength=(short)(length+PREFIX_SIZE);
 
 		ByteBuffer myBuffer = ByteBuffer.allocateDirect(bufflength);
 
@@ -223,7 +224,7 @@ public class MessageConvertion {
 	public byte[] messageToBytes(BorderWalkMsg Message){
 
 		short length=10;
-		short bufflength=(short)(length+3);
+		short bufflength=(short)(length+PREFIX_SIZE);
 
 		ByteBuffer myBuffer = ByteBuffer.allocateDirect(bufflength);
 
@@ -247,7 +248,7 @@ public class MessageConvertion {
 	public byte[] messageToBytes(StopCutMsg Message){
 
 		short length=4;
-		short bufflength=(short)(length+3);
+		short bufflength=(short)(length+PREFIX_SIZE);
 
 		ByteBuffer myBuffer = ByteBuffer.allocateDirect(bufflength);
 
@@ -312,33 +313,36 @@ public class MessageConvertion {
 
 		int i=0;
 
-		while(i<bytes.length-3){
+		while(true){
 			
-			if(bytes[i] <0x01 || bytes[i]>0x06)
+			if(bytes[i] <0x011 || bytes[i]>0x016)
 				break;
 			
 			short len = myBuffer.getShort(i+1);
 
-			byte[] btmsg = new byte[len+3];
+			byte[] btmsg = new byte[len+PREFIX_SIZE];
 			
-			for(int j=0;j<len+3;j++){
+			for(int j=0;j<len+PREFIX_SIZE;j++){
 				
-				btmsg[j]=bytes[i+j];
+				if(i+j<bytes.length)
+					btmsg[j]=bytes[i+j];
+				else
+					break;
 				
 			}
 			
 			InterMessage message = bytesToMessage(btmsg);
 			
-			InterMessage[] res2 = new InterMessage[res.length+1];
+			InterMessage[] resExtended = new InterMessage[res.length+1];
 			
 			for(int j=0;j<res.length;j++)
-				res2[j]=res[j];
+				resExtended[j]=res[j];
 			
-			res2[res.length]=message;
+			resExtended[res.length]=message;
 			
-			res=res2;
+			res=resExtended;
 			
-			i+=len+3;
+			i+=len+PREFIX_SIZE;
 			
 		}
 		

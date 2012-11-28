@@ -20,7 +20,7 @@ public class Player implements GameObject{
 
 	private int type;
 
-	private short speed=3;
+	private short speed=2;
 
 	private Vector2D.Short orientation;
 
@@ -39,13 +39,13 @@ public class Player implements GameObject{
 	public boolean isCutting(){return cuttingPhase==true;}
 
 	public void stopCutting(){
-		
-		Log.e("","stopCutting");
 
-		if(cuttingPath!=null && cuttingPath.getSize()>0)
+		if(cuttingPhase && cuttingPath.getSize()>0){
+
 			cuttingPath.setValue(cuttingPath.getSize()-1, body.getLocation().getx(), body.getLocation().gety());
 
-		cuttingPhase=false;
+			cuttingPhase=false;
+		}
 	}
 
 	public boolean isBoundariesMoving(){return boundariesPhase==true;}
@@ -91,15 +91,15 @@ public class Player implements GameObject{
 		}
 
 		if(!cuttingPhase){
-			
+
 			Point2D.Short tmploc = new Point2D.Short(body.getLocation());
-			
+
 			tmploc.add(orientation);
-			
+
 			if(!pol.contains(tmploc)){
 				return;
 			}
-			
+
 			orientation.setLength(speed);
 
 			cuttingPhase=true;
@@ -117,35 +117,32 @@ public class Player implements GameObject{
 
 	public void proceedCutting(Vector2D.Short orientation){
 
-		orientation.setLength(speed);
+		if(cuttingPath.getSize()>=2){
 
-		if(!cuttingPhase || (this.orientation.getVx()==orientation.getVx() && this.orientation.getVy()==orientation.getVy())){
+			orientation.setLength(speed);
 
-			return;
+			if(!cuttingPhase || (this.orientation.getVx()==orientation.getVx() && this.orientation.getVy()==orientation.getVy())){
+				return;
+			}
+
+			cuttingPath.setValue(cuttingPath.getSize()-1, body.getLocation().getx(), body.getLocation().gety());
+
+			Point2D.Short p1 = cuttingPath.getPoint(cuttingPath.getSize()-1);
+			Point2D.Short p2 = cuttingPath.getPoint(cuttingPath.getSize()-2);
+
+
+			if(p1.equals(p2)){
+				cuttingPath.removeLast();
+				cuttingPath.removeLast();
+			}
+
+			if(!(this.orientation.getVx()==-orientation.getVx() && this.orientation.getVy()==-orientation.getVy()))
+				cuttingPath.proceed(body.getLocation().getx(), body.getLocation().gety());
+
+
+			this.orientation=new Vector2D.Short(orientation.getVx(),orientation.getVy());
+
 		}
-		
-		if(cuttingPath==null || cuttingPath.getSize()<2)
-			return;
-			
-			
-			
-		cuttingPath.setValue(cuttingPath.getSize()-1, body.getLocation().getx(), body.getLocation().gety());
-
-		Point2D.Short p1 = cuttingPath.getPoint(cuttingPath.getSize()-1);
-		Point2D.Short p2 = cuttingPath.getPoint(cuttingPath.getSize()-2);
-
-
-		if(p1.equals(p2)){
-			cuttingPath.removeLast();
-			cuttingPath.removeLast();
-		}
-
-		if(!(this.orientation.getVx()==-orientation.getVx() && this.orientation.getVy()==-orientation.getVy()))
-			cuttingPath.proceed(body.getLocation().getx(), body.getLocation().gety());
-
-
-		this.orientation=new Vector2D.Short(orientation.getVx(),orientation.getVy());
-
 	}
 
 
@@ -178,7 +175,7 @@ public class Player implements GameObject{
 
 		//----------------------- cutting phase
 
-		if(cuttingPhase){
+		if(cuttingPhase && cuttingPath.getSize()>0){
 
 			Point2D.Short nextloc= new Point2D.Short(body.getLocation());
 			nextloc.add(orientation);
@@ -187,8 +184,7 @@ public class Player implements GameObject{
 
 				body.setLocation(nextloc);
 
-				if(cuttingPath!=null && cuttingPath.getSize()>0)
-					cuttingPath.setValue(cuttingPath.getSize()-1, body.getLocation().getx(), body.getLocation().gety());
+				cuttingPath.setValue(cuttingPath.getSize()-1, body.getLocation().getx(), body.getLocation().gety());
 			}
 			else{
 
@@ -200,8 +196,8 @@ public class Player implements GameObject{
 					body.setLocation(newLoc);
 				}
 
-				if(cuttingPath!=null && cuttingPath.getSize()>0)
-					cuttingPath.setValue(cuttingPath.getSize()-1, body.getLocation().getx(), body.getLocation().gety());
+
+				cuttingPath.setValue(cuttingPath.getSize()-1, body.getLocation().getx(), body.getLocation().gety());
 
 				orientation=new Vector2D.Short((short)0,(short)0);
 			}
