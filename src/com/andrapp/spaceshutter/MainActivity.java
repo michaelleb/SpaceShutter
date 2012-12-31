@@ -477,9 +477,7 @@ public class MainActivity extends Activity {
 	private short otherBorderMsgCount=0;	//count of "BoundsUpdateMessage" messages sent to me
 
 	//-------------------------------------------------
-
-	ArrayList<InterMessage> messageQueue = new ArrayList<InterMessage>();	//queue for outgoing messages
-
+	
 	MyMessageProcessing messageProc = new MyMessageProcessing();	//game custom message processor
 
 	MessageConvertion messConv = new MessageConvertion();
@@ -495,7 +493,6 @@ public class MainActivity extends Activity {
 		//start doing rounds
 		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_LOGIC_ROUND), refreshRate);
 		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_DRAW_ROUND), Constants.DRAW_REFRESH);
-		mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_SEND_BT_MESSAGE_ROUND), 0);
 	}
 
 	public void initVars(){
@@ -571,8 +568,8 @@ public class MainActivity extends Activity {
 
 				myBorderMsgCount++;
 
-				if(!isSinglePlayer) messageQueue.add(new BoundsUpdateMsg(env.myPoly,myBorderMsgCount));
-
+				if(!isSinglePlayer) mChatService.write(messConv.messageToBytes(new BoundsUpdateMsg(env.myPoly,myBorderMsgCount)));
+				
 				if(!isSinglePlayer) updateMonsterToOtherPlayer();
 
 				env.myObject.recalcBoundMovingPhase(env.myPoly);
@@ -596,7 +593,7 @@ public class MainActivity extends Activity {
 
 		}
 
-		messageQueue.add(msg);
+		mChatService.write(messConv.messageToBytes(msg));
 	}
 
 	
@@ -618,8 +615,9 @@ public class MainActivity extends Activity {
 
 			if(!isJoiningGame) TryCutBorder(env.myPath);
 
-			if(!isSinglePlayer) messageQueue.add(new StopCutMsg(env.myObject.getLocation()));	//stop cut msg comes after potential update border msg !!!
-
+			if(!isSinglePlayer) //stop cut msg comes after potential update border msg !!!
+				mChatService.write(messConv.messageToBytes(new StopCutMsg(env.myObject.getLocation())));
+				
 			env.myPath.clear();
 		}
 
@@ -814,8 +812,7 @@ public class MainActivity extends Activity {
 						env.myObject.startCuting(vec,env.myPath,env.myPoly);
 
 						if(!isSinglePlayer)
-							messageQueue.add(new StartCutMsg(env.myObject.getLocation(),vec));
-
+							mChatService.write(messConv.messageToBytes(new StartCutMsg(env.myObject.getLocation(),vec)));
 					}
 
 					firsttime=false;
@@ -824,8 +821,10 @@ public class MainActivity extends Activity {
 				else if(env.myObject.isCutting() && vec.getLength()>0){
 
 					if(!isSinglePlayer)
-						messageQueue.add(new ProcCutMsg(env.myObject.getLocation(),vec));
-
+						
+						mChatService.write(messConv.messageToBytes(new ProcCutMsg(env.myObject.getLocation(),vec)));
+					
+						
 					env.myObject.proceedCutting(vec);
 
 					firsttime=false;
@@ -843,8 +842,10 @@ public class MainActivity extends Activity {
 			if(!env.myObject.isCutting()){
 
 				if(!isSinglePlayer)
-					messageQueue.add(new BorderWalkMsg(env.myObject.getLocation(),true,point));
-
+					mChatService.write(messConv.messageToBytes(new BorderWalkMsg(env.myObject.getLocation(),true,point)));
+				
+				
+				
 				env.myObject.setBoundMovingPhase(point,true,env.myPoly);
 			}
 
@@ -858,22 +859,7 @@ public class MainActivity extends Activity {
 			drawGame();
 
 			break;
-
-		case Constants.MESSAGE_SEND_BT_MESSAGE_ROUND:
-
-			if(messageQueue.size()>0){
-
-				byte[] bytes = messConv.messagesToBytes(messageQueue);
-
-				mChatService.write(bytes);
-
-				messageQueue.clear();
-			}
-
-			mHandler.sendMessageDelayed(mHandler.obtainMessage(Constants.MESSAGE_SEND_BT_MESSAGE_ROUND), Constants.SEND_BT_MESSG_REFRESH);
-
-			break;
-
+			
 		case BlueToothDefaults.MESSAGE_READ:
 
 			byte[] readBuf = (byte[]) msg.obj;
@@ -915,7 +901,7 @@ public class MainActivity extends Activity {
 			if(!isSinglePlayer){
 
 				myBorderMsgCount++;
-				messageQueue.add(new BoundsUpdateMsg(env.myPoly,myBorderMsgCount));
+				mChatService.write(messConv.messageToBytes(new BoundsUpdateMsg(env.myPoly,myBorderMsgCount)));
 			}
 
 			env.myObject.recalcBoundMovingPhase(env.myPoly);

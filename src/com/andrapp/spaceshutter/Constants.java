@@ -16,8 +16,6 @@ public class Constants {
 	public static final int MESSAGE_LOGIC_ROUND=1234;
 	public static final int MESSAGE_DRAW_ROUND=4321;
 	
-	public static final int MESSAGE_SEND_BT_MESSAGE_ROUND=12345;
-	
 	
 	public static final int INIT_ROUND_REFRESH=50;
 	public static final int DRAW_REFRESH=50;
